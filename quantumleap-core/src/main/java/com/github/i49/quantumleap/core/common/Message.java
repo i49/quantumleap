@@ -25,10 +25,9 @@ import java.util.ResourceBundle;
  * Localized messages defined for this API implementation.
  */
 public enum Message {
-    /* given parameter is null */
     PARAMETER_IS_NULL,
-    /* given parameter does not belong to this engine. */
-    PARAMETER_NOT_INSTANCE_FOR_ENGINE;
+    PARAMETER_NOT_INSTANCE_FOR_ENGINE,
+    REPOSITORY_FAILED_TO_CLEAR;
 
     private static final String BASE_NAME = "com.github.i49.quantumleap.core.messages";
     private static final ResourceBundle bundle = ResourceBundle.getBundle(BASE_NAME);

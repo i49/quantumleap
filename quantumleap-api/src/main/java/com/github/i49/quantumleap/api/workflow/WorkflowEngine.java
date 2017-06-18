@@ -34,44 +34,36 @@ public interface WorkflowEngine {
     /**
      * Creates a builder to build a workflow.
      * 
-     * @param name
-     *            the name of the workflow, cannot be {@code null}.
+     * @param name the name of the workflow, cannot be {@code null}.
      * @return a builder to build a workflow.
-     * @throws NullPointerException
-     *             if given {@code name} is {@code null}.
+     * @throws NullPointerException if given {@code name} is {@code null}.
      */
     WorkflowBuilder buildWorkflow(String name);
 
     /**
      * Creates a builder to build a job.
      * 
-     * @param name
-     *            the name of the job, cannot be {@code null}.
+     * @param name the name of the job, cannot be {@code null}.
      * @return a builder to build a job.
-     * @throws NullPointerException
-     *             if given {@code name} is {@code null}.
+     * @throws NullPointerException if given {@code name} is {@code null}.
      */
     JobBuilder buildJob(String name);
 
     /**
      * Creates a builder to build a workflow runner.
      * 
-     * @param repository
-     *            the repository where workflows to run are stored.
+     * @param repository the repository where workflows to run are stored.
      * @return a builder to build a workflow runner.
-     * @throws NullPointerException
-     *             if given {@code repository} is {@code null}.
+     * @throws NullPointerException if given {@code repository} is {@code null}.
      */
     WorkflowRunnerBuilder buildRunner(WorkflowRepository repository);
 
     /**
      * Creates a workflow runner.
      * 
-     * @param repository
-     *            the repository where workflows to run are stored.
+     * @param repository the repository where workflows to run are stored.
      * @return an instance of {@link WorkflowRunner}.
-     * @throws NullPointerException
-     *             if given {@code repository} is {@code null}.
+     * @throws NullPointerException if given {@code repository} is {@code null}.
      */
     WorkflowRunner createRunner(WorkflowRepository repository);
 

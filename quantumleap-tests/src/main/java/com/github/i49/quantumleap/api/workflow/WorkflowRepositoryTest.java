@@ -22,8 +22,9 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.github.i49.quantumleap.api.workflow.Job;
@@ -37,25 +38,30 @@ import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
  */
 public class WorkflowRepositoryTest {
 
-    private final WorkflowEngine engine = WorkflowEngine.get();
-    private WorkflowRepository repository;
+    private static WorkflowEngine engine;
+    private static WorkflowRepository repository;
 
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUpOnce() {
+        engine = WorkflowEngine.get();
         repository = engine.createRepository();
-        repository.clear();
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDownOnce() {
         if (repository != null) {
             repository.close();
         }
     }
 
+    @Before
+    public void setUp() {
+        repository.clear();
+    }
+
     @Test
     public void addWorkflow_shouldAddEmptyWorkflow() {
-        Workflow workflow = this.engine.buildWorkflow("workflow1").get();
+        Workflow workflow = engine.buildWorkflow("workflow1").get();
         assertThat(repository.countWorkflows()).isEqualTo(0);
         repository.addWorkflow(workflow);
         assertThat(repository.countWorkflows()).isEqualTo(1);
@@ -64,9 +70,9 @@ public class WorkflowRepositoryTest {
 
     @Test
     public void addWorkflow_shouldAddJobs() {
-        Job job1 = this.engine.buildJob("job1").get();
-        Job job2 = this.engine.buildJob("job2").get();
-        Workflow workflow = this.engine.buildWorkflow("workflow1").jobs(job1, job2).get();
+        Job job1 = engine.buildJob("job1").get();
+        Job job2 = engine.buildJob("job2").get();
+        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1, job2).get();
         repository.addWorkflow(workflow);
 
         assertThat(repository.countWorkflows()).isEqualTo(1);
@@ -78,9 +84,9 @@ public class WorkflowRepositoryTest {
 
     @Test
     public void findJobsByStatus_shouldReturnReadyJobs() {
-        Job job1 = this.engine.buildJob("job1").get();
-        Job job2 = this.engine.buildJob("job2").get();
-        Workflow workflow = this.engine.buildWorkflow("workflow1").jobs(job1, job2).get();
+        Job job1 = engine.buildJob("job1").get();
+        Job job2 = engine.buildJob("job2").get();
+        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1, job2).get();
         repository.addWorkflow(workflow);
 
         List<Job> jobs = repository.findJobsByStatus(JobStatus.READY);
@@ -90,9 +96,9 @@ public class WorkflowRepositoryTest {
 
     @Test
     public void findFirstJobByStatus_shouldReturnFirstReadyJob() {
-        Job job1 = this.engine.buildJob("job1").get();
-        Job job2 = this.engine.buildJob("job2").get();
-        Workflow workflow = this.engine.buildWorkflow("workflow1").jobs(job1, job2).get();
+        Job job1 = engine.buildJob("job1").get();
+        Job job2 = engine.buildJob("job2").get();
+        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1, job2).get();
         repository.addWorkflow(workflow);
 
         Optional<Job> job = repository.findFirstJobByStatus(JobStatus.READY);

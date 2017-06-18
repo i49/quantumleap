@@ -27,8 +27,7 @@ public interface JobBuilder {
     /**
      * Specifies the first task of the job.
      * 
-     * @param task
-     *            the task to execute.
+     * @param task the task to execute.
      * @return this builder.
      */
     JobBuilder start(Task task);
@@ -36,8 +35,7 @@ public interface JobBuilder {
     /**
      * Specifies the next task of the job.
      * 
-     * @param task
-     *            the task to execute.
+     * @param task the task to execute.
      * @return this builder.
      */
     JobBuilder next(Task task);
@@ -45,7 +43,7 @@ public interface JobBuilder {
     /**
      * Returns the {@link Job} built by this builder.
      * 
-     * @return an instance of {@link Job}.
+     * @return the instance of {@link Job}.
      */
     Job get();
 }

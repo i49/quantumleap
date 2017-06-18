@@ -20,6 +20,7 @@ package com.github.i49.quantumleap.core.tasks;
 import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 
 import com.github.i49.quantumleap.api.tasks.EchoTask;
+import com.github.i49.quantumleap.api.tasks.ShellTaskBuilder;
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
 
 /**
@@ -31,5 +32,10 @@ public class DefaultTaskFactory implements TaskFactory {
     public EchoTask createEchoTask(String message) {
         checkNotNull(message, "message");
         return new EchoTaskImpl(message);
+    }
+
+    @Override
+    public ShellTaskBuilder buildShellTask() {
+        return new ShellTaskImpl.Builder();
     }
 }

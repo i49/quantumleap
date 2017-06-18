@@ -17,8 +17,11 @@
  */
 package com.github.i49.quantumleap.core.repository;
 
+import static com.github.i49.quantumleap.core.common.Message.*;
+
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.json.Json;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.sql.DataSource;
@@ -53,14 +55,18 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     private final Jsonb jsonb;
 
     public JdbcWorkflowRepository(DataSource dataSource) {
+        Connection connection = null;
         try {
-            Connection connection = dataSource.getConnection();
+            connection = dataSource.getConnection();
             createSchema(connection);
             this.statements = prepareStatements(connection);
             this.connection = connection;
-            Json.createObjectBuilder();
             this.jsonb = JsonbBuilder.create();
+        } catch (WorkflowException e) {
+            closeConnectionIgnoringError(connection);
+            throw e;
         } catch (Exception e) {
+            closeConnectionIgnoringError(connection);
             // TODO: add message
             throw new WorkflowException("", e);
         }
@@ -79,11 +85,11 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     @Override
     public void clear() {
         try {
+            getStatement(SqlCommand.DELETE_TASKS).execute();
             getStatement(SqlCommand.DELETE_JOBS).execute();
             getStatement(SqlCommand.DELETE_WORKFLOWS).execute();
         } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
+            throw new WorkflowException(REPOSITORY_FAILED_TO_CLEAR.toString(), e);
         }
     }
 
@@ -158,7 +164,7 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     }
 
     @Override
-    public void updateJobStatus(Job job) {
+    public void storeJobStatus(Job job) {
         PreparedStatement s = getStatement(SqlCommand.UPDATE_JOB_STATUS);
         try {
             s.setInt(1, job.getStatus().ordinal());
@@ -167,6 +173,15 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
         } catch (SQLException e) {
             // TODO: add message
             throw new WorkflowException("", e);
+        }
+    }
+    
+    private void closeConnectionIgnoringError(Connection connection) {
+        try {
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
         }
     }
 
@@ -254,8 +269,21 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     }
 
     private void createSchema(Connection connection) throws IOException, SQLException {
+        if (checkSchemaExistence(connection)) {
+            return;
+        }
         SqlScriptRunner runner = new SqlScriptRunner(connection);
         runner.runScript("create-schema.sql");
+    }
+    
+    private boolean checkSchemaExistence(Connection connection) throws SQLException {
+        DatabaseMetaData meta = connection.getMetaData();
+        try (ResultSet rs = meta.getTables(null, null, "WORKFLOW", null)) {
+            if (rs.next()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Map<SqlCommand, PreparedStatement> prepareStatements(Connection connection) throws SQLException {

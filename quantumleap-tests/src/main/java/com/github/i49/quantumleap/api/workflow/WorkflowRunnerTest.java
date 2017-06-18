@@ -19,8 +19,9 @@ package com.github.i49.quantumleap.api.workflow;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.github.i49.quantumleap.api.tasks.Task;
@@ -37,21 +38,27 @@ import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
  */
 public class WorkflowRunnerTest {
 
-    private final WorkflowEngine engine = WorkflowEngine.get();
-    private WorkflowRepository repository;
+    private static WorkflowEngine engine;
+    private static WorkflowRepository repository;
     private WorkflowRunner runner;
 
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUpOnce() {
+        engine = WorkflowEngine.get();
         repository = engine.createRepository();
-        runner = engine.buildRunner(repository).get();
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         if (repository != null) {
             repository.close();
         }
+    }
+
+    @Before
+    public void setUp() {
+        repository.clear();
+        runner = engine.buildRunner(repository).get();
     }
 
     @Test

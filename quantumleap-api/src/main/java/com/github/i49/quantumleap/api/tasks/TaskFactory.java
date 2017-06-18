@@ -30,4 +30,6 @@ public interface TaskFactory {
      * @throws NullPointerException if given message is {@code null}.
      */
     EchoTask createEchoTask(String message);
+    
+    ShellTaskBuilder buildShellTask();
 }

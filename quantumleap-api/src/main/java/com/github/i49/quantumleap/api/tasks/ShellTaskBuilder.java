@@ -15,20 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.repository;
-
-import com.github.i49.quantumleap.api.workflow.Job;
-import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
+package com.github.i49.quantumleap.api.tasks;
 
 /**
- * The enhanced {@link WorkflowRepository} interface.
+ * Builder interface for building an instance of {@link ShellTask}.
  */
-public interface EnhancedWorkflowRepository extends WorkflowRepository {
+public interface ShellTaskBuilder {
 
+    ShellTaskBuilder commands(String... commands);
+    
     /**
-     * Stores the status of the job.
+     * Builds the {@link ShellTask} built by this builder.
      * 
-     * @param job the job to store.
+     * @return the instance of {@link ShellTask}.
      */
-    void storeJobStatus(Job job);
+    ShellTask get();
 }

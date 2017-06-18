@@ -25,8 +25,7 @@ public interface WorkflowBuilder {
     /**
      * Adds a job to the workflow.
      * 
-     * @param jobs
-     *            list of jobs to be added.
+     * @param jobs list of jobs to be added.
      * @return this builder.
      */
     WorkflowBuilder jobs(Job... jobs);
@@ -34,7 +33,7 @@ public interface WorkflowBuilder {
     /**
      * Builds the {@link Workflow} built by this builder.
      * 
-     * @return an instance of {@link Workflow}.
+     * @return the instance of {@link Workflow}.
      */
     Workflow get();
 }

@@ -39,10 +39,8 @@ public interface WorkflowRepository extends AutoCloseable {
     /**
      * Adds a workflow to this repository.
      * 
-     * @param workflow
-     *            the workflow to add.
-     * @throws NullPointerException
-     *             if given {@code workflow} is {@code null}.
+     * @param workflow the workflow to add.
+     * @throws NullPointerException if given {@code workflow} is {@code null}.
      */
     void addWorkflow(Workflow workflow);
 

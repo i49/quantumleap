@@ -96,7 +96,7 @@ public class SerialWorkflowRunner implements WorkflowRunner {
 
     private void launchJob(BasicJob job) {
         executeJob(job);
-        repository.updateJobStatus(job);
+        repository.storeJobStatus(job);
     }
 
     private void executeJob(BasicJob job) {
@@ -105,7 +105,7 @@ public class SerialWorkflowRunner implements WorkflowRunner {
             task.run(context);
         }
         job.setStatus(JobStatus.COMPLETED);
-        repository.updateJobStatus(job);
+        repository.storeJobStatus(job);
     }
 
     /**
