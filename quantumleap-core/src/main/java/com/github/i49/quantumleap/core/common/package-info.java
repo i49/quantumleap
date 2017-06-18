@@ -1,4 +1,4 @@
-/* 
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 2017 the original author or authors.
@@ -17,6 +17,6 @@
  */
 
 /**
- * Provides API implementation.
+ * Provides common classes used by higher level packages.
  */
-package com.github.i49.quantumleap.core.workflow;
+package com.github.i49.quantumleap.core.common;

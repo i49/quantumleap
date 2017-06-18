@@ -1,4 +1,6 @@
 /* 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,22 +20,21 @@ package com.github.i49.quantumleap.api.workflow;
 import java.nio.file.Path;
 
 /**
- * The builder interface for building {@link WorkflowRunner}.
+ * The builder interface for building an instance of {@link WorkflowRunner}.
  */
 public interface WorkflowRunnerBuilder {
 
     /**
-     * Specifies working directory of the runner.
+     * Specifies the working directory of the runner.
      * 
-     * @param path
-     *            the path to the working directory.
+     * @param path the path to the working directory.
      */
     WorkflowRunnerBuilder workAt(Path path);
 
     /**
      * Returns the {@link WorkflowRunner} built by this builder.
      * 
-     * @return ant instance of {@link WorkflowRunner}, never be {@code null}.
+     * @return the instance of {@link WorkflowRunner}, never be {@code null}.
      */
     WorkflowRunner get();
 }

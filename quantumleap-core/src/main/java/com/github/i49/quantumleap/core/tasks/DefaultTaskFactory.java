@@ -1,4 +1,6 @@
 /* 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +17,19 @@
  */
 package com.github.i49.quantumleap.core.tasks;
 
+import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
+
 import com.github.i49.quantumleap.api.tasks.EchoTask;
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
 
 /**
- *
+ * The default implementation of {@link TaskFactory}.
  */
 public class DefaultTaskFactory implements TaskFactory {
 
     @Override
     public EchoTask createEchoTask(String message) {
+        checkNotNull(message, "message");
         return new EchoTaskImpl(message);
     }
 }

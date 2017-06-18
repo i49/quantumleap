@@ -1,4 +1,6 @@
 /* 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +18,16 @@
 package com.github.i49.quantumleap.api.tasks;
 
 /**
- *
+ * A factory interface for producing predefined tasks.
  */
 public interface TaskFactory {
 
+    /**
+     * Creates an instance of {@link EchoTask}.
+     * 
+     * @param message the message to echo, cannot be {@code null}.
+     * @return newly created task.
+     * @throws NullPointerException if given message is {@code null}.
+     */
     EchoTask createEchoTask(String message);
 }

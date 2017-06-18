@@ -1,4 +1,6 @@
 /* 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +16,8 @@
  * limitations under the License.
  */
 package com.github.i49.quantumleap.core.workflow;
+
+import static com.github.i49.quantumleap.core.common.Preconditions.checkRealType;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -66,12 +70,8 @@ public class BasicWorkflow extends WorkflowComponent implements Workflow {
                 if (job == null) {
                     continue;
                 }
-                if (job instanceof BasicJob) {
-                    this.jobs.add((BasicJob) job);
-                } else {
-                    // TODO:
-                    throw new IllegalArgumentException("");
-                }
+                BasicJob realJob = checkRealType(job, BasicJob.class, "jobs");
+                this.jobs.add(realJob);
             }
             return this;
         }

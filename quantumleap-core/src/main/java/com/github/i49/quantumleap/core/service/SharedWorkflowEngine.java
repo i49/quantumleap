@@ -1,4 +1,6 @@
 /* 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +17,8 @@
  */
 package com.github.i49.quantumleap.core.service;
 
-import java.util.Objects;
+import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
+import static com.github.i49.quantumleap.core.common.Preconditions.checkRealType;
 
 import javax.sql.DataSource;
 
@@ -54,26 +57,21 @@ public class SharedWorkflowEngine implements WorkflowEngine {
 
     @Override
     public WorkflowBuilder buildWorkflow(String name) {
-        Objects.requireNonNull(name, "\"name\" must not be null");
+        checkNotNull(name, "name");
         return new BasicWorkflow.Builder(name);
     }
 
     @Override
     public JobBuilder buildJob(String name) {
-        Objects.requireNonNull(name, "\"name\" must not be null.");
+        checkNotNull(name, "name");
         return new BasicJob.Builder(name);
     }
 
     @Override
     public WorkflowRunnerBuilder buildRunner(WorkflowRepository repository) {
-        Objects.requireNonNull(repository, "\"repository\" must not be null.");
-        if (repository instanceof EnhancedWorkflowRepository) {
-            EnhancedWorkflowRepository atcual = (EnhancedWorkflowRepository) repository;
-            return new SerialWorkflowRunner.Builder(atcual);
-        } else {
-            // TODO:
-            throw new IllegalArgumentException("");
-        }
+        checkNotNull(repository, "repository");
+        EnhancedWorkflowRepository real = checkRealType(repository, EnhancedWorkflowRepository.class, "repository");
+        return new SerialWorkflowRunner.Builder(real);
     }
 
     @Override

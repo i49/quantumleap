@@ -1,4 +1,6 @@
 /* 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +18,15 @@
 package com.github.i49.quantumleap.api.workflow;
 
 /**
- * The type for running workflows.
+ * The interface for running workflows and jobs in the repository.
  */
 public interface WorkflowRunner {
 
+    /**
+     * Returns the total number of jobs completed by this runner.
+     * 
+     * @return the total number of jobs completed.
+     */
     long getTotalNumberOfJobsDone();
 
     /**
@@ -43,7 +50,7 @@ public interface WorkflowRunner {
      */
     long runAll();
 
-    long runIndefinite();
+    long runInfinite();
 
     /**
      * Stops running.

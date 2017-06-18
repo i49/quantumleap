@@ -1,4 +1,6 @@
 /* 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +18,14 @@
 package com.github.i49.quantumleap.api.tasks;
 
 /**
- *
+ * A task which composes a step of a job.
  */
 public interface Task {
 
+    /**
+     * Runs this task.
+     * 
+     * @param context the context of the run.
+     */
     void run(TaskContext context);
 }
