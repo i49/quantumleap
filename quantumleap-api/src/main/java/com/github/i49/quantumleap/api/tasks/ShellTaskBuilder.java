@@ -17,13 +17,32 @@
  */
 package com.github.i49.quantumleap.api.tasks;
 
+import java.nio.file.Path;
+
 /**
  * Builder interface for building an instance of {@link ShellTask}.
  */
 public interface ShellTaskBuilder {
 
+    /**
+     * Specifies the commands to execute.
+     * 
+     * @param commands the commands to execute.
+     * @return this builder.
+     * @throws NullPointerException if any one of commands is {@code null}.
+     */
     ShellTaskBuilder commands(String... commands);
-    
+
+    /**
+     * Specifies the path to the script to execute.
+     * The path must be visible for the workflow runner.
+     * 
+     * @param scriptPath the path to the script.
+     * @return this builder.
+     * @throws NullPointerException if given scriptPath is {@code null}.
+     */
+    ShellTaskBuilder script(Path scriptPath);
+ 
     /**
      * Builds the {@link ShellTask} built by this builder.
      * 

@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import javax.sql.DataSource;
 
 import com.github.i49.quantumleap.api.tasks.Task;
@@ -55,13 +54,13 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     private final Jsonb jsonb;
 
     public JdbcWorkflowRepository(DataSource dataSource) {
+        this.jsonb = CustomJsonbBuilder.create();
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
             createSchema(connection);
             this.statements = prepareStatements(connection);
             this.connection = connection;
-            this.jsonb = JsonbBuilder.create();
         } catch (WorkflowException e) {
             closeConnectionIgnoringError(connection);
             throw e;

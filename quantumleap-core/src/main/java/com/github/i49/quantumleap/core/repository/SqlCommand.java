@@ -43,10 +43,22 @@ enum SqlCommand {
 
     private final String sql;
 
+    /**
+     * Constructs this command.
+     * 
+     * @param sql the SQL statement assigned to this command.
+     */
     private SqlCommand(String sql) {
         this.sql = sql;
     }
 
+    /**
+     * Creates a prepared statement for this command.
+     * 
+     * @param connection the database connection.
+     * @return newly created prepared statement.
+     * @throws SQLException if data access error has occurred. 
+     */
     public PreparedStatement prepare(Connection connection) throws SQLException {
         if (this == INSERT_WORKFLOW || this == INSERT_JOB) {
             return connection.prepareStatement(this.sql, Statement.RETURN_GENERATED_KEYS);

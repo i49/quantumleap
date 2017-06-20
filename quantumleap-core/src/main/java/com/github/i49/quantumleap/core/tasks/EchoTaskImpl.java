@@ -26,7 +26,7 @@ import com.github.i49.quantumleap.api.tasks.EchoTask;
 import com.github.i49.quantumleap.api.tasks.TaskContext;
 
 /**
- *
+ * An implementation of {@link EchoTask}.
  */
 public class EchoTaskImpl implements EchoTask {
 

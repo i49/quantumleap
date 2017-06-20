@@ -17,15 +17,25 @@
  */
 package com.github.i49.quantumleap.api.tasks;
 
+import java.nio.file.Path;
+import java.util.List;
+
 /**
- * A task for executing given shell script.
+ * A task for executing given command or script.
  */
 public interface ShellTask extends Task {
 
     /**
      * Returns the commands to be executed by shell.
      * 
-     * @return the commands to be executed.
+     * @return the commands to be executed, can be {@code null}.
      */
-    String[] getCommands();
+    List<String> getCommands();
+    
+    /**
+     * Returns the path to the script to be executed by shell.
+     * 
+     * @return the path to the script, can be {@code null}.
+     */
+    Path getScriptPath();
 }
