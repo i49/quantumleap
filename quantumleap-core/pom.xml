@@ -39,6 +39,29 @@
     <build>
         <plugins>
             <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+	                            <artifactItem>
+	                                <groupId>${project.groupId}</groupId>
+	                                <artifactId>quantumleap-tests</artifactId>
+	                                <version>${project.version}</version>
+	                                <includes>*.bat, *.sh</includes>
+	                                <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+	                            </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <dependenciesToScan>

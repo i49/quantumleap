@@ -44,5 +44,14 @@
             <scope>runtime</scope>
         </dependency>
     </dependencies>
-
+    
+    <build>
+        <!-- copies main resources to test-classes. -->
+        <testResources>
+            <testResource>
+                <directory>src/main/resources</directory>
+            </testResource>
+        </testResources>
+    </build>
+    
 </project>
