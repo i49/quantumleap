@@ -17,6 +17,8 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
+import java.nio.file.Path;
+
 import com.github.i49.quantumleap.api.tasks.TaskContext;
 
 /**
@@ -28,5 +30,11 @@ class JobTaskContext implements TaskContext {
 
     JobTaskContext(BasicJob job) {
         this.job = job;
+    }
+    
+    @Override
+    public Path getJobDirectory() {
+        // TODO:
+        return null;
     }
 }

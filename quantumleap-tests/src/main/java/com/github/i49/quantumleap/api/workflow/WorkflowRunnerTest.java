@@ -66,7 +66,7 @@ public class WorkflowRunnerTest {
         TaskFactory factory = engine.getTaskFactory();
         Task task1 = factory.createEchoTask("Hello");
         Task task2 = factory.createEchoTask("World");
-        Job job1 = engine.buildJob("job1").start(task1).next(task2).get();
+        Job job1 = engine.buildJob("job1").tasks(task1, task2).get();
         Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1).get();
         repository.addWorkflow(workflow);
 

@@ -26,6 +26,7 @@ import java.util.ResourceBundle;
  */
 public enum Message {
     PARAMETER_IS_NULL,
+    PARAMETER_ITEM_IS_NULL,
     PARAMETER_NOT_INSTANCE_FOR_ENGINE,
     REPOSITORY_FAILED_TO_CLEAR;
 

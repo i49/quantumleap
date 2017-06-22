@@ -17,6 +17,8 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
+import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -81,15 +83,18 @@ public class BasicJob extends WorkflowComponent implements Job {
         }
 
         @Override
-        public Builder start(Task task) {
-            this.tasks.clear();
-            this.tasks.add(task);
+        public Builder tasks(Task... tasks) {
+            checkNotNull(tasks, "tasks");
+            for (Task task: tasks) {
+                this.tasks.add(task);
+            }
             return this;
         }
-
+        
         @Override
-        public Builder next(Task task) {
-            this.tasks.add(task);
+        public Builder tasks(List<Task> tasks) {
+            checkNotNull(tasks, "tasks");
+            this.tasks.addAll(tasks);
             return this;
         }
 

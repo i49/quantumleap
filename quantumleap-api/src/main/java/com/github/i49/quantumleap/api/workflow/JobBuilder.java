@@ -17,6 +17,8 @@
  */
 package com.github.i49.quantumleap.api.workflow;
 
+import java.util.List;
+
 import com.github.i49.quantumleap.api.tasks.Task;
 
 /**
@@ -25,21 +27,21 @@ import com.github.i49.quantumleap.api.tasks.Task;
 public interface JobBuilder {
 
     /**
-     * Specifies the first task of the job.
+     * Specifies the tasks executed in the job.
      * 
-     * @param task the task to execute.
+     * @param tasks the tasks executed in the order as specified.
      * @return this builder.
      */
-    JobBuilder start(Task task);
-
+    JobBuilder tasks(Task... tasks);
+    
     /**
-     * Specifies the next task of the job.
+     * Specifies the list of the tasks executed in the job.
      * 
-     * @param task the task to execute.
+     * @param tasks the list of tasks executed in the order as specified.
      * @return this builder.
      */
-    JobBuilder next(Task task);
-
+    JobBuilder tasks(List<Task> tasks);
+    
     /**
      * Returns the {@link Job} built by this builder.
      * 

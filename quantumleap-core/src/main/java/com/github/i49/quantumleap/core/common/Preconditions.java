@@ -17,8 +17,7 @@
  */
 package com.github.i49.quantumleap.core.common;
 
-import static com.github.i49.quantumleap.core.common.Message.PARAMETER_IS_NULL;
-import static com.github.i49.quantumleap.core.common.Message.PARAMETER_NOT_INSTANCE_FOR_ENGINE;
+import static com.github.i49.quantumleap.core.common.Message.*;
 
 /**
  * Preconditions for methods.
@@ -35,6 +34,23 @@ public final class Preconditions {
     public static void checkNotNull(Object object, String name) {
         if (object == null) {
             throw new NullPointerException(PARAMETER_IS_NULL.with(name));
+        }
+    }
+    
+    /**
+     * Checks if any element value of given array parameter is {@code null}. 
+     * 
+     * @param objects the array passed in as a parameter.
+     * @param name the name of the array-type parameter.
+     */
+    public static void checkNotNull(Object[] objects, String name) {
+        if (objects == null) {
+            throw new NullPointerException(PARAMETER_IS_NULL.with(name));
+        }
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                throw new NullPointerException(PARAMETER_ITEM_IS_NULL.with(name, i));
+            }
         }
     }
 

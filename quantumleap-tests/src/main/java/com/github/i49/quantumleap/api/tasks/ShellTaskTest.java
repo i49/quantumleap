@@ -63,7 +63,7 @@ public class ShellTaskTest {
 
     @Test
     public void run_shouldExecuteGivenCommand() {
-        Task task = factory.buildShellTask().commands("echo", "hello world", ">shelltask-command.txt").get();
+        Task task = factory.buildShellTask().commands("echo", "hello world", ">shelltask-command.log").get();
         runTask(task);
     }
     
@@ -75,7 +75,7 @@ public class ShellTaskTest {
     }
     
     private void runTask(Task task) {
-        Job job1 = engine.buildJob("job1").start(task).get();
+        Job job1 = engine.buildJob("job1").tasks(task).get();
         Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1).get();
         repository.addWorkflow(workflow);
         runner.runSingle();

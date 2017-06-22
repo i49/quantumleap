@@ -307,14 +307,13 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     private void buildTasks(long jobId, JobBuilder builder) throws SQLException {
         PreparedStatement s = getStatement(SqlCommand.FIND_TASK);
         s.setLong(1, jobId);
+        List<Task> tasks = new ArrayList<>();
         try (ResultSet rs = s.executeQuery()) {
-            if (rs.next()) {
-                builder.start(mapToTask(rs));
-                while (rs.next()) {
-                    builder.next(mapToTask(rs));
-                }
+            while (rs.next()) {
+                tasks.add(mapToTask(rs));
             }
         }
+        builder.tasks(tasks);
     }
 
     private Task mapToTask(ResultSet rs) throws SQLException {

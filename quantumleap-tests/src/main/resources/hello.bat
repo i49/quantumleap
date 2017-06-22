@@ -1,1 +1,1 @@
-echo hello world > shelltask-script.txt
+echo hello world > shelltask-script.log
