@@ -98,7 +98,6 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
         for (Task task : job.getTasks()) {
             task.run(context);
         }
-        job.setStatus(JobStatus.COMPLETED);
-        getRepository().storeJobStatus(job);
+        completeJob(job);
     }
 }

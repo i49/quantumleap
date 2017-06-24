@@ -25,12 +25,22 @@ import com.github.i49.quantumleap.api.tasks.Task;
  * Builder interface for building an instance of {@link Job}.
  */
 public interface JobBuilder {
+    
+    /**
+     * Specifies the predecessors of the job.
+     * 
+     * @param jobs the predecessors
+     * @return this builder.
+     * @throws NullPointerException if one or more {@code jobs} are {@code null}.
+     */
+    JobBuilder depend(Job... jobs);
 
     /**
      * Specifies the tasks executed in the job.
      * 
      * @param tasks the tasks executed in the order as specified.
      * @return this builder.
+     * @throws NullPointerException if one or more {@code tasks} are {@code null}.
      */
     JobBuilder tasks(Task... tasks);
     
@@ -39,6 +49,7 @@ public interface JobBuilder {
      * 
      * @param tasks the list of tasks executed in the order as specified.
      * @return this builder.
+     * @throws NullPointerException if given {@code tasks} is {@code null}.
      */
     JobBuilder tasks(List<Task> tasks);
     

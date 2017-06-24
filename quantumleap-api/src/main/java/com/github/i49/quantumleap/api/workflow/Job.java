@@ -66,10 +66,10 @@ public interface Job {
     boolean hasId();
 
     /**
-     * Checks if this job has any predecessors or not.
+     * Checks if this job has any dependencies or not.
      * 
-     * @return {@code true} if this job has predecessors, {@code false}
+     * @return {@code true} if this job has dependencies, {@code false}
      *         otherwise.
      */
-    boolean hasPredecessor();
+    boolean hasDependencies();
 }

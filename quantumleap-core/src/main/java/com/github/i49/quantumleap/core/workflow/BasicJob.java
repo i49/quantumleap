@@ -21,7 +21,9 @@ import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.github.i49.quantumleap.api.tasks.Task;
 import com.github.i49.quantumleap.api.workflow.Job;
@@ -34,11 +36,13 @@ import com.github.i49.quantumleap.api.workflow.JobStatus;
 public class BasicJob extends WorkflowComponent implements Job {
 
     private final String name;
+    private final Set<Job> dependencies;
     private final List<Task> tasks;
     private JobStatus status;
 
     private BasicJob(Builder builder) {
         this.name = builder.name;
+        this.dependencies = Collections.unmodifiableSet(builder.dependencies);
         this.tasks = Collections.unmodifiableList(builder.tasks);
         this.status = JobStatus.INITIAL;
     }
@@ -59,9 +63,8 @@ public class BasicJob extends WorkflowComponent implements Job {
     }
 
     @Override
-    public boolean hasPredecessor() {
-        // TODO:
-        return false;
+    public boolean hasDependencies() {
+        return dependencies.size() > 0;
     }
 
     public void setStatus(JobStatus status) {
@@ -72,14 +75,28 @@ public class BasicJob extends WorkflowComponent implements Job {
     public String toString() {
         return getName();
     }
+    
+    public Iterable<Job> getDependencies() {
+        return dependencies;
+    }
 
     public static class Builder implements JobBuilder {
 
         private final String name;
+        private final Set<Job> dependencies = new HashSet<>();
         private final List<Task> tasks = new ArrayList<>();
 
         public Builder(String name) {
             this.name = name;
+        }
+        
+        @Override
+        public Builder depend(Job... jobs) {
+            checkNotNull(jobs, "jobs");
+            for (Job job: jobs) {
+                this.dependencies.add(job);
+            }
+            return this;
         }
 
         @Override

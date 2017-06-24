@@ -23,6 +23,7 @@ import java.nio.file.Path;
 
 import com.github.i49.quantumleap.api.tasks.TaskContext;
 import com.github.i49.quantumleap.api.workflow.Job;
+import com.github.i49.quantumleap.api.workflow.JobStatus;
 import com.github.i49.quantumleap.api.workflow.Platform;
 import com.github.i49.quantumleap.api.workflow.WorkflowException;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
@@ -73,6 +74,14 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         return new TaskExecutionContext(job, jobDirectory);
     }
     
+    protected void completeJob(BasicJob job) {
+        job.setStatus(JobStatus.COMPLETED);
+        getRepository().storeJobStatus(job);
+        for (long dependant: getRepository().findDependants(job)) {
+            getRepository().updateJobStatusIfReady(dependant);
+        }
+    }
+    
     private Path createDirectoryForJob(Job job) {
         String name = String.valueOf(job.getId());
         Path path = jobsDirectory.resolve(name);
@@ -85,6 +94,12 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         return path;
     }
     
+    /**
+     * Prepares working directory of this runner.
+     * 
+     * @param clean
+     * @throws IOException if an I/O error has occurred.
+     */
     private void prepareDirectory(boolean clean) throws IOException {
         Files.createDirectories(workDirectory);
         Files.createDirectories(jobsDirectory);

@@ -17,7 +17,10 @@
  */
 package com.github.i49.quantumleap.core.repository;
 
+import java.util.List;
+
 import com.github.i49.quantumleap.api.workflow.Job;
+import com.github.i49.quantumleap.api.workflow.JobStatus;
 import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
 
 /**
@@ -25,10 +28,17 @@ import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
  */
 public interface EnhancedWorkflowRepository extends WorkflowRepository {
 
+    List<Long> findDependants(Job job);
+
+    
     /**
      * Stores the status of the job.
      * 
      * @param job the job to store.
      */
     void storeJobStatus(Job job);
+    
+    void storeJobStatus(long jobId, JobStatus status);
+    
+    int updateJobStatusIfReady(long jobId);
 }

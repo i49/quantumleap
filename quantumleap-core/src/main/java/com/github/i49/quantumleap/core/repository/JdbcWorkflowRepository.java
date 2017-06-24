@@ -18,6 +18,8 @@
 package com.github.i49.quantumleap.core.repository;
 
 import static com.github.i49.quantumleap.core.common.Message.*;
+import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
+import static com.github.i49.quantumleap.core.common.Preconditions.checkRealType;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -85,6 +87,7 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     public void clear() {
         try {
             getStatement(SqlCommand.DELETE_TASKS).execute();
+            getStatement(SqlCommand.DELETE_JOB_DEPENDENCY).execute();
             getStatement(SqlCommand.DELETE_JOBS).execute();
             getStatement(SqlCommand.DELETE_WORKFLOWS).execute();
         } catch (SQLException e) {
@@ -115,10 +118,10 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     }
 
     @Override
-    public long countJobsByStatus(JobStatus status) {
+    public long countJobsWithStatus(JobStatus status) {
         PreparedStatement s = getStatement(SqlCommand.COUNT_JOBS_BY_STATUS);
         try {
-            s.setInt(1, status.ordinal());
+            s.setString(1, status.name());
         } catch (SQLException e) {
             // TODO: add message
             throw new WorkflowException("", e);
@@ -130,7 +133,7 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     public List<Job> findJobsByStatus(JobStatus status) {
         PreparedStatement s = getStatement(SqlCommand.FIND_JOBS_BY_STATUS);
         try {
-            s.setInt(1, status.ordinal());
+            s.setString(1, status.name());
             try (ResultSet rs = s.executeQuery()) {
                 List<Job> jobs = new ArrayList<>();
                 while (rs.next()) {
@@ -148,7 +151,7 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     public Optional<Job> findFirstJobByStatus(JobStatus status) {
         PreparedStatement s = getStatement(SqlCommand.FIND_FIRST_JOB_BY_STATUS);
         try {
-            s.setInt(1, status.ordinal());
+            s.setString(1, status.name());
             try (ResultSet rs = s.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(mapToJob(rs));
@@ -161,14 +164,73 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
             throw new WorkflowException("", e);
         }
     }
-
+    
+    @Override
+    public boolean updateJobStatus(Job job) {
+        checkNotNull(job, "job");
+        BasicJob basicJob = checkRealType(job, BasicJob.class, "job");
+        PreparedStatement s = getStatement(SqlCommand.FIND_JOB_STATUS_BY_ID);
+        try {
+            s.setLong(1, job.getId());
+            try (ResultSet rs = s.executeQuery()) {
+                if (rs.next()) {
+                    JobStatus status = JobStatus.valueOf(rs.getString(1));
+                    basicJob.setStatus(status);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            // TODO: add message
+            throw new WorkflowException("", e);
+        }
+    }
+    
+    /* EnhancedWorkflowRepository interface */
+   
+    @Override
+    public List<Long> findDependants(Job job) {
+        PreparedStatement s = getStatement(SqlCommand.FIND_DEPENDANT_JOBS);
+        try {
+            s.setLong(1, job.getId());
+            List<Long> dependants = new ArrayList<>();
+            try (ResultSet rs = s.executeQuery()) {
+                while (rs.next()) {
+                    dependants.add(rs.getLong(1));
+                }
+            }
+            return dependants;
+        } catch (SQLException e) {
+            // TODO: add message
+            throw new WorkflowException("", e);
+        }
+    }
+    
     @Override
     public void storeJobStatus(Job job) {
+        storeJobStatus(job.getId(), job.getStatus());
+    }
+    
+    @Override
+    public void storeJobStatus(long jobId, JobStatus status) {
         PreparedStatement s = getStatement(SqlCommand.UPDATE_JOB_STATUS);
         try {
-            s.setInt(1, job.getStatus().ordinal());
-            s.setLong(2, job.getId());
+            s.setString(1, status.name());
+            s.setLong(2, jobId);
             s.executeUpdate();
+        } catch (SQLException e) {
+            // TODO: add message
+            throw new WorkflowException("", e);
+        }
+    }
+    
+    @Override
+    public int updateJobStatusIfReady(long jobId) {
+        PreparedStatement s = getStatement(SqlCommand.UPDATE_JOB_STATUS_IF_READY);
+        try {
+            s.setLong(1, jobId);
+            return s.executeUpdate();
         } catch (SQLException e) {
             // TODO: add message
             throw new WorkflowException("", e);
@@ -181,18 +243,20 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
                 connection.close();
             }
         } catch (SQLException e) {
+            // TODO: logging
         }
     }
 
     private void addWorkflow(BasicWorkflow workflow) {
         long workflowId = insertWorkflow(workflow);
+        // TODO: reorder jobs
         for (Job job : workflow.getJobs()) {
             addJob((BasicJob) job, workflowId);
         }
     }
 
     private void addJob(BasicJob job, long workflowId) {
-        JobStatus status = job.hasPredecessor() ? JobStatus.WAITING : JobStatus.READY;
+        JobStatus status = job.hasDependencies() ? JobStatus.WAITING : JobStatus.READY;
         job.setStatus(status);
         long jobId = insertJob(job, workflowId);
         int sequence = 0;
@@ -219,18 +283,35 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
         try {
             PreparedStatement s = getStatement(SqlCommand.INSERT_JOB);
             s.setString(1, job.getName());
-            s.setInt(2, job.getStatus().ordinal());
+            s.setString(2, job.getStatus().name());
             s.setLong(3, workflowId);
             s.executeUpdate();
-            long id = getGeneratedKey(s);
-            job.setId(id);
-            return id;
+            long jobId = getGeneratedKey(s);
+            job.setId(jobId);
+            if (job.hasDependencies()) {
+                insertJobDependencies(jobId, job.getDependencies());
+            }
+            return jobId;
         } catch (SQLException e) {
             // TODO: add message
             throw new WorkflowException("", e);
         }
     }
-
+    
+    private void insertJobDependencies(long jobId, Iterable<Job> dependencies) {
+        PreparedStatement s = getStatement(SqlCommand.INSERT_JOB_DEPENDENCY);
+        try {
+            s.setLong(1, jobId);
+            for (Job dependency: dependencies) {
+                s.setLong(2, dependency.getId());
+                s.executeUpdate();
+            }
+        } catch (SQLException e) {
+            // TODO: add message
+            throw new WorkflowException("", e);
+        }
+    }
+    
     private void insertTask(Task task, long jobId, int sequenceNumber) {
         try {
             PreparedStatement s = getStatement(SqlCommand.INSERT_TASK);
