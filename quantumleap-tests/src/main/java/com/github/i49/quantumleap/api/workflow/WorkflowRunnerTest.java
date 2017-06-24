@@ -81,7 +81,7 @@ public class WorkflowRunnerTest {
     }
     
     @Test
-    public void runSingle_shouldJobsWithDependencies() {
+    public void runSingle_shouldRunJobWithDependencies() {
         Job job1 = engine.buildJob("job1")
                 .tasks(taskFactory.createEchoTask("Running job1"))
                 .get();
@@ -113,7 +113,7 @@ public class WorkflowRunnerTest {
     }
 
     @Test
-    public void runSingle_shouldJobsWithDiamondDependencies() {
+    public void runSingle_shouldRunJobInDiamondDependencies() {
         Job job1 = engine.buildJob("job1")
                 .tasks(taskFactory.createEchoTask("Running job1"))
                 .get();

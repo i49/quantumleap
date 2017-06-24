@@ -18,11 +18,19 @@
 package com.github.i49.quantumleap.api.tasks;
 
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * A task for executing a given shell script.
  */
 public interface ScriptTask extends Task {
+    
+    /**
+     * Returns the arguments of the script.
+     * 
+     * @return the arguments of the script, never be {@code null}.
+     */
+    List<String> getArguments();
 
     /**
      * Returns the path to the script to be executed by shell.

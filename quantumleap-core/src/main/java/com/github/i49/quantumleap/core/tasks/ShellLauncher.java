@@ -54,7 +54,7 @@ abstract class ShellLauncher {
         return this;
     }
     
-    void launchScript(String scriptPath, String... arguments) {
+    void launchScript(String scriptPath, List<String> arguments) {
         List<String> commands = buildCommands(scriptPath, arguments);
         ProcessBuilder builder = new ProcessBuilder(commands);
         builder.directory(this.directory.toFile());
@@ -70,7 +70,7 @@ abstract class ShellLauncher {
         }
     }
     
-    protected abstract List<String> buildCommands(String scriptPath, String[] arguments);
+    protected abstract List<String> buildCommands(String scriptPath, List<String> arguments);
 
     /**
      * {@link ShellLauncher} for Windows platform.
@@ -78,11 +78,14 @@ abstract class ShellLauncher {
     private static class WindowsShellLauncher extends ShellLauncher {
         
         @Override
-        protected List<String> buildCommands(String scriptPath, String[] arguments) {
+        protected List<String> buildCommands(String scriptPath, List<String> arguments) {
             List<String> commands = new ArrayList<>();
             commands.add("cmd.exe");
             commands.add("/C");
             commands.add(scriptPath.toString());
+            if (arguments.size() > 0) {
+                commands.addAll(arguments);
+            }
             return commands;
         }
     }

@@ -46,7 +46,7 @@ CREATE TABLE task (
     sequence_number INTEGER NOT NULL,
 
     class_name VARCHAR(1000) NOT NULL,
-    task_params VARCHAR(10000),
+    parameters VARCHAR(10000),
 
     PRIMARY KEY (job_id, sequence_number),
     FOREIGN KEY (job_id) REFERENCES job (job_id)

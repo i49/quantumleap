@@ -65,9 +65,11 @@ public class ScriptTaskTest {
     }
 
     @Test
-    public void run_shouldExecuteGivenScript() {
+    public void run_shouldRunScript() {
         Path path = Paths.get("target/test-classes/hello.bat");
-        Task task = factory.buildShellTask(path).get();
+        Task task = factory.buildShellTask(path)
+                .arguments("John Smith")
+                .get();
         runTask(task);
     }
     

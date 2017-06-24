@@ -21,6 +21,14 @@ package com.github.i49.quantumleap.api.tasks;
  * Builder interface for building an instance of {@link ScriptTask}.
  */
 public interface ScriptTaskBuilder {
+    
+    /**
+     * Specifies the arguments which will be passed to the script.
+     * 
+     * @param arguments the arguments of the script.
+     * @return this builder.
+     */
+    ScriptTaskBuilder arguments(String... arguments);
 
     /**
      * Builds the {@link ScriptTask} built by this builder.

@@ -17,7 +17,12 @@
  */
 package com.github.i49.quantumleap.core.tasks;
 
+import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
+
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.github.i49.quantumleap.api.tasks.ScriptTask;
 import com.github.i49.quantumleap.api.tasks.ScriptTaskBuilder;
@@ -29,6 +34,7 @@ import com.github.i49.quantumleap.api.tasks.TaskContext;
 public class ScriptTaskImpl implements ScriptTask {
     
     private Path scriptPath;
+    private List<String> arguments;
     
     public ScriptTaskImpl() {
     }
@@ -38,17 +44,26 @@ public class ScriptTaskImpl implements ScriptTask {
         ShellLauncher launcher = ShellLauncher.get(context.getPlatform());
         launcher.setDirectory(context.getJobDirectory());
         Path scriptPath = getScriptPath().toAbsolutePath();
-        launcher.launchScript(scriptPath.toString());
+        launcher.launchScript(scriptPath.toString(), this.arguments);
+    }
+
+    @Override
+    public List<String> getArguments() {
+        return arguments;
     }
 
     @Override
     public Path getScriptPath() {
         return scriptPath;
     }
-
+    
     public void setScriptPath(Path scriptPath) {
         assert(scriptPath != null);
         this.scriptPath = scriptPath;
+    }
+    
+    public void setArguments(List<String> arguments) {
+        this.arguments = Collections.unmodifiableList(arguments);
     }
 
     /**
@@ -57,6 +72,7 @@ public class ScriptTaskImpl implements ScriptTask {
     public static class Builder implements ScriptTaskBuilder {
         
         private final Path scriptPath;
+        private final List<String> arguments = new ArrayList<>();
         
         Builder(Path scriptPath) {
             assert(scriptPath != null);
@@ -64,9 +80,19 @@ public class ScriptTaskImpl implements ScriptTask {
         }
         
         @Override
+        public ScriptTaskBuilder arguments(String... arguments) {
+            checkNotNull(arguments, "arguments");
+            for (String argument: arguments) {
+                this.arguments.add(argument);
+            }
+            return this;
+        }
+        
+        @Override
         public ScriptTask get() {
             ScriptTaskImpl task = new ScriptTaskImpl();
-            task.setScriptPath(scriptPath);
+            task.setScriptPath(this.scriptPath);
+            task.setArguments(this.arguments);
             return task;
         }
     }
