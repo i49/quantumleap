@@ -19,7 +19,6 @@ package com.github.i49.quantumleap.core.service;
 
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
 import com.github.i49.quantumleap.api.workflow.JobBuilder;
-import com.github.i49.quantumleap.api.workflow.Platform;
 import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 import com.github.i49.quantumleap.api.workflow.WorkflowBuilder;
 import com.github.i49.quantumleap.api.workflow.WorkflowEngine;
@@ -37,11 +36,6 @@ public class ServiceProvider implements WorkflowEngine {
      */
     private static final SharedWorkflowEngine singleton = new SharedWorkflowEngine();
 
-    @Override
-    public Platform getPlatform() {
-        return singleton.getPlatform();
-    }
-    
     @Override
     public WorkflowRepository createRepository() {
         return singleton.createRepository();

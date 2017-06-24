@@ -34,13 +34,6 @@ public interface WorkflowEngine {
         return WorkflowEngineLoader.getEngine();
     }
     
-    /**
-     * Returns the current platform.
-     * 
-     * @return the current platform.
-     */
-    Platform getPlatform();
-    
      /**
      * Creates the repository which will store workflows and jobs.
      * 

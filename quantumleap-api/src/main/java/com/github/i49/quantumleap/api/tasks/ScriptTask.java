@@ -15,33 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.workflow;
+package com.github.i49.quantumleap.api.tasks;
 
 import java.nio.file.Path;
 
-import com.github.i49.quantumleap.api.tasks.TaskContext;
-
 /**
- *
+ * A task for executing a given shell script.
  */
-class JobTaskContext implements TaskContext {
-
-    private final BasicJob job;
-    private final Path directory;
+public interface ScriptTask extends Task {
 
     /**
-     * Constructs this context.
+     * Returns the path to the script to be executed by shell.
      * 
-     * @param job the current job.
-     * @param directory the directory for the job.
+     * @return the path to the script, never be {@code null}.
      */
-    JobTaskContext(BasicJob job, Path directory) {
-        this.job = job;
-        this.directory = directory;
-    }
-    
-    @Override
-    public Path getJobDirectory() {
-        return directory;
-    }
+    Path getScriptPath();
 }

@@ -22,14 +22,18 @@ import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.github.i49.quantumleap.api.workflow.Platform;
 import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
+import com.github.i49.quantumleap.core.common.Platforms;
 
 public class DefaultRunnerConfiguration implements RunnerConfiguration {
 
+    Platform platform;
     Path workDirectory;
     boolean clean;
     
     public DefaultRunnerConfiguration() {
+        this.platform = Platforms.getCurrent();
         this.workDirectory = Paths.get(".").toAbsolutePath().normalize();
         this.clean = false;
     }

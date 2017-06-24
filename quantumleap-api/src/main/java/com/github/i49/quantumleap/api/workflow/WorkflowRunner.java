@@ -21,6 +21,13 @@ package com.github.i49.quantumleap.api.workflow;
  * The interface for running workflows and jobs in the repository.
  */
 public interface WorkflowRunner {
+ 
+    /**
+     * Returns the current platform on which this runner is running.
+     * 
+     * @return the current platform, never be {@code null}.
+     */
+    Platform getPlatform();
 
     /**
      * Returns the total number of jobs completed by this runner.

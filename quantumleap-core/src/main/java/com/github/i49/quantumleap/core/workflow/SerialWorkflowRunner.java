@@ -17,7 +17,6 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
-import java.nio.file.Path;
 import java.util.Optional;
 
 import com.github.i49.quantumleap.api.tasks.Task;
@@ -34,6 +33,7 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
 
     private long totalJobsDone;
     private boolean running;
+    @SuppressWarnings("unused")
     private boolean canceled;
 
     public SerialWorkflowRunner(EnhancedWorkflowRepository repository, DefaultRunnerConfiguration configuration) {
@@ -94,8 +94,7 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
     }
 
     private void executeJob(BasicJob job) {
-        Path directory = createDirectoryForJob(job);
-        TaskContext context = new JobTaskContext(job, directory);
+        TaskContext context = createTaskContext(job);
         for (Task task : job.getTasks()) {
             task.run(context);
         }

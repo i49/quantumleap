@@ -35,7 +35,7 @@ import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
 /**
  *
  */
-public class ShellTaskTest {
+public class ScriptTaskTest {
 
     private static WorkflowEngine engine;
     private static TaskFactory factory;
@@ -65,15 +65,9 @@ public class ShellTaskTest {
     }
 
     @Test
-    public void run_shouldExecuteGivenCommand() {
-        Task task = factory.buildShellTask().commands("echo", "hello world", ">shelltask-command.log").get();
-        runTask(task);
-    }
-    
-    @Test
     public void run_shouldExecuteGivenScript() {
         Path path = Paths.get("target/test-classes/hello.bat");
-        Task task = factory.buildShellTask().script(path).get();
+        Task task = factory.buildShellTask(path).get();
         runTask(task);
     }
     

@@ -24,13 +24,11 @@ import javax.sql.DataSource;
 
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
 import com.github.i49.quantumleap.api.workflow.JobBuilder;
-import com.github.i49.quantumleap.api.workflow.Platform;
 import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 import com.github.i49.quantumleap.api.workflow.WorkflowBuilder;
 import com.github.i49.quantumleap.api.workflow.WorkflowEngine;
 import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
-import com.github.i49.quantumleap.core.common.Platforms;
 import com.github.i49.quantumleap.core.repository.EnhancedWorkflowRepository;
 import com.github.i49.quantumleap.core.repository.JdbcWorkflowRepository;
 import com.github.i49.quantumleap.core.repository.SimpleDataSource;
@@ -47,19 +45,12 @@ public class SharedWorkflowEngine implements WorkflowEngine {
 
     private static final String DEFAULT_DATASOURCE_URL = "jdbc:hsqldb:mem:workflowdb;shutdown=true";
 
-    private final Platform platform;
     private final TaskFactory taskFactory;
 
     public SharedWorkflowEngine() {
-        this.platform = Platforms.getCurrent();
-        this.taskFactory = new DefaultTaskFactory(this.platform);
+        this.taskFactory = new DefaultTaskFactory();
     }
 
-    @Override
-    public Platform getPlatform() {
-        return platform;
-    }
-    
     @Override
     public WorkflowRepository createRepository() {
         return new JdbcWorkflowRepository(createDefaultDataSource());

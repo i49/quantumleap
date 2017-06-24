@@ -17,6 +17,8 @@
  */
 package com.github.i49.quantumleap.api.tasks;
 
+import java.nio.file.Path;
+
 /**
  * A factory interface for producing predefined tasks.
  */
@@ -31,5 +33,13 @@ public interface TaskFactory {
      */
     EchoTask createEchoTask(String message);
     
-    ShellTaskBuilder buildShellTask();
+    /**
+     * Creates a builder for building {@link ScriptTask}.
+     * The path must be visible for the workflow runner.
+     * 
+     * @param scriptPath the path to the script to run.
+     * @return newly created builder.
+     * @throws NullPointerException if given scriptPath is {@code null}.
+     */
+    ScriptTaskBuilder buildShellTask(Path scriptPath);
 }

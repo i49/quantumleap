@@ -19,25 +19,21 @@ package com.github.i49.quantumleap.core.tasks;
 
 import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 
+import java.nio.file.Path;
+
 import com.github.i49.quantumleap.api.tasks.EchoTask;
-import com.github.i49.quantumleap.api.tasks.ShellTaskBuilder;
+import com.github.i49.quantumleap.api.tasks.ScriptTaskBuilder;
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
-import com.github.i49.quantumleap.api.workflow.Platform;
 
 /**
  * The default implementation of {@link TaskFactory}.
  */
 public class DefaultTaskFactory implements TaskFactory {
     
-    private final Platform platform;
-    
     /**
      * Constructs this factory.
-     * 
-     * @param platform the current platform.
      */
-    public DefaultTaskFactory(Platform platform) {
-        this.platform = platform;
+    public DefaultTaskFactory() {
     }
 
     @Override
@@ -47,7 +43,8 @@ public class DefaultTaskFactory implements TaskFactory {
     }
 
     @Override
-    public ShellTaskBuilder buildShellTask() {
-        return new ShellTaskImpl.Builder();
+    public ScriptTaskBuilder buildShellTask(Path scriptPath) {
+        checkNotNull(scriptPath, "scriptPath");
+        return new ScriptTaskImpl.Builder(scriptPath);
     }
 }

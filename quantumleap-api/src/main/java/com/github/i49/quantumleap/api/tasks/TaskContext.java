@@ -19,15 +19,24 @@ package com.github.i49.quantumleap.api.tasks;
 
 import java.nio.file.Path;
 
+import com.github.i49.quantumleap.api.workflow.Platform;
+
 /**
  * The context of a running task.
  */
 public interface TaskContext {
-
+    
     /**
      * Returns the directory for the current job which owns the tasks.
      * 
      * @return the directory for the current job, never be {@code null}. 
      */
     Path getJobDirectory();
+
+    /**
+     * Returns the current platform.
+     * 
+     * @return the current platform, never be {@code null}.
+     */
+    Platform getPlatform();
 }

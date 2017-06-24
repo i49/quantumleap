@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import com.github.i49.quantumleap.api.tasks.TaskContext;
 import com.github.i49.quantumleap.api.workflow.Job;
+import com.github.i49.quantumleap.api.workflow.Platform;
 import com.github.i49.quantumleap.api.workflow.WorkflowException;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
 import com.github.i49.quantumleap.core.repository.EnhancedWorkflowRepository;
@@ -31,11 +33,16 @@ import com.github.i49.quantumleap.core.repository.EnhancedWorkflowRepository;
  */
 abstract class AbstractWorkflowRunner implements WorkflowRunner {
     
+    private final Platform platform;
     private final EnhancedWorkflowRepository repository;
     private final Path workDirectory;
     private final Path jobsDirectory;
 
-    protected AbstractWorkflowRunner(EnhancedWorkflowRepository repository, DefaultRunnerConfiguration configuration) {
+    protected AbstractWorkflowRunner(
+            EnhancedWorkflowRepository repository, 
+            DefaultRunnerConfiguration configuration) {
+
+        this.platform = configuration.platform;
         this.repository = repository;
         this.workDirectory = configuration.workDirectory;
         this.jobsDirectory = this.workDirectory.resolve("jobs");
@@ -48,6 +55,11 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         }
     }
     
+    @Override
+    public Platform getPlatform() {
+        return platform;
+    }
+    
     protected EnhancedWorkflowRepository getRepository() {
         return repository;
     }
@@ -56,7 +68,12 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         return workDirectory;
     }
     
-    protected Path createDirectoryForJob(Job job) {
+    protected TaskContext createTaskContext(BasicJob job) {
+        Path jobDirectory = createDirectoryForJob(job);
+        return new TaskExecutionContext(job, jobDirectory);
+    }
+    
+    private Path createDirectoryForJob(Job job) {
         String name = String.valueOf(job.getId());
         Path path = jobsDirectory.resolve(name);
         try {
@@ -71,5 +88,30 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
     private void prepareDirectory(boolean clean) throws IOException {
         Files.createDirectories(workDirectory);
         Files.createDirectories(jobsDirectory);
+    }
+    
+    /**
+     * The implementation of {@link TaskContext} for this runner.
+     */
+    private class TaskExecutionContext implements TaskContext {
+        
+        @SuppressWarnings("unused")
+        private final BasicJob job;
+        private final Path jobDirectory;
+        
+        private TaskExecutionContext(BasicJob job, Path jobDirectory) {
+            this.job = job;
+            this.jobDirectory = jobDirectory;
+        }
+
+        @Override
+        public Path getJobDirectory() {
+            return jobDirectory;
+        }
+
+        @Override
+        public Platform getPlatform() {
+            return platform;
+        }
     }
 }
