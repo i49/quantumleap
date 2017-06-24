@@ -26,6 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.github.i49.quantumleap.api.workflow.Job;
+import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 import com.github.i49.quantumleap.api.workflow.Workflow;
 import com.github.i49.quantumleap.api.workflow.WorkflowEngine;
 import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
@@ -58,7 +59,9 @@ public class ShellTaskTest {
     @Before
     public void setUp() {
         repository.clear();
-        runner = engine.buildRunner(repository).get();
+        RunnerConfiguration config = engine.createRunnerConfiguration()
+                .withDirectory(Paths.get("target/work"));
+        runner = engine.createRunner(repository, config);
     }
 
     @Test

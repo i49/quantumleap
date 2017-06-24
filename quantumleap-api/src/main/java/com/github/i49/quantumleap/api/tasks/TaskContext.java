@@ -20,14 +20,14 @@ package com.github.i49.quantumleap.api.tasks;
 import java.nio.file.Path;
 
 /**
- *
+ * The context of a running task.
  */
 public interface TaskContext {
 
     /**
      * Returns the directory for the current job which owns the tasks.
      * 
-     * @return the directory for the current job. 
+     * @return the directory for the current job, never be {@code null}. 
      */
     Path getJobDirectory();
 }

@@ -17,31 +17,33 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
+import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
+
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import com.github.i49.quantumleap.api.tasks.TaskContext;
+import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 
-/**
- *
- */
-class JobTaskContext implements TaskContext {
+public class DefaultRunnerConfiguration implements RunnerConfiguration {
 
-    private final BasicJob job;
-    private final Path directory;
-
-    /**
-     * Constructs this context.
-     * 
-     * @param job the current job.
-     * @param directory the directory for the job.
-     */
-    JobTaskContext(BasicJob job, Path directory) {
-        this.job = job;
-        this.directory = directory;
+    Path workDirectory;
+    boolean clean;
+    
+    public DefaultRunnerConfiguration() {
+        this.workDirectory = Paths.get(".").toAbsolutePath().normalize();
+        this.clean = false;
     }
     
     @Override
-    public Path getJobDirectory() {
-        return directory;
+    public RunnerConfiguration withDirectory(Path path) {
+        return withDirectory(path, false);
+    }
+
+    @Override
+    public RunnerConfiguration withDirectory(Path path, boolean clean) {
+        checkNotNull(path, "path");
+        this.workDirectory = path.toAbsolutePath().normalize();
+        this.clean = clean;
+        return this;
     }
 }

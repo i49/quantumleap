@@ -22,11 +22,23 @@ import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 import com.github.i49.quantumleap.api.tasks.EchoTask;
 import com.github.i49.quantumleap.api.tasks.ShellTaskBuilder;
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
+import com.github.i49.quantumleap.api.workflow.Platform;
 
 /**
  * The default implementation of {@link TaskFactory}.
  */
 public class DefaultTaskFactory implements TaskFactory {
+    
+    private final Platform platform;
+    
+    /**
+     * Constructs this factory.
+     * 
+     * @param platform the current platform.
+     */
+    public DefaultTaskFactory(Platform platform) {
+        this.platform = platform;
+    }
 
     @Override
     public EchoTask createEchoTask(String message) {

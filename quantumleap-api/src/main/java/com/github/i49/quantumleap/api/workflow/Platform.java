@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.common;
+package com.github.i49.quantumleap.api.workflow;
 
 /**
  * Platforms on which workflows are executed.
@@ -27,27 +27,5 @@ public enum Platform {
     WINDOWS,
     SOLARIS,
     MAC,
-    OTHER;
-    
-    private static final Platform current;
-    
-    static {
-        current = detect();
-    }
-    
-    public static Platform getCurrent() {
-        return current;
-    }
-    
-    private static Platform detect() {
-        String name = System.getProperty("os.name");
-        name = name.toLowerCase();
-        if (name.contains("windows")) {
-            return WINDOWS;
-        } else if (name.contains("linux") || name.contains("unix")) {
-            return UNIX;
-        }
-        // TODO: test other platforms.
-        return OTHER;
-    }
+    OTHER
 }

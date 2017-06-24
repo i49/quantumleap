@@ -18,7 +18,6 @@
 package com.github.i49.quantumleap.core.workflow;
 
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.Optional;
 
 import com.github.i49.quantumleap.api.tasks.Task;
@@ -26,24 +25,19 @@ import com.github.i49.quantumleap.api.tasks.TaskContext;
 import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
-import com.github.i49.quantumleap.api.workflow.WorkflowRunnerBuilder;
 import com.github.i49.quantumleap.core.repository.EnhancedWorkflowRepository;
 
 /**
  * An implementation of {@link WorkflowRunner} which executes jobs sequentially.
  */
-public class SerialWorkflowRunner implements WorkflowRunner {
+public class SerialWorkflowRunner extends AbstractWorkflowRunner implements WorkflowRunner {
 
-    private final EnhancedWorkflowRepository repository;
-
-    private final Path jobsPath;
     private long totalJobsDone;
     private boolean running;
     private boolean canceled;
 
-    public SerialWorkflowRunner(Builder builder) {
-        this.repository = builder.repository;
-        this.jobsPath = builder.jobsPath;
+    public SerialWorkflowRunner(EnhancedWorkflowRepository repository, DefaultRunnerConfiguration configuration) {
+        super(repository, configuration);
         this.totalJobsDone = 0;
         this.running = false;
         this.canceled = false;
@@ -61,7 +55,7 @@ public class SerialWorkflowRunner implements WorkflowRunner {
 
     @Override
     public long runSingle() {
-        Optional<Job> job = repository.findFirstJobByStatus(JobStatus.READY);
+        Optional<Job> job = getRepository().findFirstJobByStatus(JobStatus.READY);
         if (job.isPresent()) {
             launchJob((BasicJob) job.get());
             this.totalJobsDone++;
@@ -96,41 +90,16 @@ public class SerialWorkflowRunner implements WorkflowRunner {
 
     private void launchJob(BasicJob job) {
         executeJob(job);
-        repository.storeJobStatus(job);
+        getRepository().storeJobStatus(job);
     }
 
     private void executeJob(BasicJob job) {
-        TaskContext context = new JobTaskContext(job);
+        Path directory = createDirectoryForJob(job);
+        TaskContext context = new JobTaskContext(job, directory);
         for (Task task : job.getTasks()) {
             task.run(context);
         }
         job.setStatus(JobStatus.COMPLETED);
-        repository.storeJobStatus(job);
-    }
-
-    /**
-     * An implementation of {@link WorkflowRunnerBuilder}.
-     */
-    public static class Builder implements WorkflowRunnerBuilder {
-
-        private final EnhancedWorkflowRepository repository;
-
-        private Path jobsPath;
-
-        public Builder(EnhancedWorkflowRepository repository) {
-            this.repository = repository;
-        }
-
-        @Override
-        public WorkflowRunnerBuilder workAt(Path path) {
-            Objects.requireNonNull(path, "\"path\" must not be null.");
-            this.jobsPath = path;
-            return this;
-        }
-
-        @Override
-        public WorkflowRunner get() {
-            return new SerialWorkflowRunner(this);
-        }
+        getRepository().storeJobStatus(job);
     }
 }

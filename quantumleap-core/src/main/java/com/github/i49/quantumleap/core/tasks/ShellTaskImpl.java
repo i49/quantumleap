@@ -29,7 +29,8 @@ import java.util.List;
 import com.github.i49.quantumleap.api.tasks.ShellTask;
 import com.github.i49.quantumleap.api.tasks.ShellTaskBuilder;
 import com.github.i49.quantumleap.api.tasks.TaskContext;
-import com.github.i49.quantumleap.core.common.Platform;
+import com.github.i49.quantumleap.api.workflow.Platform;
+import com.github.i49.quantumleap.core.common.Platforms;
 
 /**
  * An implementation of {@link ShellTask}.
@@ -72,7 +73,7 @@ public class ShellTaskImpl implements ShellTask {
     }
 
     private List<String> buildCommands() {
-        Platform platform = Platform.getCurrent();
+        Platform platform = Platforms.getCurrent();
         if (platform == Platform.UNIX) {
             return buildCommandsForUnixPlatform();
         } else if (platform == Platform.WINDOWS) {

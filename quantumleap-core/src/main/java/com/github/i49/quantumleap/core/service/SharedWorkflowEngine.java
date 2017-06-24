@@ -24,17 +24,20 @@ import javax.sql.DataSource;
 
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
 import com.github.i49.quantumleap.api.workflow.JobBuilder;
+import com.github.i49.quantumleap.api.workflow.Platform;
+import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 import com.github.i49.quantumleap.api.workflow.WorkflowBuilder;
 import com.github.i49.quantumleap.api.workflow.WorkflowEngine;
 import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
-import com.github.i49.quantumleap.api.workflow.WorkflowRunnerBuilder;
+import com.github.i49.quantumleap.core.common.Platforms;
 import com.github.i49.quantumleap.core.repository.EnhancedWorkflowRepository;
 import com.github.i49.quantumleap.core.repository.JdbcWorkflowRepository;
 import com.github.i49.quantumleap.core.repository.SimpleDataSource;
 import com.github.i49.quantumleap.core.tasks.DefaultTaskFactory;
 import com.github.i49.quantumleap.core.workflow.BasicJob;
 import com.github.i49.quantumleap.core.workflow.BasicWorkflow;
+import com.github.i49.quantumleap.core.workflow.DefaultRunnerConfiguration;
 import com.github.i49.quantumleap.core.workflow.SerialWorkflowRunner;
 
 /**
@@ -44,12 +47,19 @@ public class SharedWorkflowEngine implements WorkflowEngine {
 
     private static final String DEFAULT_DATASOURCE_URL = "jdbc:hsqldb:mem:workflowdb;shutdown=true";
 
+    private final Platform platform;
     private final TaskFactory taskFactory;
 
     public SharedWorkflowEngine() {
-        this.taskFactory = new DefaultTaskFactory();
+        this.platform = Platforms.getCurrent();
+        this.taskFactory = new DefaultTaskFactory(this.platform);
     }
 
+    @Override
+    public Platform getPlatform() {
+        return platform;
+    }
+    
     @Override
     public WorkflowRepository createRepository() {
         return new JdbcWorkflowRepository(createDefaultDataSource());
@@ -68,15 +78,22 @@ public class SharedWorkflowEngine implements WorkflowEngine {
     }
 
     @Override
-    public WorkflowRunnerBuilder buildRunner(WorkflowRepository repository) {
-        checkNotNull(repository, "repository");
-        EnhancedWorkflowRepository real = checkRealType(repository, EnhancedWorkflowRepository.class, "repository");
-        return new SerialWorkflowRunner.Builder(real);
+    public RunnerConfiguration createRunnerConfiguration() {
+        return new DefaultRunnerConfiguration();
     }
 
     @Override
     public WorkflowRunner createRunner(WorkflowRepository repository) {
-        return buildRunner(repository).get();
+        return createRunner(repository, createRunnerConfiguration());
+    }
+    
+    @Override
+    public WorkflowRunner createRunner(WorkflowRepository repository, RunnerConfiguration configuration) {
+        checkNotNull(repository, "repository");
+        checkNotNull(configuration, "configuration");
+        EnhancedWorkflowRepository realRepository = checkRealType(repository, EnhancedWorkflowRepository.class, "repository"); 
+        DefaultRunnerConfiguration realConfiguration = checkRealType(configuration, DefaultRunnerConfiguration.class, "realConfiguration"); 
+        return new SerialWorkflowRunner(realRepository, realConfiguration);
     }
 
     @Override

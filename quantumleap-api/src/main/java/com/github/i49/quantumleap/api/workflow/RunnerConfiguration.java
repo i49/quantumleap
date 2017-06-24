@@ -20,21 +20,26 @@ package com.github.i49.quantumleap.api.workflow;
 import java.nio.file.Path;
 
 /**
- * The builder interface for building an instance of {@link WorkflowRunner}.
+ * Configuration of {@link WorkflowRunner}.
  */
-public interface WorkflowRunnerBuilder {
-
+public interface RunnerConfiguration {
+    
     /**
-     * Specifies the working directory of the runner.
+     * Specifies the working directory for the workflow runner.
      * 
      * @param path the path to the working directory.
+     * @return this configuration.
+     * @throws NullPointerException if given {@code path} is {@code null}.
      */
-    WorkflowRunnerBuilder workAt(Path path);
+    RunnerConfiguration withDirectory(Path path);
 
     /**
-     * Returns the {@link WorkflowRunner} built by this builder.
+     * Specifies the working directory for the workflow runner.
      * 
-     * @return the instance of {@link WorkflowRunner}, never be {@code null}.
+     * @param path the path to the working directory.
+     * @param clean {@code true} if all contents of the directory are to be cleaned.  
+     * @return this configuration.
+     * @throws NullPointerException if given {@code path} is {@code null}.
      */
-    WorkflowRunner get();
+    RunnerConfiguration withDirectory(Path path, boolean clean);
 }

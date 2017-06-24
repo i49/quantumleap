@@ -19,11 +19,12 @@ package com.github.i49.quantumleap.core.service;
 
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
 import com.github.i49.quantumleap.api.workflow.JobBuilder;
+import com.github.i49.quantumleap.api.workflow.Platform;
+import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 import com.github.i49.quantumleap.api.workflow.WorkflowBuilder;
 import com.github.i49.quantumleap.api.workflow.WorkflowEngine;
 import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
-import com.github.i49.quantumleap.api.workflow.WorkflowRunnerBuilder;
 
 /**
  * An implementation of {@link WorkflowEngine}. This class just delegates all
@@ -36,6 +37,11 @@ public class ServiceProvider implements WorkflowEngine {
      */
     private static final SharedWorkflowEngine singleton = new SharedWorkflowEngine();
 
+    @Override
+    public Platform getPlatform() {
+        return singleton.getPlatform();
+    }
+    
     @Override
     public WorkflowRepository createRepository() {
         return singleton.createRepository();
@@ -52,13 +58,18 @@ public class ServiceProvider implements WorkflowEngine {
     }
 
     @Override
-    public WorkflowRunnerBuilder buildRunner(WorkflowRepository repository) {
-        return singleton.buildRunner(repository);
+    public RunnerConfiguration createRunnerConfiguration() {
+        return singleton.createRunnerConfiguration();
     }
 
     @Override
     public WorkflowRunner createRunner(WorkflowRepository repository) {
         return singleton.createRunner(repository);
+    }
+
+    @Override
+    public WorkflowRunner createRunner(WorkflowRepository repository, RunnerConfiguration configuration) {
+        return singleton.createRunner(repository, configuration);
     }
 
     @Override

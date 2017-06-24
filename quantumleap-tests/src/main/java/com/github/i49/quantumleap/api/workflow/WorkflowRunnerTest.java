@@ -19,6 +19,8 @@ package com.github.i49.quantumleap.api.workflow;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.nio.file.Paths;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -58,7 +60,9 @@ public class WorkflowRunnerTest {
     @Before
     public void setUp() {
         repository.clear();
-        runner = engine.buildRunner(repository).get();
+        RunnerConfiguration config = engine.createRunnerConfiguration()
+                .withDirectory(Paths.get("target/work"));
+        runner = engine.createRunner(repository, config);
     }
 
     @Test

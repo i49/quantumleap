@@ -25,6 +25,23 @@ import com.github.i49.quantumleap.api.tasks.TaskFactory;
 public interface WorkflowEngine {
 
     /**
+     * Returns the default workflow engine found. The instance will be loaded
+     * via Service Provider Interface.
+     * 
+     * @return the default workflow engine loaded.
+     */
+    static WorkflowEngine get() {
+        return WorkflowEngineLoader.getEngine();
+    }
+    
+    /**
+     * Returns the current platform.
+     * 
+     * @return the current platform.
+     */
+    Platform getPlatform();
+    
+     /**
      * Creates the repository which will store workflows and jobs.
      * 
      * @return the workflow repository.
@@ -50,22 +67,30 @@ public interface WorkflowEngine {
     JobBuilder buildJob(String name);
 
     /**
-     * Creates a builder to build a workflow runner.
+     * Creates a configuration of a workflow runner.
      * 
-     * @param repository the repository where workflows to run are stored.
-     * @return a builder to build a workflow runner.
-     * @throws NullPointerException if given {@code repository} is {@code null}.
+     * @return a configuration of a workflow runner.
      */
-    WorkflowRunnerBuilder buildRunner(WorkflowRepository repository);
-
+    RunnerConfiguration createRunnerConfiguration();
+    
     /**
-     * Creates a workflow runner.
+     * Creates a workflow runner with default configuration.
      * 
-     * @param repository the repository where workflows to run are stored.
-     * @return an instance of {@link WorkflowRunner}.
+     * @param repository the repository where workflows to run are stored, cannot be {@code null}.
+     * @return newly created instance of {@link WorkflowRunner}.
      * @throws NullPointerException if given {@code repository} is {@code null}.
      */
     WorkflowRunner createRunner(WorkflowRepository repository);
+
+    /**
+     * Creates a workflow runner with specified configuration.
+     * 
+     * @param repository the repository where workflows to run are stored, cannot be {@code null}.
+     * @param configuration the configuration of the runner, cannot be {@code null}.
+     * @return newly created instance of {@link WorkflowRunner}.
+     * @throws NullPointerException if one or more parameters are {@code null}.
+     */
+    WorkflowRunner createRunner(WorkflowRepository repository, RunnerConfiguration configuration);
 
     /**
      * Returns the instance of {@link TaskFactory}.
@@ -73,14 +98,4 @@ public interface WorkflowEngine {
      * @return the instance of {@link TaskFactory}.
      */
     TaskFactory getTaskFactory();
-
-    /**
-     * Returns the default workflow engine found. The instance will be loaded
-     * via Service Provider Interface.
-     * 
-     * @return the default workflow engine loaded.
-     */
-    static WorkflowEngine get() {
-        return WorkflowEngineLoader.getEngine();
-    }
 }
