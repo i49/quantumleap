@@ -18,11 +18,34 @@
 package com.github.i49.quantumleap.api.workflow;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * Configuration of {@link WorkflowRunner}.
  */
 public interface RunnerConfiguration {
+    
+    static final String WORKING_DIRECTORY = "runner.working.directory";
+    static final String WORKING_DIRECTORY_RESET = "runner.working.directory.reset";
+    
+    /**
+     * Returns the value of the specified configuration property.
+     * 
+     * @param name the name of the property to retrieve.
+     * @return the value of the requested property.
+     * @throws NullPointerException if given {@code name} is {@code null}.
+     */
+    Optional<Object> getProperty(String name);
+    
+    /**
+     * Sets the specified configuration property to a given value.
+     * 
+     * @param name the name of the property to be set.
+     * @param value the new value of the property to be set.
+     * @return this configuration.
+     * @throws NullPointerException if given {@code name} is {@code null}.
+     */
+    RunnerConfiguration setProperty(String name, Object value);
     
     /**
      * Specifies the working directory for the workflow runner.
@@ -37,9 +60,9 @@ public interface RunnerConfiguration {
      * Specifies the working directory for the workflow runner.
      * 
      * @param path the path to the working directory.
-     * @param clean {@code true} if all contents of the directory are to be cleaned.  
+     * @param reset {@code true} if the directory are to be reset.  
      * @return this configuration.
      * @throws NullPointerException if given {@code path} is {@code null}.
      */
-    RunnerConfiguration withDirectory(Path path, boolean clean);
+    RunnerConfiguration withDirectory(Path path, boolean reset);
 }

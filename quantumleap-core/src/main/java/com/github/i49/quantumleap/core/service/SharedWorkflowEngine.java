@@ -29,14 +29,13 @@ import com.github.i49.quantumleap.api.workflow.WorkflowBuilder;
 import com.github.i49.quantumleap.api.workflow.WorkflowEngine;
 import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
-import com.github.i49.quantumleap.core.repository.EnhancedWorkflowRepository;
+import com.github.i49.quantumleap.core.repository.EnhancedRepository;
 import com.github.i49.quantumleap.core.repository.JdbcWorkflowRepository;
 import com.github.i49.quantumleap.core.repository.SimpleDataSource;
+import com.github.i49.quantumleap.core.runner.SimpleRunnerConfiguration;
+import com.github.i49.quantumleap.core.runner.SerialWorkflowRunner;
 import com.github.i49.quantumleap.core.tasks.DefaultTaskFactory;
-import com.github.i49.quantumleap.core.workflow.BasicJob;
-import com.github.i49.quantumleap.core.workflow.BasicWorkflow;
-import com.github.i49.quantumleap.core.workflow.DefaultRunnerConfiguration;
-import com.github.i49.quantumleap.core.workflow.SerialWorkflowRunner;
+import com.github.i49.quantumleap.core.workflow.WorkflowFactory;
 
 /**
  * The workflow engine which is shared by all threads.
@@ -45,32 +44,34 @@ public class SharedWorkflowEngine implements WorkflowEngine {
 
     private static final String DEFAULT_DATASOURCE_URL = "jdbc:hsqldb:mem:workflowdb;shutdown=true";
 
+    private final WorkflowFactory workflowFactory;
     private final TaskFactory taskFactory;
 
     public SharedWorkflowEngine() {
+        this.workflowFactory = WorkflowFactory.newInstance();
         this.taskFactory = new DefaultTaskFactory();
     }
 
     @Override
     public WorkflowRepository createRepository() {
-        return new JdbcWorkflowRepository(createDefaultDataSource());
+        return new JdbcWorkflowRepository(createDefaultDataSource(), this.workflowFactory);
     }
 
     @Override
     public WorkflowBuilder buildWorkflow(String name) {
         checkNotNull(name, "name");
-        return new BasicWorkflow.Builder(name);
+        return workflowFactory.createWorkflowBuilder(name);
     }
 
     @Override
     public JobBuilder buildJob(String name) {
         checkNotNull(name, "name");
-        return new BasicJob.Builder(name);
+        return workflowFactory.createJobBuilder(name);
     }
 
     @Override
     public RunnerConfiguration createRunnerConfiguration() {
-        return new DefaultRunnerConfiguration();
+        return new SimpleRunnerConfiguration();
     }
 
     @Override
@@ -82,9 +83,8 @@ public class SharedWorkflowEngine implements WorkflowEngine {
     public WorkflowRunner createRunner(WorkflowRepository repository, RunnerConfiguration configuration) {
         checkNotNull(repository, "repository");
         checkNotNull(configuration, "configuration");
-        EnhancedWorkflowRepository realRepository = checkRealType(repository, EnhancedWorkflowRepository.class, "repository"); 
-        DefaultRunnerConfiguration realConfiguration = checkRealType(configuration, DefaultRunnerConfiguration.class, "realConfiguration"); 
-        return new SerialWorkflowRunner(realRepository, realConfiguration);
+        EnhancedRepository enhanced = checkRealType(repository, EnhancedRepository.class, "repository"); 
+        return new SerialWorkflowRunner(enhanced, configuration);
     }
 
     @Override

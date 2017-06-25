@@ -17,8 +17,6 @@
  */
 package com.github.i49.quantumleap.api.workflow;
 
-import java.util.List;
-
 import com.github.i49.quantumleap.api.tasks.Task;
 
 /**
@@ -27,13 +25,13 @@ import com.github.i49.quantumleap.api.tasks.Task;
 public interface JobBuilder {
     
     /**
-     * Specifies the predecessors of the job.
+     * Specifies the dependencies of the job.
      * 
-     * @param jobs the predecessors
+     * @param jobs the dependencies.
      * @return this builder.
      * @throws NullPointerException if one or more {@code jobs} are {@code null}.
      */
-    JobBuilder depend(Job... jobs);
+    JobBuilder dependOn(Job... jobs);
 
     /**
      * Specifies the tasks executed in the job.
@@ -43,15 +41,6 @@ public interface JobBuilder {
      * @throws NullPointerException if one or more {@code tasks} are {@code null}.
      */
     JobBuilder tasks(Task... tasks);
-    
-    /**
-     * Specifies the list of the tasks executed in the job.
-     * 
-     * @param tasks the list of tasks executed in the order as specified.
-     * @return this builder.
-     * @throws NullPointerException if given {@code tasks} is {@code null}.
-     */
-    JobBuilder tasks(List<Task> tasks);
     
     /**
      * Returns the {@link Job} built by this builder.

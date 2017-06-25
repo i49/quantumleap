@@ -39,6 +39,7 @@ enum SqlCommand {
     FIND_JOBS_BY_STATUS("SELECT * FROM job WHERE job_status = ? ORDER BY job_id"),
     FIND_FIRST_JOB_BY_STATUS("SELECT * FROM job WHERE job_status = ? ORDER BY job_id LIMIT 1"),
     FIND_JOB_STATUS_BY_ID("SELECT job_status FROM job WHERE job_id = ?"),
+    FIND_JOB_BY_ID("SELECT * FROM job WHERE job_id = ?"),
     FIND_DEPENDANT_JOBS("SELECT job_id FROM job_dependency WHERE dependency_id = ?"),
     FIND_TASK("SELECT * FROM task WHERE job_id = ? ORDER BY sequence_number"),
 
@@ -47,6 +48,7 @@ enum SqlCommand {
     INSERT_TASK("INSERT INTO task (job_id, sequence_number, class_name, parameters) VALUES(?, ?, ?, ?)"),
     INSERT_WORKFLOW("INSERT INTO workflow (workflow_name) VALUES(?)"),
     
+    UPDATE_JOB("UPDATE job SET job_status = ?, standard_output = ? WHERE job_id = ?"),
     UPDATE_JOB_STATUS("UPDATE job SET job_status = ? WHERE job_id = ?"),
     UPDATE_JOB_STATUS_IF_READY(
             "UPDATE job j SET job_status = 'READY' "
@@ -54,7 +56,7 @@ enum SqlCommand {
             + "SELECT 1 FROM job_dependency d "
             + "INNER JOIN job dj ON dj.job_id = d.dependency_id AND dj.job_status <> 'COMPLETED' "
             + "WHERE d.job_id = j.job_id) "
-    )
+    ),
     ;
 
     private final String sql;

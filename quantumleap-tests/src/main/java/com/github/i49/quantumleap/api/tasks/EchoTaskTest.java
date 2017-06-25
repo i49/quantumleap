@@ -17,23 +17,26 @@
  */
 package com.github.i49.quantumleap.api.tasks;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 
+import com.github.i49.quantumleap.api.workflow.Job;
+import com.github.i49.quantumleap.api.workflow.JobStatus;
+
 /**
- * Unit test of {@link ScriptTask}.
+ * Unit test of {@link EchoTask}.
  */
-public class ScriptTaskTest extends BaseTaskTest {
+public class EchoTaskTest extends BaseTaskTest {
 
     @Test
-    public void run_shouldRunScript() {
-        Path path = Paths.get("target/test-classes/hello.bat");
-        Task task = factory.buildShellTask(path)
-                .arguments("John Smith")
-                .get();
-        runTask(task);
+    public void run_shouldEchoMessage() {
+        String message = "The quick brown fox jumps over the lazy dog";
+        Task task = factory.createEchoTask(message);
+        Job job = runTask(task);
+        
+        job = repository.findJobById(job.getId()).get();
+        assertThat(job.getStatus()).isSameAs(JobStatus.COMPLETED);
+        assertThat(job.getStandardOutput()).containsExactly(message);
     }
 }
-

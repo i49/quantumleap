@@ -29,6 +29,10 @@ class WorkflowComponent {
     protected WorkflowComponent() {
         this.id = OptionalLong.empty();
     }
+    
+    protected WorkflowComponent(OptionalLong id) {
+        this.id = id;
+    }
 
     public boolean hasId() {
         return id.isPresent();

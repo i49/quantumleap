@@ -17,6 +17,7 @@
  */
 package com.github.i49.quantumleap.api.tasks;
 
+import java.io.PrintStream;
 import java.nio.file.Path;
 
 import com.github.i49.quantumleap.api.workflow.Platform;
@@ -39,4 +40,11 @@ public interface TaskContext {
      * @return the current platform, never be {@code null}.
      */
     Platform getPlatform();
+    
+    /**
+     * Returns the standard output stream assigned to the current job.
+     * 
+     * @return the standard output stream, never be {@code null}.
+     */
+    PrintStream getStandardOutput();
 }

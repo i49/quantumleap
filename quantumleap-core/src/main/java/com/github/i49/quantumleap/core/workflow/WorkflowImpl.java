@@ -28,16 +28,16 @@ import com.github.i49.quantumleap.api.workflow.Workflow;
 import com.github.i49.quantumleap.api.workflow.WorkflowBuilder;
 
 /**
- * An implementation of {@link Workflow}.
+ * The implementation of {@link Workflow} provided by this engine.
  */
-public class BasicWorkflow extends WorkflowComponent implements Workflow {
+class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
 
     private final String name;
-    private final Set<BasicJob> jobs;
+    private final Set<ManagedJob> jobs;
 
-    private BasicWorkflow(Builder builder) {
+    private WorkflowImpl(Builder builder) {
         this.name = builder.name;
-        this.jobs = builder.jobs;
+        this.jobs = Collections.unmodifiableSet(builder.jobs);
     }
 
     @Override
@@ -47,18 +47,33 @@ public class BasicWorkflow extends WorkflowComponent implements Workflow {
 
     @Override
     public Iterable<Job> getJobs() {
-        return Collections.unmodifiableCollection(jobs);
+        return castSet(this.jobs);
     }
 
     @Override
     public String toString() {
         return getName();
     }
+    
+    /* ManagedWorkflow interface */
+ 
+    @Override
+    public Iterable<ManagedJob> getManagedJobs() {
+        return jobs;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static <T> Set<T> castSet(Set<? extends T> set) {
+        return (Set<T>)set;
+    }
 
-    public static class Builder implements WorkflowBuilder {
+    /**
+     * The implementation of {@link WorkflowBuilder} provided by this engine.
+     */
+    public static class Builder implements ManagedWorkflowBuilder {
 
         private final String name;
-        private final Set<BasicJob> jobs = new LinkedHashSet<>();
+        private final Set<ManagedJob> jobs = new LinkedHashSet<>();
 
         public Builder(String name) {
             this.name = name;
@@ -70,15 +85,15 @@ public class BasicWorkflow extends WorkflowComponent implements Workflow {
                 if (job == null) {
                     continue;
                 }
-                BasicJob realJob = checkRealType(job, BasicJob.class, "jobs");
+                ManagedJob realJob = checkRealType(job, ManagedJob.class, "jobs");
                 this.jobs.add(realJob);
             }
             return this;
         }
 
         @Override
-        public Workflow get() {
-            return new BasicWorkflow(this);
+        public ManagedWorkflow get() {
+            return new WorkflowImpl(this);
         }
     }
 }

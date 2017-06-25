@@ -15,30 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.repository;
-
-import java.util.List;
-
-import com.github.i49.quantumleap.api.workflow.Job;
-import com.github.i49.quantumleap.api.workflow.JobStatus;
-import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
+package com.github.i49.quantumleap.core.workflow;
 
 /**
- * The enhanced {@link WorkflowRepository} interface.
+ *
  */
-public interface EnhancedWorkflowRepository extends WorkflowRepository {
+public interface WorkflowFactory {
+    
+    static WorkflowFactory newInstance() {
+        return new WorkflowFactoryImpl();
+    }
+    
+    ManagedJobBuilder createJobBuilder(String name);
 
-    List<Long> findDependants(Job job);
-
-    
-    /**
-     * Stores the status of the job.
-     * 
-     * @param job the job to store.
-     */
-    void storeJobStatus(Job job);
-    
-    void storeJobStatus(long jobId, JobStatus status);
-    
-    int updateJobStatusIfReady(long jobId);
+    ManagedWorkflowBuilder createWorkflowBuilder(String name);
 }

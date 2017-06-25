@@ -20,9 +20,11 @@ package com.github.i49.quantumleap.core.workflow;
 import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.OptionalLong;
 import java.util.Set;
 
 import com.github.i49.quantumleap.api.tasks.Task;
@@ -31,30 +33,38 @@ import com.github.i49.quantumleap.api.workflow.JobBuilder;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
 
 /**
- * An implementation of {@link Job}.
+ * The implementation of {@link Job} provided by this engine.
  */
-public class BasicJob extends WorkflowComponent implements Job {
+class JobImpl extends WorkflowComponent implements ManagedJob {
 
     private final String name;
     private final Set<Job> dependencies;
     private final List<Task> tasks;
-    private JobStatus status;
+    private final JobStatus status;
+    private final List<String> standardOutput;
 
-    private BasicJob(Builder builder) {
+    private JobImpl(Builder builder) {
+        super(builder.id);
         this.name = builder.name;
         this.dependencies = Collections.unmodifiableSet(builder.dependencies);
         this.tasks = Collections.unmodifiableList(builder.tasks);
-        this.status = JobStatus.INITIAL;
+        this.status = builder.status;
+        this.standardOutput = builder.standardOutput;
     }
 
     @Override
     public String getName() {
         return name;
     }
-
+    
     @Override
     public JobStatus getStatus() {
         return status;
+    }
+    
+    @Override
+    public List<String> getStandardOutput() {
+        return standardOutput;   
     }
 
     @Override
@@ -67,31 +77,37 @@ public class BasicJob extends WorkflowComponent implements Job {
         return dependencies.size() > 0;
     }
 
-    public void setStatus(JobStatus status) {
-        this.status = status;
-    }
-
     @Override
     public String toString() {
         return getName();
     }
     
-    public Iterable<Job> getDependencies() {
+    @Override
+    public Set<Job> getDependencies() {
         return dependencies;
     }
 
-    public static class Builder implements JobBuilder {
+    /**
+     * The implementation of {@link JobBuilder} provided by this engine.
+     */
+    public static class Builder implements ManagedJobBuilder {
 
+        private OptionalLong id;
         private final String name;
         private final Set<Job> dependencies = new HashSet<>();
         private final List<Task> tasks = new ArrayList<>();
+        private JobStatus status;
+        private List<String> standardOutput;
 
         public Builder(String name) {
+            this.id = OptionalLong.empty();
             this.name = name;
+            this.status = JobStatus.INITIAL;
+            this.standardOutput = Collections.emptyList();
         }
         
         @Override
-        public Builder depend(Job... jobs) {
+        public Builder dependOn(Job... jobs) {
             checkNotNull(jobs, "jobs");
             for (Job job: jobs) {
                 this.dependencies.add(job);
@@ -109,15 +125,28 @@ public class BasicJob extends WorkflowComponent implements Job {
         }
         
         @Override
-        public Builder tasks(List<Task> tasks) {
-            checkNotNull(tasks, "tasks");
-            this.tasks.addAll(tasks);
-            return this;
+        public JobImpl get() {
+            return new JobImpl(this);
         }
 
+        /* ManagedJobBuilder */
+        
         @Override
-        public BasicJob get() {
-            return new BasicJob(this);
+        public Builder jobId(long id) {
+            this.id = OptionalLong.of(id);
+            return this;
+        }
+        
+        @Override
+        public Builder status(JobStatus status) {
+            this.status = status;
+            return this;
+        }
+        
+        @Override
+        public Builder standardOutput(String[] lines) {
+            this.standardOutput = Arrays.asList(lines);
+            return this;
         }
     }
 }

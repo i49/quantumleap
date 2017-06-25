@@ -30,7 +30,6 @@ import com.github.i49.quantumleap.api.tasks.TaskContext;
  */
 public class EchoTaskImpl implements EchoTask {
 
-    private final PrintStream stream = System.out;
     private final String message;
 
     @JsonbCreator
@@ -45,6 +44,7 @@ public class EchoTaskImpl implements EchoTask {
 
     @Override
     public void run(TaskContext context) {
+        PrintStream stream = context.getStandardOutput();
         stream.println(getMessage());
     }
 }

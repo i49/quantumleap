@@ -15,25 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.api.tasks;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import org.junit.Test;
 
 /**
- * Unit test of {@link ScriptTask}.
+ * Provides workflow runner implementation.
  */
-public class ScriptTaskTest extends BaseTaskTest {
-
-    @Test
-    public void run_shouldRunScript() {
-        Path path = Paths.get("target/test-classes/hello.bat");
-        Task task = factory.buildShellTask(path)
-                .arguments("John Smith")
-                .get();
-        runTask(task);
-    }
-}
-
+package com.github.i49.quantumleap.core.runner;

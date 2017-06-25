@@ -15,19 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.workflow;
+package com.github.i49.quantumleap.core.runner;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.github.i49.quantumleap.api.tasks.TaskContext;
-import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
 import com.github.i49.quantumleap.api.workflow.Platform;
+import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 import com.github.i49.quantumleap.api.workflow.WorkflowException;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
-import com.github.i49.quantumleap.core.repository.EnhancedWorkflowRepository;
+import com.github.i49.quantumleap.core.common.Platforms;
+import com.github.i49.quantumleap.core.repository.EnhancedRepository;
+import com.github.i49.quantumleap.core.workflow.ManagedJob;
 
 /**
  * A skeletal implementation of {@link WorkflowRunner}.
@@ -35,21 +38,19 @@ import com.github.i49.quantumleap.core.repository.EnhancedWorkflowRepository;
 abstract class AbstractWorkflowRunner implements WorkflowRunner {
     
     private final Platform platform;
-    private final EnhancedWorkflowRepository repository;
+    private final EnhancedRepository repository;
     private final Path workDirectory;
     private final Path jobsDirectory;
 
-    protected AbstractWorkflowRunner(
-            EnhancedWorkflowRepository repository, 
-            DefaultRunnerConfiguration configuration) {
+    protected AbstractWorkflowRunner(EnhancedRepository repository, RunnerConfiguration config) {
 
-        this.platform = configuration.platform;
+        this.platform = Platforms.getCurrent();
         this.repository = repository;
-        this.workDirectory = configuration.workDirectory;
+        this.workDirectory = (Path)config.getProperty(RunnerConfiguration.WORKING_DIRECTORY).get();
         this.jobsDirectory = this.workDirectory.resolve("jobs");
-        
+                
         try {
-            prepareDirectory(configuration.clean);
+            prepareDirectory((Boolean)config.getProperty(RunnerConfiguration.WORKING_DIRECTORY_RESET).get());
         } catch (IOException e) {
             // TODO
             throw new WorkflowException("", e);
@@ -61,7 +62,7 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         return platform;
     }
     
-    protected EnhancedWorkflowRepository getRepository() {
+    protected EnhancedRepository getRepository() {
         return repository;
     }
     
@@ -69,20 +70,21 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         return workDirectory;
     }
     
-    protected TaskContext createTaskContext(BasicJob job) {
+    protected JobContext createJobContext(ManagedJob job) {
         Path jobDirectory = createDirectoryForJob(job);
-        return new TaskExecutionContext(job, jobDirectory);
+        return new JobContextImpl(job, jobDirectory);
     }
     
-    protected void completeJob(BasicJob job) {
-        job.setStatus(JobStatus.COMPLETED);
-        getRepository().storeJobStatus(job);
+    protected void completeJob(ManagedJob job, JobContext context) {
+        JobStatus status = JobStatus.COMPLETED;
+        String[] lines = context.getStandardOutputLines();
+        getRepository().storeJob(job, status, lines);
         for (long dependant: getRepository().findDependants(job)) {
             getRepository().updateJobStatusIfReady(dependant);
         }
     }
     
-    private Path createDirectoryForJob(Job job) {
+    private Path createDirectoryForJob(ManagedJob job) {
         String name = String.valueOf(job.getId());
         Path path = jobsDirectory.resolve(name);
         try {
@@ -108,15 +110,18 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
     /**
      * The implementation of {@link TaskContext} for this runner.
      */
-    private class TaskExecutionContext implements TaskContext {
+    private class JobContextImpl implements JobContext {
         
         @SuppressWarnings("unused")
-        private final BasicJob job;
-        private final Path jobDirectory;
+        private final ManagedJob job;
         
-        private TaskExecutionContext(BasicJob job, Path jobDirectory) {
+        private final Path jobDirectory;
+        private final JobPrintStream standardOutput;
+        
+        private JobContextImpl(ManagedJob job, Path jobDirectory) {
             this.job = job;
             this.jobDirectory = jobDirectory;
+            this.standardOutput = new JobPrintStream();
         }
 
         @Override
@@ -127,6 +132,17 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         @Override
         public Platform getPlatform() {
             return platform;
+        }
+
+        @Override
+        public PrintStream getStandardOutput() {
+            return standardOutput;
+        }
+
+        @Override
+        public String[] getStandardOutputLines() {
+            standardOutput.flush();
+            return standardOutput.getLines();
         }
     }
 }

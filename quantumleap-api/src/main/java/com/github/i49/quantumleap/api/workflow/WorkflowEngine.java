@@ -72,6 +72,7 @@ public interface WorkflowEngine {
      * @param repository the repository where workflows to run are stored, cannot be {@code null}.
      * @return newly created instance of {@link WorkflowRunner}.
      * @throws NullPointerException if given {@code repository} is {@code null}.
+     * @throws WorkflowException if given {@code repository} is not instantiated by this engine.
      */
     WorkflowRunner createRunner(WorkflowRepository repository);
 
@@ -82,6 +83,7 @@ public interface WorkflowEngine {
      * @param configuration the configuration of the runner, cannot be {@code null}.
      * @return newly created instance of {@link WorkflowRunner}.
      * @throws NullPointerException if one or more parameters are {@code null}.
+     * @throws WorkflowException if given {@code repository} is not instantiated by this engine.
      */
     WorkflowRunner createRunner(WorkflowRepository repository, RunnerConfiguration configuration);
 

@@ -15,25 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.api.tasks;
+package com.github.i49.quantumleap.core.runner;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import org.junit.Test;
+import com.github.i49.quantumleap.api.tasks.TaskContext;
 
 /**
- * Unit test of {@link ScriptTask}.
  */
-public class ScriptTaskTest extends BaseTaskTest {
+public interface JobContext extends TaskContext {
 
-    @Test
-    public void run_shouldRunScript() {
-        Path path = Paths.get("target/test-classes/hello.bat");
-        Task task = factory.buildShellTask(path)
-                .arguments("John Smith")
-                .get();
-        runTask(task);
-    }
+    String[] getStandardOutputLines();
 }
-

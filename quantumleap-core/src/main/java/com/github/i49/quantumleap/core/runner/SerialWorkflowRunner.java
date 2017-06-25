@@ -15,16 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.workflow;
+package com.github.i49.quantumleap.core.runner;
 
 import java.util.Optional;
 
 import com.github.i49.quantumleap.api.tasks.Task;
-import com.github.i49.quantumleap.api.tasks.TaskContext;
 import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
+import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
-import com.github.i49.quantumleap.core.repository.EnhancedWorkflowRepository;
+import com.github.i49.quantumleap.core.repository.EnhancedRepository;
+import com.github.i49.quantumleap.core.workflow.ManagedJob;
 
 /**
  * An implementation of {@link WorkflowRunner} which executes jobs sequentially.
@@ -36,7 +37,7 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
     @SuppressWarnings("unused")
     private boolean canceled;
 
-    public SerialWorkflowRunner(EnhancedWorkflowRepository repository, DefaultRunnerConfiguration configuration) {
+    public SerialWorkflowRunner(EnhancedRepository repository, RunnerConfiguration configuration) {
         super(repository, configuration);
         this.totalJobsDone = 0;
         this.running = false;
@@ -57,7 +58,7 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
     public long runSingle() {
         Optional<Job> job = getRepository().findFirstJobByStatus(JobStatus.READY);
         if (job.isPresent()) {
-            launchJob((BasicJob) job.get());
+            launchJob((ManagedJob)job.get());
             this.totalJobsDone++;
             return 1L;
         } else {
@@ -88,16 +89,15 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
         }
     }
 
-    private void launchJob(BasicJob job) {
+    private void launchJob(ManagedJob job) {
         executeJob(job);
-        getRepository().storeJobStatus(job);
     }
 
-    private void executeJob(BasicJob job) {
-        TaskContext context = createTaskContext(job);
+    private void executeJob(ManagedJob job) {
+        JobContext context = createJobContext(job);
         for (Task task : job.getTasks()) {
             task.run(context);
         }
-        completeJob(job);
+        completeJob(job, context);
     }
 }

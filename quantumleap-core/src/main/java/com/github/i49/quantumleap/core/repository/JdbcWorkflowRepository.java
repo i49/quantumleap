@@ -38,25 +38,28 @@ import javax.sql.DataSource;
 
 import com.github.i49.quantumleap.api.tasks.Task;
 import com.github.i49.quantumleap.api.workflow.Job;
-import com.github.i49.quantumleap.api.workflow.JobBuilder;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
 import com.github.i49.quantumleap.api.workflow.Workflow;
 import com.github.i49.quantumleap.api.workflow.WorkflowException;
-import com.github.i49.quantumleap.core.workflow.BasicJob;
-import com.github.i49.quantumleap.core.workflow.BasicWorkflow;
+import com.github.i49.quantumleap.core.workflow.ManagedJob;
+import com.github.i49.quantumleap.core.workflow.ManagedJobBuilder;
+import com.github.i49.quantumleap.core.workflow.ManagedWorkflow;
+import com.github.i49.quantumleap.core.workflow.WorkflowFactory;
 
 /**
  * A repository which can be manipulated by JDBC interface.
  */
-public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
+public class JdbcWorkflowRepository implements EnhancedRepository {
 
     private final Connection connection;
-
     private final Map<SqlCommand, PreparedStatement> statements;
-    private final Jsonb jsonb;
 
-    public JdbcWorkflowRepository(DataSource dataSource) {
+    private final Jsonb jsonb;
+    private final WorkflowFactory workflowFactory;
+
+    public JdbcWorkflowRepository(DataSource dataSource, WorkflowFactory workflowFactory) {
         this.jsonb = CustomJsonbBuilder.create();
+        this.workflowFactory = workflowFactory;
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
@@ -75,12 +78,9 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
 
     @Override
     public void addWorkflow(Workflow workflow) {
-        if (workflow instanceof BasicWorkflow) {
-            addWorkflow((BasicWorkflow) workflow);
-        } else {
-            // TODO:
-            throw new IllegalArgumentException("");
-        }
+        checkNotNull(workflow, "workflow");
+        checkRealType(workflow, ManagedWorkflow.class, "workflow");
+        addWorkflow((ManagedWorkflow)workflow);
     }
 
     @Override
@@ -137,7 +137,7 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
             try (ResultSet rs = s.executeQuery()) {
                 List<Job> jobs = new ArrayList<>();
                 while (rs.next()) {
-                    jobs.add(mapToJob(rs));
+                    jobs.add(mapToJobWithTasks(rs));
                 }
                 return jobs;
             }
@@ -154,7 +154,7 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
             s.setString(1, status.name());
             try (ResultSet rs = s.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapToJob(rs));
+                    return Optional.of(mapToJobWithTasks(rs));
                 } else {
                     return Optional.empty();
                 }
@@ -166,19 +166,34 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     }
     
     @Override
-    public boolean updateJobStatus(Job job) {
-        checkNotNull(job, "job");
-        BasicJob basicJob = checkRealType(job, BasicJob.class, "job");
+    public Optional<Job> findJobById(long jobId) {
+        PreparedStatement s = getStatement(SqlCommand.FIND_JOB_BY_ID);
+        try {
+            s.setLong(1, jobId);
+            try (ResultSet resultSet = s.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(mapToJob(resultSet));
+                } else {
+                    return Optional.empty();
+                }
+            }
+        } catch (SQLException e) {
+            // TODO: add message
+            throw new WorkflowException("", e);
+        }
+    }
+    
+    @Override
+    public Optional<JobStatus> getJobStatus(long jobId) {
         PreparedStatement s = getStatement(SqlCommand.FIND_JOB_STATUS_BY_ID);
         try {
-            s.setLong(1, job.getId());
+            s.setLong(1, jobId);
             try (ResultSet rs = s.executeQuery()) {
                 if (rs.next()) {
                     JobStatus status = JobStatus.valueOf(rs.getString(1));
-                    basicJob.setStatus(status);
-                    return true;
+                    return Optional.of(status);
                 } else {
-                    return false;
+                    return Optional.empty();
                 }
             }
         } catch (SQLException e) {
@@ -208,16 +223,12 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     }
     
     @Override
-    public void storeJobStatus(Job job) {
-        storeJobStatus(job.getId(), job.getStatus());
-    }
-    
-    @Override
-    public void storeJobStatus(long jobId, JobStatus status) {
-        PreparedStatement s = getStatement(SqlCommand.UPDATE_JOB_STATUS);
+    public void storeJob(Job job, JobStatus status, String[] standardOutput) {
+        PreparedStatement s = getStatement(SqlCommand.UPDATE_JOB);
         try {
             s.setString(1, status.name());
-            s.setLong(2, jobId);
+            s.setString(2, jsonb.toJson(standardOutput));
+            s.setLong(3, job.getId());
             s.executeUpdate();
         } catch (SQLException e) {
             // TODO: add message
@@ -247,25 +258,24 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
         }
     }
 
-    private void addWorkflow(BasicWorkflow workflow) {
+    private void addWorkflow(ManagedWorkflow workflow) {
         long workflowId = insertWorkflow(workflow);
         // TODO: reorder jobs
-        for (Job job : workflow.getJobs()) {
-            addJob((BasicJob) job, workflowId);
+        for (ManagedJob job : workflow.getManagedJobs()) {
+            addJob(job, workflowId);
         }
     }
 
-    private void addJob(BasicJob job, long workflowId) {
+    private void addJob(ManagedJob job, long workflowId) {
         JobStatus status = job.hasDependencies() ? JobStatus.WAITING : JobStatus.READY;
-        job.setStatus(status);
-        long jobId = insertJob(job, workflowId);
+        long jobId = insertJob(job, status, workflowId);
         int sequence = 0;
         for (Task task : job.getTasks()) {
             insertTask(task, jobId, sequence++);
         }
     }
 
-    private long insertWorkflow(BasicWorkflow workflow) {
+    private long insertWorkflow(ManagedWorkflow workflow) {
         try {
             PreparedStatement s = getStatement(SqlCommand.INSERT_WORKFLOW);
             s.setString(1, workflow.getName());
@@ -279,11 +289,11 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
         }
     }
 
-    private long insertJob(BasicJob job, long workflowId) {
+    private long insertJob(ManagedJob job, JobStatus status, long workflowId) {
         try {
             PreparedStatement s = getStatement(SqlCommand.INSERT_JOB);
             s.setString(1, job.getName());
-            s.setString(2, job.getStatus().name());
+            s.setString(2, status.name());
             s.setLong(3, workflowId);
             s.executeUpdate();
             long jobId = getGeneratedKey(s);
@@ -358,8 +368,8 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
     
     private boolean checkSchemaExistence(Connection connection) throws SQLException {
         DatabaseMetaData meta = connection.getMetaData();
-        try (ResultSet rs = meta.getTables(null, null, "WORKFLOW", null)) {
-            if (rs.next()) {
+        try (ResultSet resultSet = meta.getTables(null, null, "WORKFLOW", null)) {
+            if (resultSet.next()) {
                 return true;
             }
         }
@@ -368,33 +378,47 @@ public class JdbcWorkflowRepository implements EnhancedWorkflowRepository {
 
     private Map<SqlCommand, PreparedStatement> prepareStatements(Connection connection) throws SQLException {
         Map<SqlCommand, PreparedStatement> map = new EnumMap<SqlCommand, PreparedStatement>(SqlCommand.class);
-        ;
         for (SqlCommand c : SqlCommand.values()) {
             map.put(c, c.prepare(connection));
         }
         return map;
     }
-
-    private Job mapToJob(ResultSet rs) throws SQLException {
-        final long id = rs.getLong(1);
-        final String name = rs.getString(2);
-        BasicJob.Builder b = new BasicJob.Builder(name);
-        buildTasks(id, b);
-        BasicJob job = b.get();
-        job.setId(id);
-        return job;
+    
+    private ManagedJob mapToJob(ResultSet resultSet) throws SQLException {
+        return buildJob(resultSet).get();
     }
-
-    private void buildTasks(long jobId, JobBuilder builder) throws SQLException {
+    
+    private Job mapToJobWithTasks(ResultSet resultSet) throws SQLException {
+        long jobId = resultSet.getLong(1);
+        ManagedJobBuilder builder = buildJob(resultSet);
+        buildTasks(jobId, builder);
+        return builder.get();
+    }
+    
+    private ManagedJobBuilder buildJob(ResultSet resultSet) throws SQLException {
+        long id = resultSet.getLong(1);
+        String name = resultSet.getString(2);
+        JobStatus status = JobStatus.valueOf(resultSet.getString(3));
+        String standartOutput = resultSet.getString(4);
+        ManagedJobBuilder builder = this.workflowFactory.createJobBuilder(name);
+        builder.jobId(id);
+        builder.status(status);
+        if (standartOutput != null) {
+            builder.standardOutput(jsonb.fromJson(standartOutput, String[].class));
+        }
+        return builder;
+    }
+    
+    private void buildTasks(long jobId, ManagedJobBuilder builder) throws SQLException {
         PreparedStatement s = getStatement(SqlCommand.FIND_TASK);
         s.setLong(1, jobId);
         List<Task> tasks = new ArrayList<>();
-        try (ResultSet rs = s.executeQuery()) {
-            while (rs.next()) {
-                tasks.add(mapToTask(rs));
+        try (ResultSet resultSet = s.executeQuery()) {
+            while (resultSet.next()) {
+                tasks.add(mapToTask(resultSet));
             }
         }
-        builder.tasks(tasks);
+        builder.tasks(tasks.toArray(new Task[0]));
     }
 
     private Task mapToTask(ResultSet rs) throws SQLException {

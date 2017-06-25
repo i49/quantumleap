@@ -87,7 +87,7 @@ public class WorkflowRunnerTest {
                 .get();
         Job job2 = engine.buildJob("job2")
                 .tasks(taskFactory.createEchoTask("Running job2"))
-                .depend(job1)
+                .dependOn(job1)
                 .get();
         
         Workflow workflow1 = engine.buildWorkflow("workflow1")
@@ -96,20 +96,16 @@ public class WorkflowRunnerTest {
         
         repository.addWorkflow(workflow1);
         
-        assertThat(job1.getStatus()).isSameAs(JobStatus.READY);
-        assertThat(job2.getStatus()).isSameAs(JobStatus.WAITING);
+        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.READY);
+        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.WAITING);
 
         runner.runSingle();
-        repository.updateJobStatus(job1);
-        repository.updateJobStatus(job2);
-        assertThat(job1.getStatus()).isSameAs(JobStatus.COMPLETED);
-        assertThat(job2.getStatus()).isSameAs(JobStatus.READY);
+        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.READY);
        
         runner.runSingle();
-        repository.updateJobStatus(job1);
-        repository.updateJobStatus(job2);
-        assertThat(job1.getStatus()).isSameAs(JobStatus.COMPLETED);
-        assertThat(job2.getStatus()).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.COMPLETED);
     }
 
     @Test
@@ -119,15 +115,15 @@ public class WorkflowRunnerTest {
                 .get();
         Job job2 = engine.buildJob("job2")
                 .tasks(taskFactory.createEchoTask("Running job2"))
-                .depend(job1)
+                .dependOn(job1)
                 .get();
         Job job3 = engine.buildJob("job3")
                 .tasks(taskFactory.createEchoTask("Running job3"))
-                .depend(job1)
+                .dependOn(job1)
                 .get();
         Job job4 = engine.buildJob("job4")
                 .tasks(taskFactory.createEchoTask("Running job4"))
-                .depend(job2, job3)
+                .dependOn(job2, job3)
                 .get();
         
         Workflow workflow1 = engine.buildWorkflow("workflow1")
@@ -136,40 +132,28 @@ public class WorkflowRunnerTest {
         
         repository.addWorkflow(workflow1);
         
-        assertThat(job1.getStatus()).isSameAs(JobStatus.READY);
-        assertThat(job2.getStatus()).isSameAs(JobStatus.WAITING);
-        assertThat(job3.getStatus()).isSameAs(JobStatus.WAITING);
-        assertThat(job4.getStatus()).isSameAs(JobStatus.WAITING);
+        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.READY);
+        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.WAITING);
+        assertThat(repository.getJobStatus(job3.getId())).hasValue(JobStatus.WAITING);
+        assertThat(repository.getJobStatus(job4.getId())).hasValue(JobStatus.WAITING);
 
         runner.runSingle();
-        repository.updateJobStatus(job1);
-        repository.updateJobStatus(job2);
-        repository.updateJobStatus(job3);
-        repository.updateJobStatus(job4);
-        assertThat(job1.getStatus()).isSameAs(JobStatus.COMPLETED);
-        assertThat(job2.getStatus()).isSameAs(JobStatus.READY);
-        assertThat(job3.getStatus()).isSameAs(JobStatus.READY);
-        assertThat(job4.getStatus()).isSameAs(JobStatus.WAITING);
+        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.READY);
+        assertThat(repository.getJobStatus(job3.getId())).hasValue(JobStatus.READY);
+        assertThat(repository.getJobStatus(job4.getId())).hasValue(JobStatus.WAITING);
        
         runner.runSingle();
         runner.runSingle();
-        repository.updateJobStatus(job1);
-        repository.updateJobStatus(job2);
-        repository.updateJobStatus(job3);
-        repository.updateJobStatus(job4);
-        assertThat(job1.getStatus()).isSameAs(JobStatus.COMPLETED);
-        assertThat(job2.getStatus()).isSameAs(JobStatus.COMPLETED);
-        assertThat(job3.getStatus()).isSameAs(JobStatus.COMPLETED);
-        assertThat(job4.getStatus()).isSameAs(JobStatus.READY);
+        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job3.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job4.getId())).hasValue(JobStatus.READY);
 
         runner.runSingle();
-        repository.updateJobStatus(job1);
-        repository.updateJobStatus(job2);
-        repository.updateJobStatus(job3);
-        repository.updateJobStatus(job4);
-        assertThat(job1.getStatus()).isSameAs(JobStatus.COMPLETED);
-        assertThat(job2.getStatus()).isSameAs(JobStatus.COMPLETED);
-        assertThat(job3.getStatus()).isSameAs(JobStatus.COMPLETED);
-        assertThat(job4.getStatus()).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job3.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job4.getId())).hasValue(JobStatus.COMPLETED);
     }
 }

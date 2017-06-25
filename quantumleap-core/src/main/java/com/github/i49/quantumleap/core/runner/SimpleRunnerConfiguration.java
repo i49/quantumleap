@@ -15,27 +15,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.workflow;
+package com.github.i49.quantumleap.core.runner;
 
 import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-import com.github.i49.quantumleap.api.workflow.Platform;
 import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
-import com.github.i49.quantumleap.core.common.Platforms;
 
-public class DefaultRunnerConfiguration implements RunnerConfiguration {
+/**
+ * A simple implementation of {@link RunnerConfiguration}.
+ */
+public class SimpleRunnerConfiguration implements RunnerConfiguration {
 
-    Platform platform;
-    Path workDirectory;
-    boolean clean;
+    private final Map<String, Object> properties;
     
-    public DefaultRunnerConfiguration() {
-        this.platform = Platforms.getCurrent();
-        this.workDirectory = Paths.get(".").toAbsolutePath().normalize();
-        this.clean = false;
+    public SimpleRunnerConfiguration() {
+        this.properties = new HashMap<>();
+        setProperty(WORKING_DIRECTORY, Paths.get(".").toAbsolutePath().normalize());
+        setProperty(WORKING_DIRECTORY_RESET, false);
+    }
+    
+    @Override
+    public Optional<Object> getProperty(String name) {
+        checkNotNull(name, "name");
+        return Optional.ofNullable(properties.get(name));
+    }
+ 
+    @Override
+    public RunnerConfiguration setProperty(String name, Object value) {
+        checkNotNull(name, "name");
+        this.properties.put(name, value);
+        return this;
     }
     
     @Override
@@ -44,10 +59,10 @@ public class DefaultRunnerConfiguration implements RunnerConfiguration {
     }
 
     @Override
-    public RunnerConfiguration withDirectory(Path path, boolean clean) {
+    public RunnerConfiguration withDirectory(Path path, boolean reset) {
         checkNotNull(path, "path");
-        this.workDirectory = path.toAbsolutePath().normalize();
-        this.clean = clean;
+        setProperty(WORKING_DIRECTORY, path.toAbsolutePath().normalize());
+        setProperty(WORKING_DIRECTORY_RESET, reset);
         return this;
     }
 }

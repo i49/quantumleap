@@ -66,16 +66,17 @@ public interface WorkflowRepository extends AutoCloseable {
      */
     long countJobsWithStatus(JobStatus status);
 
+    /**
+     * Returns the job specified by the ID.
+     * 
+     * @param id the identifier of the job.
+     * @return retrieved job, may be empty.
+     */
+    Optional<Job> findJobById(long id);
+
     List<Job> findJobsByStatus(JobStatus status);
 
     Optional<Job> findFirstJobByStatus(JobStatus status);
     
-    /**
-     * Updates the status of the specified job. 
-     * 
-     * @param job the job to update its status.
-     * @return {@code true} if the job is updated, {@code false} otherwise.
-     * @throws NullPointerException if given {@code job} is {@code null}.
-     */
-    boolean updateJobStatus(Job job); 
+    Optional<JobStatus> getJobStatus(long id);
 }

@@ -17,6 +17,6 @@
  */
 
 /**
- * Provides API implementation.
+ * Provides workflow models and workflow runner implementation.
  */
 package com.github.i49.quantumleap.core.workflow;
