@@ -18,6 +18,7 @@
 package com.github.i49.quantumleap.api.workflow;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -50,7 +51,19 @@ public interface Job {
      * @return the dependencies of this job.
      */
     Set<Job> getDependencies();
+
+    /**
+     * Returns the parameters assigned to this job.
+     * 
+     * @return the unmodifiable map of parameters.
+     */
+    Map<String, Object> getParameters();
     
+    /**
+     * Returns the contents which this job wrote into the standard output.
+     * 
+     * @return the unmodifiable of list of lines, never be {@code null}.
+     */
     List<String> getStandardOutput();
 
     /**

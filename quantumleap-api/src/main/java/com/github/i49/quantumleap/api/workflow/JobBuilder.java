@@ -17,6 +17,8 @@
  */
 package com.github.i49.quantumleap.api.workflow;
 
+import java.util.Map;
+
 import com.github.i49.quantumleap.api.tasks.Task;
 
 /**
@@ -32,7 +34,26 @@ public interface JobBuilder {
      * @throws NullPointerException if one or more {@code jobs} are {@code null}.
      */
     JobBuilder dependOn(Job... jobs);
+    
+    /**
+     * Adds a parameter of this job.
+     * 
+     * @param name the name of the parameter, cannot be {@code null}.
+     * @param value the value of the parameter cannot be {@code null}.
+     * @return this builder.
+     * @throws NullPointerException if one or more parameters are {@code null}.
+     */
+    JobBuilder parameter(String name, Object value);
 
+    /**
+     * Adds parameters of this job.
+     * 
+     * @param parameters the map containing names and values of the job parameters.
+     * @return this builder.
+     * @throws NullPointerException if given {@code parameters} is {@code null}.
+     */
+    JobBuilder parameters(Map<String, Object> parameters);
+    
     /**
      * Specifies the tasks executed in the job.
      * 

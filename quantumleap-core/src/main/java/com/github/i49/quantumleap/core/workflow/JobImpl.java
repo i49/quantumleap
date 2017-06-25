@@ -22,8 +22,10 @@ import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.OptionalLong;
 import java.util.Set;
 
@@ -39,6 +41,7 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
 
     private final String name;
     private final Set<Job> dependencies;
+    private final Map<String, Object> parameters;
     private final List<Task> tasks;
     private final JobStatus status;
     private final List<String> standardOutput;
@@ -47,6 +50,7 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         super(builder.id);
         this.name = builder.name;
         this.dependencies = Collections.unmodifiableSet(builder.dependencies);
+        this.parameters = Collections.unmodifiableMap(builder.parameters);
         this.tasks = Collections.unmodifiableList(builder.tasks);
         this.status = builder.status;
         this.standardOutput = builder.standardOutput;
@@ -55,6 +59,11 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
     @Override
     public String getName() {
         return name;
+    }
+   
+    @Override
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
     
     @Override
@@ -96,6 +105,7 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         private final String name;
         private final Set<Job> dependencies = new HashSet<>();
         private final List<Task> tasks = new ArrayList<>();
+        private final Map<String, Object> parameters = new HashMap<>();
         private JobStatus status;
         private List<String> standardOutput;
 
@@ -116,6 +126,26 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         }
 
         @Override
+        public JobBuilder parameter(String name, Object value) {
+            checkNotNull(name, "name");
+            checkNotNull(value, "value");
+            this.parameters.put(name, value);
+            return this;
+        }
+
+        @Override
+        public JobBuilder parameters(Map<String, Object> parameters) {
+            checkNotNull(parameters, "parameters");
+            for (String key: parameters.keySet()) {
+                Object value = parameters.get(key);
+                if (value != null) {
+                    this.parameters.put(key, value);
+                }
+            }
+            return this;
+        }
+        
+        @Override
         public Builder tasks(Task... tasks) {
             checkNotNull(tasks, "tasks");
             for (Task task: tasks) {
@@ -129,7 +159,9 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
             return new JobImpl(this);
         }
 
-        /* ManagedJobBuilder */
+        /* 
+         * methods for ManagedJobBuilder interface
+         */
         
         @Override
         public Builder jobId(long id) {
