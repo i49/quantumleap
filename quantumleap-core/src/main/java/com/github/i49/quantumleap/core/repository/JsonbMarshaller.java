@@ -28,21 +28,28 @@ import javax.json.bind.JsonbConfig;
 import javax.json.bind.adapter.JsonbAdapter;
 
 /**
- * A wrapper for customizing {@link JsonbBuilder}.
+ * {@link JsonMarshaller} implemented with Java API for JSON Binding (JSR-367).
  */
-class CustomJsonbBuilder {
-
-    /**
-     * Creates a custom {@link Jsonb} object.
-     *  
-     * @return newly created {@link Jsonb}.
-     */
-    static Jsonb create() {
+public class JsonbMarshaller implements JsonMarshaller {
+    
+    private final Jsonb jsonb;
+    
+    public JsonbMarshaller() {
         JsonbConfig config = new JsonbConfig()
                 .withAdapters(new PathAdapter());
-        return JsonbBuilder.create(config);
+        this.jsonb = JsonbBuilder.create(config);
     }
-    
+
+    @Override
+    public String marshal(Object object) {
+        return jsonb.toJson(object);
+    }
+
+    @Override
+    public <T> T unmarshal(String str, Class<T> type) {
+        return jsonb.fromJson(str, type);
+    }
+
     /**
      * Adapter class for adapting {@link Path} objects.
      */

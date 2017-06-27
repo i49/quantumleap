@@ -128,7 +128,6 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         @Override
         public JobBuilder parameter(String name, Object value) {
             checkNotNull(name, "name");
-            checkNotNull(value, "value");
             this.parameters.put(name, value);
             return this;
         }
@@ -136,12 +135,7 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         @Override
         public JobBuilder parameters(Map<String, Object> parameters) {
             checkNotNull(parameters, "parameters");
-            for (String key: parameters.keySet()) {
-                Object value = parameters.get(key);
-                if (value != null) {
-                    this.parameters.put(key, value);
-                }
-            }
+            this.parameters.putAll(parameters);
             return this;
         }
         

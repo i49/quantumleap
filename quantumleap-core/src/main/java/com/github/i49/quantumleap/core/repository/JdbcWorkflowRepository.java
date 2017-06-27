@@ -29,11 +29,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.json.bind.Jsonb;
 import javax.sql.DataSource;
 
 import com.github.i49.quantumleap.api.tasks.Task;
@@ -54,11 +54,11 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     private final Connection connection;
     private final Map<SqlCommand, PreparedStatement> statements;
 
-    private final Jsonb jsonb;
+    private final JsonMarshaller marshaller;
     private final WorkflowFactory workflowFactory;
 
     public JdbcWorkflowRepository(DataSource dataSource, WorkflowFactory workflowFactory) {
-        this.jsonb = CustomJsonbBuilder.create();
+        this.marshaller = new JsonbMarshaller();
         this.workflowFactory = workflowFactory;
         Connection connection = null;
         try {
@@ -227,7 +227,7 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         PreparedStatement s = getStatement(SqlCommand.UPDATE_JOB);
         try {
             s.setString(1, status.name());
-            s.setString(2, jsonb.toJson(standardOutput));
+            s.setString(2, marshalToString(standardOutput));
             s.setLong(3, job.getId());
             s.executeUpdate();
         } catch (SQLException e) {
@@ -294,7 +294,8 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
             PreparedStatement s = getStatement(SqlCommand.INSERT_JOB);
             s.setString(1, job.getName());
             s.setString(2, status.name());
-            s.setLong(3, workflowId);
+            s.setString(3, marshalToString(job.getParameters()));
+            s.setLong(4, workflowId);
             s.executeUpdate();
             long jobId = getGeneratedKey(s);
             job.setId(jobId);
@@ -328,7 +329,7 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
             s.setLong(1, jobId);
             s.setInt(2, sequenceNumber);
             s.setString(3, task.getClass().getName());
-            String params = jsonb.toJson(task);
+            String params = marshalToString(task);
             s.setString(4, params);
             s.executeUpdate();
         } catch (SQLException e) {
@@ -396,15 +397,18 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     }
     
     private ManagedJobBuilder buildJob(ResultSet resultSet) throws SQLException {
-        long id = resultSet.getLong(1);
-        String name = resultSet.getString(2);
-        JobStatus status = JobStatus.valueOf(resultSet.getString(3));
-        String standartOutput = resultSet.getString(4);
+        final long id = resultSet.getLong(1);
+        final String name = resultSet.getString(2);
+        final JobStatus status = JobStatus.valueOf(resultSet.getString(3));
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> parameters = unmarshalFromString(resultSet.getString(4), HashMap.class);
+        final String standardOutput = resultSet.getString(6);
         ManagedJobBuilder builder = this.workflowFactory.createJobBuilder(name);
         builder.jobId(id);
+        builder.parameters(parameters);
         builder.status(status);
-        if (standartOutput != null) {
-            builder.standardOutput(jsonb.fromJson(standartOutput, String[].class));
+        if (standardOutput != null) {
+            builder.standardOutput(unmarshalFromString(standardOutput, String[].class));
         }
         return builder;
     }
@@ -427,7 +431,7 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         try {
             Class<?> type = Class.forName(className);
             if (Task.class.isAssignableFrom(type)) {
-                Object task = this.jsonb.fromJson(params, type);
+                Object task = unmarshalFromString(params, type);
                 return (Task) task;
             } else {
                 // TODO
@@ -437,5 +441,13 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
             // TODO Auto-generated catch block
             throw new WorkflowException("", e);
         }
+    }
+    
+    private String marshalToString(Object object) {
+        return this.marshaller.marshal(object);
+    }
+    
+    private <T> T unmarshalFromString(String str, Class<? extends T> type) {
+        return this.marshaller.unmarshal(str, type);
     }
 }

@@ -19,8 +19,15 @@ package com.github.i49.quantumleap.api.workflow;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.github.i49.quantumleap.api.workflow.Job;
@@ -32,32 +39,152 @@ import com.github.i49.quantumleap.api.workflow.WorkflowEngine;
  */
 public class JobTest {
 
-    private final WorkflowEngine engine = WorkflowEngine.get();
+    private static WorkflowEngine engine;
+    private static WorkflowRepository repository;
 
+    @BeforeClass
+    public static void setUpOnce() {
+        engine = WorkflowEngine.get();
+        repository = engine.createRepository();
+    }
+   
+    @AfterClass
+    public static void tearDown() {
+        if (repository != null) {
+            repository.close();
+        }
+    }
+   
+    /**
+     * Registers a job with repository.
+     * 
+     * @param job the job to register.
+     */
+    private void registerJob(Job job) {
+        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job).get();
+        repository.addWorkflow(workflow);
+    }
+    
+    /* hasId() */
+    
     @Test
     public void hasId_shouldReturnFalseByDefault() {
-        Job job = this.engine.buildJob("job1").get();
+        Job job = engine.buildJob("job1").get();
         assertThat(job.hasId()).isFalse();
     }
 
     @Test
+    public void hasId_shouldReturnAfterRegistration() {
+        Job job = engine.buildJob("job1").get();
+        registerJob(job);
+        assertThat(job.hasId()).isTrue();
+    }
+    
+    /* getId() */
+
+    @Test
     public void getId_shouldThrowExceptionByDefault() {
-        Job job = this.engine.buildJob("job1").get();
+        Job job = engine.buildJob("job1").get();
         Throwable thrown = catchThrowable(() -> {
             job.getId();
         });
         assertThat(thrown).isInstanceOf(NoSuchElementException.class);
     }
+    
+    @Test
+    public void getId_shouldReturnValidIdAfterRegistration() {
+        Job job = engine.buildJob("job1").get();
+        registerJob(job);
+        assertThat(job.getId()).isGreaterThanOrEqualTo(0);
+    }
 
+    /* getName() */
+    
     @Test
     public void getName_shouldReturnNameOfJob() {
-        Job job = this.engine.buildJob("job1").get();
+        Job job = engine.buildJob("job1").get();
+        assertThat(job.getName()).isEqualTo("job1");
+        
+        registerJob(job);
+        job = repository.findJobById(job.getId()).get();
         assertThat(job.getName()).isEqualTo("job1");
     }
+    
+    /* getParameters() */
+    
+    @Test
+    public void getParameters_shouldReturnEmptyMapByDefault() {
+        Job job = engine.buildJob("job1").get();
+        assertThat(job.getParameters()).isEmpty();
+
+        registerJob(job);
+        job = repository.findJobById(job.getId()).get();
+        assertThat(job.getParameters()).isEmpty();
+    }
+    
+    private Map<String, Object> createJobParameters() {
+        Map<String, Object> p = new HashMap<>();
+        p.put("firstName", "John");
+        p.put("lastName", "Smith");
+        p.put("isAlive", true);
+        p.put("age", 25);
+        p.put("spouse", null);
+        p.put("hobbies", Arrays.asList("ice skating", "jigsaw puzzles"));
+        Map<String, Object> address = new HashMap<>();
+        address.put("city", "New York");
+        address.put("state", "NY");
+        p.put("address", address);
+        return p;
+    }
+    
+    @Test
+    public void getParameters_shouldReturnStoredParameters() {
+        Job job = engine.buildJob("job1").parameters(createJobParameters()).get();
+        assertOnJobParameters(job, false);
+
+        registerJob(job);
+        job = repository.findJobById(job.getId()).get();
+        assertOnJobParameters(job, true);
+    }
+    
+    private void assertOnJobParameters(Job job, boolean restored) {
+        Map<String, Object> p = job.getParameters();
+        assertThat(p).isNotNull().isNotEmpty();
+        assertThat(p.get("firstName")).isInstanceOf(String.class).isEqualTo("John");
+        assertThat(p.get("lastName")).isInstanceOf(String.class).isEqualTo("Smith");
+        assertThat(p.get("isAlive")).isInstanceOf(Boolean.class).isEqualTo(Boolean.TRUE);
+        if (restored) {
+            assertThat(p.get("age")).isInstanceOf(BigDecimal.class).isEqualTo(BigDecimal.valueOf(25));
+        } else {
+            assertThat(p.get("age")).isInstanceOf(Integer.class).isEqualTo(Integer.valueOf(25));
+        }
+        assertThat(p.get("spouse")).isNull();
+        
+        assertThat(p.get("hobbies")).isInstanceOf(List.class);
+        @SuppressWarnings("unchecked")
+        List<String> hobbies = (List<String>)p.get("hobbies");
+        assertThat(hobbies).hasSize(2).containsExactly("ice skating", "jigsaw puzzles");
+        
+        assertThat(p.get("address")).isInstanceOf(Map.class);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> address = (Map<String, Object>)p.get("address");
+        assertThat(address.get("city")).isInstanceOf(String.class).isEqualTo("New York");
+        assertThat(address.get("state")).isInstanceOf(String.class).isEqualTo("NY");
+    }
+    
+    /* getStatus() */
 
     @Test
     public void getStatus_shouldReturnInitialByDefault() {
-        Job job = this.engine.buildJob("job1").get();
+        Job job = engine.buildJob("job1").get();
         assertThat(job.getStatus()).isSameAs(JobStatus.INITIAL);
+    }
+    
+    @Test
+    public void getStatus_shouldReturnReadyBeforeRun() {
+        Job job = engine.buildJob("job1").get();
+        registerJob(job);
+        job = repository.findJobById(job.getId()).get();
+        assertThat(job.getStatus()).isSameAs(JobStatus.READY);
     }
 }
