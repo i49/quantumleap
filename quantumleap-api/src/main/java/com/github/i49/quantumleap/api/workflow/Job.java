@@ -20,7 +20,6 @@ package com.github.i49.quantumleap.api.workflow;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import com.github.i49.quantumleap.api.tasks.Task;
 
@@ -44,13 +43,6 @@ public interface Job {
      * @return the name of this job, cannot be {@code null}.
      */
     String getName();
-    
-    /**
-     * Returns the dependencies of this job.
-     * 
-     * @return the dependencies of this job.
-     */
-    Set<Job> getDependencies();
     
     /**
      * Returns the input parameters for this job.
@@ -94,12 +86,4 @@ public interface Job {
      *         otherwise.
      */
     boolean hasId();
-
-    /**
-     * Checks if this job has any dependencies or not.
-     * 
-     * @return {@code true} if this job has dependencies, {@code false}
-     *         otherwise.
-     */
-    boolean hasDependencies();
 }

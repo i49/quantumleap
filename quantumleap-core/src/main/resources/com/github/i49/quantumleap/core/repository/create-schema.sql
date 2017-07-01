@@ -35,13 +35,13 @@ CREATE TABLE job (
     FOREIGN KEY (workflow_id) REFERENCES workflow (workflow_id)
 );
 
-CREATE TABLE job_dependency (
-    job_id BIGINT,
-    dependency_id BIGINT NOT NULL,
+CREATE TABLE job_link (
+    source_job_id BIGINT,
+    target_job_id BIGINT,
     
-    PRIMARY KEY (job_id, dependency_id),
-    FOREIGN KEY (job_id) REFERENCES job (job_id),
-    FOREIGN KEY (dependency_id) REFERENCES Job (job_id)
+    PRIMARY KEY (source_job_id, target_job_id),
+    FOREIGN KEY (source_job_id) REFERENCES job (job_id),
+    FOREIGN KEY (target_job_id) REFERENCES Job (job_id)
 );
 
 CREATE TABLE task (

@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -41,6 +42,7 @@ import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
 import com.github.i49.quantumleap.api.workflow.Workflow;
 import com.github.i49.quantumleap.api.workflow.WorkflowException;
+import com.github.i49.quantumleap.core.workflow.JobLink;
 import com.github.i49.quantumleap.core.workflow.ManagedJob;
 import com.github.i49.quantumleap.core.workflow.ManagedJobBuilder;
 import com.github.i49.quantumleap.core.workflow.ManagedWorkflow;
@@ -265,21 +267,23 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
 
     private void addWorkflow(ManagedWorkflow workflow) {
         long workflowId = insertWorkflow(workflow);
-        // TODO: reorder jobs
-        for (ManagedJob job : workflow.getManagedJobs()) {
-            addJob(job, workflowId);
+        for (ManagedJob job: workflow.getManagedJobs()) {
+            addJob(job, workflowId, workflow.getDependenciesOf(job));
+        }
+        for (JobLink link: workflow.getJobLinks()) {
+            insertJobLink(link);
         }
     }
 
-    private void addJob(ManagedJob job, long workflowId) {
-        JobStatus status = job.hasDependencies() ? JobStatus.WAITING : JobStatus.READY;
+    private void addJob(ManagedJob job, long workflowId, Set<ManagedJob> dependencies) {
+        JobStatus status = dependencies.isEmpty() ? JobStatus.READY : JobStatus.WAITING;
         long jobId = insertJob(job, status, workflowId);
         int sequence = 0;
         for (Task task : job.getTasks()) {
             insertTask(task, jobId, sequence++);
         }
     }
-
+    
     private long insertWorkflow(ManagedWorkflow workflow) {
         try {
             PreparedStatement s = getStatement(SqlCommand.INSERT_WORKFLOW);
@@ -304,9 +308,6 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
             s.executeUpdate();
             long jobId = getGeneratedKey(s);
             job.setId(jobId);
-            if (job.hasDependencies()) {
-                insertJobDependencies(jobId, job.getDependencies());
-            }
             return jobId;
         } catch (SQLException e) {
             // TODO: add message
@@ -314,14 +315,12 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         }
     }
     
-    private void insertJobDependencies(long jobId, Iterable<Job> dependencies) {
-        PreparedStatement s = getStatement(SqlCommand.INSERT_JOB_DEPENDENCY);
+    private void insertJobLink(JobLink link) {
+        PreparedStatement s = getStatement(SqlCommand.INSERT_JOB_LINK);
         try {
-            s.setLong(1, jobId);
-            for (Job dependency: dependencies) {
-                s.setLong(2, dependency.getId());
-                s.executeUpdate();
-            }
+            s.setLong(1, link.getSource().getId());
+            s.setLong(2, link.getTarget().getId());
+            s.executeUpdate();
         } catch (SQLException e) {
             // TODO: add message
             throw new WorkflowException("", e);

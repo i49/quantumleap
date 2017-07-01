@@ -89,11 +89,10 @@ public class WorkflowRunnerTest {
                 .get();
         Job job2 = engine.buildJob("job2")
                 .tasks(taskFactory.createEchoTask("Running job2"))
-                .dependOn(job1)
                 .get();
         
         Workflow workflow1 = engine.buildWorkflow("workflow1")
-                .jobs(job1, job2)
+                .link(job1, job2)
                 .get();
         
         repository.addWorkflow(workflow1);
@@ -117,19 +116,19 @@ public class WorkflowRunnerTest {
                 .get();
         Job job2 = engine.buildJob("job2")
                 .tasks(taskFactory.createEchoTask("Running job2"))
-                .dependOn(job1)
                 .get();
         Job job3 = engine.buildJob("job3")
                 .tasks(taskFactory.createEchoTask("Running job3"))
-                .dependOn(job1)
                 .get();
         Job job4 = engine.buildJob("job4")
                 .tasks(taskFactory.createEchoTask("Running job4"))
-                .dependOn(job2, job3)
                 .get();
         
         Workflow workflow1 = engine.buildWorkflow("workflow1")
-                .jobs(job1, job2, job3, job4)
+                .link(job1, job2)
+                .link(job1, job3)
+                .link(job2, job4)
+                .link(job3, job4)
                 .get();
         
         repository.addWorkflow(workflow1);

@@ -33,18 +33,18 @@ enum SqlCommand {
     
     DELETE_WORKFLOWS("DELETE FROM workflow"),
     DELETE_JOBS("DELETE FROM job"),
-    DELETE_JOB_DEPENDENCY("DELETE FROM job_dependency"),
+    DELETE_JOB_DEPENDENCY("DELETE FROM job_link"),
     DELETE_TASKS("DELETE FROM task"),
     
     FIND_JOBS_BY_STATUS("SELECT * FROM job WHERE job_status = ? ORDER BY job_id"),
     FIND_FIRST_JOB_BY_STATUS("SELECT * FROM job WHERE job_status = ? ORDER BY job_id LIMIT 1"),
     FIND_JOB_STATUS_BY_ID("SELECT job_status FROM job WHERE job_id = ?"),
     FIND_JOB_BY_ID("SELECT * FROM job WHERE job_id = ?"),
-    FIND_DEPENDANT_JOBS("SELECT job_id FROM job_dependency WHERE dependency_id = ?"),
+    FIND_DEPENDANT_JOBS("SELECT target_job_id FROM job_link WHERE source_job_id = ?"),
     FIND_TASK("SELECT * FROM task WHERE job_id = ? ORDER BY sequence_number"),
 
     INSERT_JOB("INSERT INTO job (job_name, job_status, job_input, workflow_id) VALUES(?, ?, ?, ?)"),
-    INSERT_JOB_DEPENDENCY("INSERT INTO job_dependency (job_id, dependency_id) VALUES(?, ?)"),
+    INSERT_JOB_LINK("INSERT INTO job_link (source_job_id, target_job_id) VALUES(?, ?)"),
     INSERT_TASK("INSERT INTO task (job_id, sequence_number, class_name, parameters) VALUES(?, ?, ?, ?)"),
     INSERT_WORKFLOW("INSERT INTO workflow (workflow_name) VALUES(?)"),
     
@@ -53,9 +53,9 @@ enum SqlCommand {
     UPDATE_JOB_STATUS_IF_READY(
             "UPDATE job j SET job_status = 'READY' "
             + "WHERE job_id = ? AND NOT EXISTS ("
-            + "SELECT 1 FROM job_dependency d "
-            + "INNER JOIN job dj ON dj.job_id = d.dependency_id AND dj.job_status <> 'COMPLETED' "
-            + "WHERE d.job_id = j.job_id) "
+            + "SELECT 1 FROM job_link l "
+            + "INNER JOIN job s ON s.job_id = l.source_job_id AND s.job_status <> 'COMPLETED' "
+            + "WHERE l.target_job_id = j.job_id) "
     ),
     ;
 

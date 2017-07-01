@@ -23,15 +23,28 @@ package com.github.i49.quantumleap.api.workflow;
 public interface WorkflowBuilder {
 
     /**
-     * Adds a job to the workflow.
+     * Adds one or more jobs to the workflow.
      * 
-     * @param jobs list of jobs to be added.
+     * @param jobs list of jobs to be added to the workflow.
      * @return this builder.
+     * @throws NullPointerException if one or more parameters are {@code null}.
+     * @throws IllegalArgumentException if one of given jobs is not instantiated by this engine.
      */
     WorkflowBuilder jobs(Job... jobs);
+    
+    /**
+     * Adds a link between two jobs composing the workflow.
+     * 
+     * @param source the source job of the link.
+     * @param target the target job of the link. 
+     * @return this builder.
+     * @throws NullPointerException if one or more parameters are {@code null}.
+     * @throws IllegalArgumentException if one of given jobs is not instantiated by this engine.
+     */
+    WorkflowBuilder link(Job source, Job target);
 
     /**
-     * Builds the {@link Workflow} built by this builder.
+     * Returns the {@link Workflow} built by this builder.
      * 
      * @return the instance of {@link Workflow}.
      */

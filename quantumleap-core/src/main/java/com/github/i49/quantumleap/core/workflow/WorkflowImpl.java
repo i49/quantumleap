@@ -17,10 +17,14 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
+import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 import static com.github.i49.quantumleap.core.common.Preconditions.checkRealType;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.github.i49.quantumleap.api.workflow.Job;
@@ -34,10 +38,14 @@ class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
 
     private final String name;
     private final Set<ManagedJob> jobs;
+    private final Set<JobLink> jobLinks;
+    private final Map<ManagedJob, Set<ManagedJob>> dependencyMap;
 
     private WorkflowImpl(Builder builder) {
         this.name = builder.name;
         this.jobs = Collections.unmodifiableSet(builder.jobs);
+        this.dependencyMap = Collections.unmodifiableMap(builder.dependencyMap);
+        this.jobLinks = Collections.unmodifiableSet(builder.links);
     }
 
     @Override
@@ -62,6 +70,20 @@ class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
         return jobs;
     }
     
+    @Override
+    public Iterable<JobLink> getJobLinks() {
+        return jobLinks;
+    }
+  
+    @Override
+    public Set<ManagedJob> getDependenciesOf(ManagedJob job) {
+        Set<ManagedJob> dependencies = dependencyMap.get(job);
+        if (dependencies == null) {
+            return Collections.emptySet();
+        }
+        return dependencies;
+    }
+  
     @SuppressWarnings("unchecked")
     private static <T> Set<T> castSet(Set<? extends T> set) {
         return (Set<T>)set;
@@ -74,6 +96,8 @@ class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
 
         private final String name;
         private final Set<ManagedJob> jobs = new LinkedHashSet<>();
+        private final Set<JobLink> links = new HashSet<>();
+        private final Map<ManagedJob, Set<ManagedJob>> dependencyMap = new HashMap<>();
 
         public Builder(String name) {
             this.name = name;
@@ -81,19 +105,85 @@ class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
 
         @Override
         public Builder jobs(Job... jobs) {
+            checkNotNull(jobs, "jobs");
+            checkRealType(jobs, ManagedJob.class, "jobs");
             for (Job job : jobs) {
-                if (job == null) {
-                    continue;
-                }
-                ManagedJob realJob = checkRealType(job, ManagedJob.class, "jobs");
-                this.jobs.add(realJob);
+                addJob((ManagedJob)job);
             }
+            return this;
+        }
+        
+        @Override
+        public Builder link(Job source, Job target) {
+            checkNotNull(source, "source");
+            checkNotNull(target, "target");
+            link(checkRealType(source, ManagedJob.class, "source"),
+                 checkRealType(target, ManagedJob.class, "target"));  
             return this;
         }
 
         @Override
         public ManagedWorkflow get() {
             return new WorkflowImpl(this);
+        }
+        
+        private void addJob(ManagedJob job) {
+            this.jobs.add(job);
+        }
+        
+        private void link(ManagedJob source, ManagedJob target) {
+            addJob(source);
+            addJob(target);
+            this.links.add(new JobLinkImpl(source, target));
+            
+            Set<ManagedJob> dependencies = this.dependencyMap.get(target);
+            if (dependencies == null) {
+                dependencies = new HashSet<>();
+                this.dependencyMap.put(target, dependencies);
+            }
+            dependencies.add(source);
+        }
+    }
+    
+    private static class JobLinkImpl implements JobLink {
+
+        private final ManagedJob source;
+        private final ManagedJob target;
+        
+        private JobLinkImpl(ManagedJob source, ManagedJob target) {
+            this.source = source;
+            this.target = target;
+        }
+        
+        @Override
+        public ManagedJob getSource() {
+            return source;
+        }
+
+        @Override
+        public ManagedJob getTarget() {
+            return target;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + System.identityHashCode(source);
+            result = prime * result + System.identityHashCode(target);
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            JobLinkImpl other = (JobLinkImpl)obj;
+            return (source == other.source && target == other.target);
         }
     }
 }

@@ -23,11 +23,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
-import java.util.Set;
 
 import com.github.i49.quantumleap.api.tasks.Task;
 import com.github.i49.quantumleap.api.workflow.Job;
@@ -40,7 +38,6 @@ import com.github.i49.quantumleap.api.workflow.JobStatus;
 class JobImpl extends WorkflowComponent implements ManagedJob {
 
     private final String name;
-    private final Set<Job> dependencies;
     private final Map<String, Object> jobInput;
     private final Map<String, Object> jobOutput;
     private final List<Task> tasks;
@@ -50,7 +47,6 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
     private JobImpl(Builder builder) {
         super(builder.id);
         this.name = builder.name;
-        this.dependencies = Collections.unmodifiableSet(builder.dependencies);
         this.jobInput = builder.jobInput;
         this.jobOutput = Collections.unmodifiableMap(builder.jobOutput);
         this.tasks = Collections.unmodifiableList(builder.tasks);
@@ -89,20 +85,10 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
     }
 
     @Override
-    public boolean hasDependencies() {
-        return dependencies.size() > 0;
-    }
-
-    @Override
     public String toString() {
         return getName();
     }
     
-    @Override
-    public Set<Job> getDependencies() {
-        return dependencies;
-    }
-
     /**
      * The implementation of {@link JobBuilder} provided by this engine.
      */
@@ -110,7 +96,6 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
 
         private OptionalLong id;
         private final String name;
-        private final Set<Job> dependencies = new HashSet<>();
         private final List<Task> tasks = new ArrayList<>();
         private Map<String, Object> jobInput;
         private Map<String, Object> jobOutput;
@@ -124,15 +109,6 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
             this.jobInput = new HashMap<>();
             this.jobOutput = new HashMap<>();
             this.standardOutput = Collections.emptyList();
-        }
-        
-        @Override
-        public Builder dependOn(Job... jobs) {
-            checkNotNull(jobs, "jobs");
-            for (Job job: jobs) {
-                this.dependencies.add(job);
-            }
-            return this;
         }
         
         public JobBuilder input(String name, Object value) {

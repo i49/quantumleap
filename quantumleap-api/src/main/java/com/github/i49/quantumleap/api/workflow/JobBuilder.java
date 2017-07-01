@@ -27,15 +27,6 @@ import com.github.i49.quantumleap.api.tasks.Task;
 public interface JobBuilder {
     
     /**
-     * Specifies the dependencies of the job.
-     * 
-     * @param jobs the dependencies.
-     * @return this builder.
-     * @throws NullPointerException if one or more {@code jobs} are {@code null}.
-     */
-    JobBuilder dependOn(Job... jobs);
-    
-    /**
      * Specifies one of input parameters for this job.
      * 
      * @param name the name of the parameter, cannot be {@code null}.

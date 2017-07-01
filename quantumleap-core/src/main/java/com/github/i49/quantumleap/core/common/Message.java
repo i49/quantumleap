@@ -27,7 +27,8 @@ import java.util.ResourceBundle;
 public enum Message {
     PARAMETER_IS_NULL,
     PARAMETER_ITEM_IS_NULL,
-    PARAMETER_NOT_INSTANCE_FOR_ENGINE,
+    PARAMETER_IS_OF_UNEXPECTED_TYPE,
+    PARAMETER_ITEM_IS_OF_UNEXPECTED_TYPE,
     REPOSITORY_FAILED_TO_CLEAR;
 
     private static final String BASE_NAME = "com.github.i49.quantumleap.core.messages";

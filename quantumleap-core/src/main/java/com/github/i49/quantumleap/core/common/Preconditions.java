@@ -64,11 +64,19 @@ public final class Preconditions {
      * @return the value casted to the {@code expectedType}.
      * @throws IllegalArgumentException if given object is not of the expected type.
      */
-    public static <T> T checkRealType(Object object, Class<T> expectedType, String name) {
+    public static <S, T extends S> T checkRealType(S object, Class<T> expectedType, String name) {
         if (!expectedType.isInstance(object)) {
-            throw new IllegalArgumentException(PARAMETER_NOT_INSTANCE_FOR_ENGINE.with(name));
+            throw new IllegalArgumentException(PARAMETER_IS_OF_UNEXPECTED_TYPE.with(name));
         }
         return expectedType.cast(object);
+    }
+    
+    public static <S, T extends S> void checkRealType(S[] objects, Class<T> expectedType, String name) {
+        for (int i = 0; i < objects.length; i++) {
+            if (!expectedType.isInstance(objects[i])) {
+                throw new IllegalArgumentException(PARAMETER_ITEM_IS_OF_UNEXPECTED_TYPE.with(name, i));
+            }
+        }
     }
     
     private Preconditions() {

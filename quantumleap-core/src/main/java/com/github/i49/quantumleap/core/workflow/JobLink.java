@@ -17,25 +17,11 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
-import java.util.Set;
-
-import com.github.i49.quantumleap.api.workflow.Workflow;
-
 /**
- * The job managed by this engine.
  */
-public interface ManagedWorkflow extends Workflow {
+public interface JobLink {
 
-    /**
-     * Assigns the identifier of this workflow.
-     * 
-     * @param id the identifier of this workflow.
-     */
-    void setId(long id);
+    ManagedJob getSource();
     
-    Iterable<ManagedJob> getManagedJobs();
-    
-    Iterable<JobLink> getJobLinks();
-    
-    Set<ManagedJob> getDependenciesOf(ManagedJob job);
+    ManagedJob getTarget();
 }
