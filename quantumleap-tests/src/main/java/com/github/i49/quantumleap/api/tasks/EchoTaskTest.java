@@ -35,7 +35,6 @@ public class EchoTaskTest extends BaseTaskTest {
         Task task = factory.createEchoTask(message);
         Job job = runTask(task);
         
-        job = repository.findJobById(job.getId()).get();
         assertThat(job.getStatus()).isSameAs(JobStatus.COMPLETED);
         assertThat(job.getStandardOutput()).containsExactly(message);
     }

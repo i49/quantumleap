@@ -20,6 +20,8 @@ package com.github.i49.quantumleap.api.workflow;
 import static org.assertj.core.api.Assertions.*;
 
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -155,5 +157,22 @@ public class WorkflowRunnerTest {
         assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.COMPLETED);
         assertThat(repository.getJobStatus(job3.getId())).hasValue(JobStatus.COMPLETED);
         assertThat(repository.getJobStatus(job4.getId())).hasValue(JobStatus.COMPLETED);
+    }
+    
+    @Test
+    public void runSingle_shouldUpdateJobOutput() {
+        Job job1 = engine.buildJob("job1")
+                .tasks(new SummingTask())
+                .input("numbers", Arrays.asList(1, 2, 3))
+                .get();
+        Workflow workflow1 = engine.buildWorkflow("workflow1").jobs(job1).get();
+        repository.addWorkflow(workflow1);
+        runner.runSingle();
+        
+        job1 = repository.findJobById(job1.getId());
+        Map<String, Object> jobParameters = job1.getJobInput();
+        assertThat(jobParameters).containsKey("numbers");
+        Map<String, Object> jobOutput = job1.getJobOutput();
+        assertThat(jobOutput.get("sum")).isEqualTo(6);
     }
 }

@@ -51,13 +51,20 @@ public interface Job {
      * @return the dependencies of this job.
      */
     Set<Job> getDependencies();
+    
+    /**
+     * Returns the input parameters for this job.
+     * 
+     * @return the unmodifiable map containing the input parameters of this job, never be {@code null}.
+     */
+    Map<String, Object> getJobInput();
 
     /**
-     * Returns the parameters assigned to this job.
+     * Returns the output of this job.
      * 
-     * @return the unmodifiable map of parameters.
+     * @return the unmodifiable map containing the output of this job, never be {@code null}.
      */
-    Map<String, Object> getParameters();
+    Map<String, Object> getJobOutput();
     
     /**
      * Returns the contents which this job wrote into the standard output.

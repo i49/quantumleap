@@ -41,7 +41,8 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
 
     private final String name;
     private final Set<Job> dependencies;
-    private final Map<String, Object> parameters;
+    private final Map<String, Object> jobInput;
+    private final Map<String, Object> jobOutput;
     private final List<Task> tasks;
     private final JobStatus status;
     private final List<String> standardOutput;
@@ -50,7 +51,8 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         super(builder.id);
         this.name = builder.name;
         this.dependencies = Collections.unmodifiableSet(builder.dependencies);
-        this.parameters = Collections.unmodifiableMap(builder.parameters);
+        this.jobInput = builder.jobInput;
+        this.jobOutput = Collections.unmodifiableMap(builder.jobOutput);
         this.tasks = Collections.unmodifiableList(builder.tasks);
         this.status = builder.status;
         this.standardOutput = builder.standardOutput;
@@ -62,8 +64,13 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
     }
    
     @Override
-    public Map<String, Object> getParameters() {
-        return parameters;
+    public Map<String, Object> getJobInput() {
+        return jobInput;
+    }
+    
+    @Override
+    public Map<String, Object> getJobOutput() {
+        return jobOutput;
     }
     
     @Override
@@ -105,7 +112,8 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         private final String name;
         private final Set<Job> dependencies = new HashSet<>();
         private final List<Task> tasks = new ArrayList<>();
-        private final Map<String, Object> parameters = new HashMap<>();
+        private Map<String, Object> jobInput;
+        private Map<String, Object> jobOutput;
         private JobStatus status;
         private List<String> standardOutput;
 
@@ -113,6 +121,8 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
             this.id = OptionalLong.empty();
             this.name = name;
             this.status = JobStatus.INITIAL;
+            this.jobInput = new HashMap<>();
+            this.jobOutput = new HashMap<>();
             this.standardOutput = Collections.emptyList();
         }
         
@@ -124,18 +134,16 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
             }
             return this;
         }
-
-        @Override
-        public JobBuilder parameter(String name, Object value) {
+        
+        public JobBuilder input(String name, Object value) {
             checkNotNull(name, "name");
-            this.parameters.put(name, value);
+            this.jobInput.put(name, value);
             return this;
         }
 
-        @Override
-        public JobBuilder parameters(Map<String, Object> parameters) {
+        public JobBuilder input(Map<String, Object> parameters) {
             checkNotNull(parameters, "parameters");
-            this.parameters.putAll(parameters);
+            this.jobInput.putAll(parameters);
             return this;
         }
         
@@ -160,6 +168,13 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         @Override
         public Builder jobId(long id) {
             this.id = OptionalLong.of(id);
+            return this;
+        }
+
+        @Override
+        public Builder jobOutput(Map<String, Object> jobOutput) {
+            checkNotNull(jobOutput, "jobOutput");
+            this.jobOutput = jobOutput;
             return this;
         }
         

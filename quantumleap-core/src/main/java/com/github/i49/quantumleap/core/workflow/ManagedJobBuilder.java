@@ -17,11 +17,14 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
+import java.util.Map;
+
 import com.github.i49.quantumleap.api.workflow.JobBuilder;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
 
 /**
- * 
+ * Builder interface for building an instance of {@link ManagedJob}.
+ * This type is for internal use.
  */
 public interface ManagedJobBuilder extends JobBuilder {
     
@@ -29,6 +32,8 @@ public interface ManagedJobBuilder extends JobBuilder {
     ManagedJob get();
     
     ManagedJobBuilder jobId(long id);
+    
+    ManagedJobBuilder jobOutput(Map<String, Object> jobOutput);
     
     ManagedJobBuilder status(JobStatus status);
 

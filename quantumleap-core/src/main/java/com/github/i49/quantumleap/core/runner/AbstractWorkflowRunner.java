@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.github.i49.quantumleap.api.tasks.TaskContext;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
@@ -77,8 +79,9 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
     
     protected void completeJob(ManagedJob job, JobContext context) {
         JobStatus status = JobStatus.COMPLETED;
+        Map<String, Object> jobOutput = context.getJobOutput();
         String[] lines = context.getStandardOutputLines();
-        getRepository().storeJob(job, status, lines);
+        getRepository().storeJob(job, status, jobOutput, lines);
         for (long dependant: getRepository().findDependants(job)) {
             getRepository().updateJobStatusIfReady(dependant);
         }
@@ -112,16 +115,16 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
      */
     private class JobContextImpl implements JobContext {
         
-        @SuppressWarnings("unused")
         private final ManagedJob job;
-        
         private final Path jobDirectory;
-        private final JobPrintStream standardOutput;
+        private final Map<String, Object> jobOutput;
+        private final JobPrintStream standardStream;
         
         private JobContextImpl(ManagedJob job, Path jobDirectory) {
             this.job = job;
             this.jobDirectory = jobDirectory;
-            this.standardOutput = new JobPrintStream();
+            this.jobOutput = new HashMap<String, Object>();
+            this.standardStream = new JobPrintStream();
         }
 
         @Override
@@ -130,19 +133,29 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         }
 
         @Override
+        public Map<String, Object> getJobInput() {
+            return job.getJobInput();
+        }
+        
+        @Override
+        public Map<String, Object> getJobOutput() {
+            return jobOutput;
+        }
+        
+        @Override
         public Platform getPlatform() {
             return platform;
         }
 
         @Override
-        public PrintStream getStandardOutput() {
-            return standardOutput;
+        public PrintStream getStandardStream() {
+            return standardStream;
         }
 
         @Override
         public String[] getStandardOutputLines() {
-            standardOutput.flush();
-            return standardOutput.getLines();
+            standardStream.flush();
+            return standardStream.getLines();
         }
     }
 }

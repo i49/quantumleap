@@ -29,9 +29,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -54,11 +54,14 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     private final Connection connection;
     private final Map<SqlCommand, PreparedStatement> statements;
 
-    private final JsonMarshaller marshaller;
+    private final Marshaller<String> textMarshaller;
+    private final Marshaller<byte[]> binaryMarshaller;
+    
     private final WorkflowFactory workflowFactory;
 
     public JdbcWorkflowRepository(DataSource dataSource, WorkflowFactory workflowFactory) {
-        this.marshaller = new JsonbMarshaller();
+        this.textMarshaller = new JsonBindingMarshaller();
+        this.binaryMarshaller = new BinaryMarshaller();
         this.workflowFactory = workflowFactory;
         Connection connection = null;
         try {
@@ -166,15 +169,16 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     }
     
     @Override
-    public Optional<Job> findJobById(long jobId) {
+    public Job findJobById(long jobId) {
         PreparedStatement s = getStatement(SqlCommand.FIND_JOB_BY_ID);
         try {
             s.setLong(1, jobId);
             try (ResultSet resultSet = s.executeQuery()) {
                 if (resultSet.next()) {
-                    return Optional.of(mapToJob(resultSet));
+                    return mapToJob(resultSet);
                 } else {
-                    return Optional.empty();
+                    // TODO:
+                    throw new NoSuchElementException();
                 }
             }
         } catch (SQLException e) {
@@ -223,12 +227,13 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     }
     
     @Override
-    public void storeJob(Job job, JobStatus status, String[] standardOutput) {
+    public void storeJob(Job job, JobStatus status, Map<String, Object> jobOutput, String[] standardOutput) {
         PreparedStatement s = getStatement(SqlCommand.UPDATE_JOB);
         try {
             s.setString(1, status.name());
-            s.setString(2, marshalToString(standardOutput));
-            s.setLong(3, job.getId());
+            s.setBytes(2, marshal(jobOutput));
+            s.setString(3, marshalToString(standardOutput));
+            s.setLong(4, job.getId());
             s.executeUpdate();
         } catch (SQLException e) {
             // TODO: add message
@@ -294,7 +299,7 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
             PreparedStatement s = getStatement(SqlCommand.INSERT_JOB);
             s.setString(1, job.getName());
             s.setString(2, status.name());
-            s.setString(3, marshalToString(job.getParameters()));
+            s.setBytes(3, marshal(job.getJobInput()));
             s.setLong(4, workflowId);
             s.executeUpdate();
             long jobId = getGeneratedKey(s);
@@ -401,11 +406,18 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         final String name = resultSet.getString(2);
         final JobStatus status = JobStatus.valueOf(resultSet.getString(3));
         @SuppressWarnings("unchecked")
-        final Map<String, Object> parameters = unmarshalFromString(resultSet.getString(4), HashMap.class);
+        final Map<String, Object> jobParameters = unmarshal(resultSet.getBytes(4), Map.class);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> jobOutput = unmarshal(resultSet.getBytes(5), Map.class);
         final String standardOutput = resultSet.getString(6);
         ManagedJobBuilder builder = this.workflowFactory.createJobBuilder(name);
         builder.jobId(id);
-        builder.parameters(parameters);
+        if (jobParameters != null) {
+            builder.input(jobParameters);
+        }
+        if (jobOutput != null) {
+            builder.jobOutput(jobOutput);
+        }
         builder.status(status);
         if (standardOutput != null) {
             builder.standardOutput(unmarshalFromString(standardOutput, String[].class));
@@ -443,11 +455,35 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         }
     }
     
+    private byte[] marshal(Optional<?> object) {
+        if (object.isPresent()) {
+            return this.binaryMarshaller.marshal(object.get());
+        } else {
+            return null;
+        }
+    }
+    
+    private byte[] marshal(Object object) {
+        return this.binaryMarshaller.marshal(object);
+    }
+    
+    private <T> T unmarshal(byte[] bytes, Class<T> type) {
+        return this.binaryMarshaller.unmarshal(bytes, type);
+    }
+    
     private String marshalToString(Object object) {
-        return this.marshaller.marshal(object);
+        return this.textMarshaller.marshal(object);
+    }
+    
+    private String marshalToString(Optional<?> object) {
+        if (object.isPresent()) {
+            return this.textMarshaller.marshal(object.get());
+        } else {
+            return null;
+        }
     }
     
     private <T> T unmarshalFromString(String str, Class<? extends T> type) {
-        return this.marshaller.unmarshal(str, type);
+        return this.textMarshaller.unmarshal(str, type);
     }
 }

@@ -18,6 +18,7 @@
 package com.github.i49.quantumleap.api.workflow;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -70,9 +71,10 @@ public interface WorkflowRepository extends AutoCloseable {
      * Returns the job specified by the ID.
      * 
      * @param id the identifier of the job.
-     * @return retrieved job, may be empty.
+     * @return retrieved job, never be {@code null}.
+     * @throws NoSuchElementException if no job has the specified ID.  
      */
-    Optional<Job> findJobById(long id);
+    Job findJobById(long id);
 
     List<Job> findJobsByStatus(JobStatus status);
 

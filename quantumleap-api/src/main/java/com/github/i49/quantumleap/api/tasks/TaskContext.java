@@ -19,6 +19,7 @@ package com.github.i49.quantumleap.api.tasks;
 
 import java.io.PrintStream;
 import java.nio.file.Path;
+import java.util.Map;
 
 import com.github.i49.quantumleap.api.workflow.Platform;
 
@@ -28,11 +29,25 @@ import com.github.i49.quantumleap.api.workflow.Platform;
 public interface TaskContext {
     
     /**
-     * Returns the directory for the current job which owns the tasks.
+     * Returns the directory for the current job.
      * 
      * @return the directory for the current job, never be {@code null}. 
      */
     Path getJobDirectory();
+    
+    /**
+     * Returns the input for the current job.
+     * 
+     * @return the input for the current job, never be {@code null}.
+     */
+    Map<String, Object> getJobInput();
+
+    /**
+     * Returns the output of the current job.
+     * 
+     * @return the output of the current job, never be {@code null} and can be modified.
+     */
+    Map<String, Object> getJobOutput();
 
     /**
      * Returns the current platform.
@@ -46,5 +61,5 @@ public interface TaskContext {
      * 
      * @return the standard output stream, never be {@code null}.
      */
-    PrintStream getStandardOutput();
+    PrintStream getStandardStream();
 }

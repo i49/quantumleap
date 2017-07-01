@@ -43,12 +43,12 @@ enum SqlCommand {
     FIND_DEPENDANT_JOBS("SELECT job_id FROM job_dependency WHERE dependency_id = ?"),
     FIND_TASK("SELECT * FROM task WHERE job_id = ? ORDER BY sequence_number"),
 
-    INSERT_JOB("INSERT INTO job (job_name, job_status, parameters, workflow_id) VALUES(?, ?, ?, ?)"),
+    INSERT_JOB("INSERT INTO job (job_name, job_status, job_input, workflow_id) VALUES(?, ?, ?, ?)"),
     INSERT_JOB_DEPENDENCY("INSERT INTO job_dependency (job_id, dependency_id) VALUES(?, ?)"),
     INSERT_TASK("INSERT INTO task (job_id, sequence_number, class_name, parameters) VALUES(?, ?, ?, ?)"),
     INSERT_WORKFLOW("INSERT INTO workflow (workflow_name) VALUES(?)"),
     
-    UPDATE_JOB("UPDATE job SET job_status = ?, standard_output = ? WHERE job_id = ?"),
+    UPDATE_JOB("UPDATE job SET job_status = ?, job_output = ?, standard_output = ? WHERE job_id = ?"),
     UPDATE_JOB_STATUS("UPDATE job SET job_status = ? WHERE job_id = ?"),
     UPDATE_JOB_STATUS_IF_READY(
             "UPDATE job j SET job_status = 'READY' "

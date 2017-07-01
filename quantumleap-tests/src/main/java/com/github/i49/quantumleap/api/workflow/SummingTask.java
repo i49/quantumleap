@@ -15,36 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.tasks;
+package com.github.i49.quantumleap.api.workflow;
 
-import java.io.PrintStream;
+import java.util.List;
 
-import javax.json.bind.annotation.JsonbCreator;
-import javax.json.bind.annotation.JsonbProperty;
-
-import com.github.i49.quantumleap.api.tasks.EchoTask;
+import com.github.i49.quantumleap.api.tasks.Task;
 import com.github.i49.quantumleap.api.tasks.TaskContext;
 
-/**
- * An implementation of {@link EchoTask}.
- */
-public class EchoTaskImpl implements EchoTask {
-
-    private final String message;
-
-    @JsonbCreator
-    public EchoTaskImpl(@JsonbProperty("message") String message) {
-        this.message = message;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
-    }
+public class SummingTask implements Task {
 
     @Override
     public void run(TaskContext context) {
-        PrintStream stream = context.getStandardStream();
-        stream.println(getMessage());
+        @SuppressWarnings("unchecked")
+        List<Integer> numbers = (List<Integer>)context.getJobInput().get("numbers");
+        context.getJobOutput().put("sum", sum(numbers));
+    }
+    
+    private static int sum(List<Integer> numbers) {
+        Integer sum = numbers.stream().reduce(0, (x, y)->x + y);
+        return sum;
     }
 }

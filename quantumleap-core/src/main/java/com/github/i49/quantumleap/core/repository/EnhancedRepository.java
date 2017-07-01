@@ -18,6 +18,7 @@
 package com.github.i49.quantumleap.core.repository;
 
 import java.util.List;
+import java.util.Map;
 
 import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
@@ -35,9 +36,10 @@ public interface EnhancedRepository extends WorkflowRepository {
      * 
      * @param job the job to store.
      * @param status the status of the job after the execution.
+     * @param jobOutput the output of the job.
      * @param standardOutput the standard output produced by the execution.
      */
-    void storeJob(Job job, JobStatus status, String[] standardOutput);
+    void storeJob(Job job, JobStatus status, Map<String, Object> jobOutput, String[] standardOutput);
 
     int updateJobStatusIfReady(long jobId);
 }

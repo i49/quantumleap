@@ -18,11 +18,13 @@
 package com.github.i49.quantumleap.core.repository;
 
 /**
- * Interface for marshalling to or unmarshalling from JSON.
+ * Interface for marshalling and unmarshalling objects.
+ * 
+ * @param <R> the type of object after marshalled.
  */
-public interface JsonMarshaller {
+interface Marshaller<R> {
+
+    R marshal(Object object);
     
-    String marshal(Object object);
-    
-    <T> T unmarshal(String str, Class<T> type);
+    <T> T unmarshal(R marshalled, Class<T> type);
 }

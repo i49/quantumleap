@@ -63,10 +63,10 @@ public class BaseTaskTest {
     }
 
     protected Job runTask(Task task) {
-        Job job1 = engine.buildJob("job1").tasks(task).get();
-        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1).get();
+        Job job = engine.buildJob("job1").tasks(task).get();
+        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job).get();
         repository.addWorkflow(workflow);
         runner.runSingle();
-        return job1;
+        return repository.findJobById(job.getId());
     }
 }

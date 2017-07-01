@@ -19,7 +19,6 @@ package com.github.i49.quantumleap.api.workflow;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -106,7 +105,7 @@ public class JobTest {
         assertThat(job.getName()).isEqualTo("job1");
         
         registerJob(job);
-        job = repository.findJobById(job.getId()).get();
+        job = repository.findJobById(job.getId());
         assertThat(job.getName()).isEqualTo("job1");
     }
     
@@ -115,11 +114,11 @@ public class JobTest {
     @Test
     public void getParameters_shouldReturnEmptyMapByDefault() {
         Job job = engine.buildJob("job1").get();
-        assertThat(job.getParameters()).isEmpty();
+        assertThat(job.getJobInput()).isEmpty();
 
         registerJob(job);
-        job = repository.findJobById(job.getId()).get();
-        assertThat(job.getParameters()).isEmpty();
+        job = repository.findJobById(job.getId());
+        assertThat(job.getJobInput()).isEmpty();
     }
     
     private Map<String, Object> createJobParameters() {
@@ -139,25 +138,21 @@ public class JobTest {
     
     @Test
     public void getParameters_shouldReturnStoredParameters() {
-        Job job = engine.buildJob("job1").parameters(createJobParameters()).get();
-        assertOnJobParameters(job, false);
+        Job job = engine.buildJob("job1").input(createJobParameters()).get();
+        assertOnJobParameters(job);
 
         registerJob(job);
-        job = repository.findJobById(job.getId()).get();
-        assertOnJobParameters(job, true);
+        job = repository.findJobById(job.getId());
+        assertOnJobParameters(job);
     }
     
-    private void assertOnJobParameters(Job job, boolean restored) {
-        Map<String, Object> p = job.getParameters();
+    private void assertOnJobParameters(Job job) {
+        Map<String, Object> p = job.getJobInput();
         assertThat(p).isNotNull().isNotEmpty();
         assertThat(p.get("firstName")).isInstanceOf(String.class).isEqualTo("John");
         assertThat(p.get("lastName")).isInstanceOf(String.class).isEqualTo("Smith");
         assertThat(p.get("isAlive")).isInstanceOf(Boolean.class).isEqualTo(Boolean.TRUE);
-        if (restored) {
-            assertThat(p.get("age")).isInstanceOf(BigDecimal.class).isEqualTo(BigDecimal.valueOf(25));
-        } else {
-            assertThat(p.get("age")).isInstanceOf(Integer.class).isEqualTo(Integer.valueOf(25));
-        }
+        assertThat(p.get("age")).isInstanceOf(Integer.class).isEqualTo(Integer.valueOf(25));
         assertThat(p.get("spouse")).isNull();
         
         assertThat(p.get("hobbies")).isInstanceOf(List.class);
@@ -184,7 +179,7 @@ public class JobTest {
     public void getStatus_shouldReturnReadyBeforeRun() {
         Job job = engine.buildJob("job1").get();
         registerJob(job);
-        job = repository.findJobById(job.getId()).get();
+        job = repository.findJobById(job.getId());
         assertThat(job.getStatus()).isSameAs(JobStatus.READY);
     }
 }

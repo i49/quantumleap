@@ -36,23 +36,23 @@ public interface JobBuilder {
     JobBuilder dependOn(Job... jobs);
     
     /**
-     * Adds a parameter of this job.
+     * Specifies one of input parameters for this job.
      * 
      * @param name the name of the parameter, cannot be {@code null}.
-     * @param value the value of the parameter cannot be {@code null}.
+     * @param value the value of the parameter.
      * @return this builder.
-     * @throws NullPointerException if one or more parameters are {@code null}.
+     * @throws NullPointerException if given {@code name} is {@code null}.
      */
-    JobBuilder parameter(String name, Object value);
-
+    JobBuilder input(String name, Object value);
+    
     /**
-     * Adds parameters of this job.
+     * Specifies the input parameters for this job.
      * 
-     * @param parameters the map containing names and values of the job parameters.
+     * @param parameters the input parameters for this job.
      * @return this builder.
      * @throws NullPointerException if given {@code parameters} is {@code null}.
      */
-    JobBuilder parameters(Map<String, Object> parameters);
+    JobBuilder input(Map<String, Object> parameters);
     
     /**
      * Specifies the tasks executed in the job.

@@ -30,11 +30,11 @@ import javax.json.bind.adapter.JsonbAdapter;
 /**
  * {@link JsonMarshaller} implemented with Java API for JSON Binding (JSR-367).
  */
-public class JsonbMarshaller implements JsonMarshaller {
+public class JsonBindingMarshaller implements Marshaller<String> {
     
     private final Jsonb jsonb;
     
-    public JsonbMarshaller() {
+    public JsonBindingMarshaller() {
         JsonbConfig config = new JsonbConfig()
                 .withAdapters(new PathAdapter());
         this.jsonb = JsonbBuilder.create(config);
@@ -42,11 +42,17 @@ public class JsonbMarshaller implements JsonMarshaller {
 
     @Override
     public String marshal(Object object) {
+        if (object == null) {
+            return null;
+        }
         return jsonb.toJson(object);
     }
 
     @Override
     public <T> T unmarshal(String str, Class<T> type) {
+        if (str == null) {
+            return null;
+        }
         return jsonb.fromJson(str, type);
     }
 
