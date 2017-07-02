@@ -24,11 +24,13 @@ import javax.sql.DataSource;
 
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
 import com.github.i49.quantumleap.api.workflow.JobBuilder;
+import com.github.i49.quantumleap.api.workflow.ParameterSetMapperFactory;
 import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 import com.github.i49.quantumleap.api.workflow.WorkflowBuilder;
 import com.github.i49.quantumleap.api.workflow.WorkflowEngine;
 import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
+import com.github.i49.quantumleap.core.mappers.DefaultParameterSetMapperFactory;
 import com.github.i49.quantumleap.core.repository.EnhancedRepository;
 import com.github.i49.quantumleap.core.repository.JdbcWorkflowRepository;
 import com.github.i49.quantumleap.core.repository.SimpleDataSource;
@@ -46,10 +48,12 @@ public class SharedWorkflowEngine implements WorkflowEngine {
 
     private final WorkflowFactory workflowFactory;
     private final TaskFactory taskFactory;
+    private final ParameterSetMapperFactory parameterSetMapperFactory;
 
     public SharedWorkflowEngine() {
         this.workflowFactory = WorkflowFactory.newInstance();
         this.taskFactory = new DefaultTaskFactory();
+        this.parameterSetMapperFactory = new DefaultParameterSetMapperFactory();
     }
 
     @Override
@@ -85,6 +89,11 @@ public class SharedWorkflowEngine implements WorkflowEngine {
         checkNotNull(configuration, "configuration");
         EnhancedRepository enhanced = checkRealType(repository, EnhancedRepository.class, "repository"); 
         return new SerialWorkflowRunner(enhanced, configuration);
+    }
+    
+    @Override
+    public ParameterSetMapperFactory getParameterSetMapperFactory() {
+        return parameterSetMapperFactory;
     }
 
     @Override

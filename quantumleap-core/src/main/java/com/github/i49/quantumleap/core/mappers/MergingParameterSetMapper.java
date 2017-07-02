@@ -15,34 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.common;
+package com.github.i49.quantumleap.core.mappers;
 
-import com.github.i49.quantumleap.api.base.Platform;
+import com.github.i49.quantumleap.api.base.ParameterSet;
+import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
 
 /**
- * A helper class to detect current platform.
  */
-public class Platforms {
-
-    private static final Platform current;
+public class MergingParameterSetMapper implements ParameterSetMapper {
     
-    static {
-        current = detect();
-    }
+    public static final MergingParameterSetMapper INSTANCE = new MergingParameterSetMapper();
     
-    public static Platform getCurrent() {
-        return current;
+    private MergingParameterSetMapper() {
     }
 
-    private static Platform detect() {
-        String name = System.getProperty("os.name");
-        name = name.toLowerCase();
-        if (name.contains("windows")) {
-            return Platform.WINDOWS;
-        } else if (name.contains("linux") || name.contains("unix")) {
-            return Platform.UNIX;
-        }
-        // TODO: test other platforms.
-        return Platform.OTHER;
+    @Override
+    public void mapParameterSet(ParameterSet source, ParameterSet target) {
     }
 }

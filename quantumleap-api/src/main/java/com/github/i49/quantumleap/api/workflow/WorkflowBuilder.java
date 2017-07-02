@@ -42,6 +42,8 @@ public interface WorkflowBuilder {
      * @throws IllegalArgumentException if one of given jobs is not instantiated by this engine.
      */
     WorkflowBuilder link(Job source, Job target);
+    
+    WorkflowBuilder link(Job source, Job target, ParameterSetMapper mapper);
 
     /**
      * Returns the {@link Workflow} built by this builder.

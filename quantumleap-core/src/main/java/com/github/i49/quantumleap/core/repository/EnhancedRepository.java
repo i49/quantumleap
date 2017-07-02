@@ -23,13 +23,22 @@ import java.util.Map;
 import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
 import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
+import com.github.i49.quantumleap.core.workflow.JobLink;
 
 /**
  * The enhanced {@link WorkflowRepository} interface.
  */
 public interface EnhancedRepository extends WorkflowRepository {
 
-    List<Long> findDependants(Job job);
+    List<JobLink> findLinksByTarget(long targetId);
+
+    /**
+     * Finds next jobs.
+     * 
+     * @param job the source job.
+     * @return the list of next jobs, never be {@code null}.
+     */
+    List<Long> findNextJobs(Job job);
     
     /**
      * Stores the specified job with product of the execution.

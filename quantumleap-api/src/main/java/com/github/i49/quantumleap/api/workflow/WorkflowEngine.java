@@ -87,6 +87,8 @@ public interface WorkflowEngine {
      */
     WorkflowRunner createRunner(WorkflowRepository repository, RunnerConfiguration configuration);
 
+    ParameterSetMapperFactory getParameterSetMapperFactory();
+    
     /**
      * Returns the instance of {@link TaskFactory}.
      * 

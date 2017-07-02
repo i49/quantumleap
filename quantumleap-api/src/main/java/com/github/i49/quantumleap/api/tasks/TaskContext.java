@@ -19,9 +19,9 @@ package com.github.i49.quantumleap.api.tasks;
 
 import java.io.PrintStream;
 import java.nio.file.Path;
-import java.util.Map;
 
-import com.github.i49.quantumleap.api.workflow.Platform;
+import com.github.i49.quantumleap.api.base.ParameterSet;
+import com.github.i49.quantumleap.api.base.Platform;
 
 /**
  * The context of a running task.
@@ -40,14 +40,14 @@ public interface TaskContext {
      * 
      * @return the input for the current job, never be {@code null}.
      */
-    Map<String, Object> getJobInput();
+    ParameterSet getInputParameters();
 
     /**
      * Returns the output of the current job.
      * 
      * @return the output of the current job, never be {@code null} and can be modified.
      */
-    Map<String, Object> getJobOutput();
+    ParameterSet getOutputParameters();
 
     /**
      * Returns the current platform.

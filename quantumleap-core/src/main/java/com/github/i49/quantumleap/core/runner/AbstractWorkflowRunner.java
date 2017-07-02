@@ -21,18 +21,19 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 
+import com.github.i49.quantumleap.api.base.ParameterSet;
+import com.github.i49.quantumleap.api.base.Platform;
 import com.github.i49.quantumleap.api.tasks.TaskContext;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
-import com.github.i49.quantumleap.api.workflow.Platform;
 import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 import com.github.i49.quantumleap.api.workflow.WorkflowException;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
 import com.github.i49.quantumleap.core.common.Platforms;
 import com.github.i49.quantumleap.core.repository.EnhancedRepository;
 import com.github.i49.quantumleap.core.workflow.ManagedJob;
+import com.github.i49.quantumleap.core.workflow.SimpleParameterSet;
 
 /**
  * A skeletal implementation of {@link WorkflowRunner}.
@@ -72,18 +73,18 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         return workDirectory;
     }
     
-    protected JobContext createJobContext(ManagedJob job) {
+    protected JobContext prepareJob(ManagedJob job) {
         Path jobDirectory = createDirectoryForJob(job);
         return new JobContextImpl(job, jobDirectory);
     }
     
     protected void completeJob(ManagedJob job, JobContext context) {
         JobStatus status = JobStatus.COMPLETED;
-        Map<String, Object> jobOutput = context.getJobOutput();
+        Map<String, Object> jobOutput = context.getOutputParameters();
         String[] lines = context.getStandardOutputLines();
         getRepository().storeJob(job, status, jobOutput, lines);
-        for (long dependant: getRepository().findDependants(job)) {
-            getRepository().updateJobStatusIfReady(dependant);
+        for (long nextId: getRepository().findNextJobs(job)) {
+            getRepository().updateJobStatusIfReady(nextId);
         }
     }
     
@@ -117,13 +118,13 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         
         private final ManagedJob job;
         private final Path jobDirectory;
-        private final Map<String, Object> jobOutput;
+        private final ParameterSet outputParameters;
         private final JobPrintStream standardStream;
         
         private JobContextImpl(ManagedJob job, Path jobDirectory) {
             this.job = job;
             this.jobDirectory = jobDirectory;
-            this.jobOutput = new HashMap<String, Object>();
+            this.outputParameters = new SimpleParameterSet();
             this.standardStream = new JobPrintStream();
         }
 
@@ -133,13 +134,13 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         }
 
         @Override
-        public Map<String, Object> getJobInput() {
-            return job.getJobInput();
+        public ParameterSet getInputParameters() {
+            return job.getInputParameters();
         }
         
         @Override
-        public Map<String, Object> getJobOutput() {
-            return jobOutput;
+        public ParameterSet getOutputParameters() {
+            return outputParameters;
         }
         
         @Override

@@ -17,6 +17,8 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
+import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
+
 /**
  */
 public interface JobLink {
@@ -24,4 +26,6 @@ public interface JobLink {
     ManagedJob getSource();
     
     ManagedJob getTarget();
+    
+    ParameterSetMapper getMapper();
 }

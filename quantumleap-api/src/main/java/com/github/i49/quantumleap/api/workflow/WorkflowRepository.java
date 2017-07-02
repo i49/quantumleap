@@ -80,5 +80,12 @@ public interface WorkflowRepository extends AutoCloseable {
 
     Optional<Job> findFirstJobByStatus(JobStatus status);
     
-    Optional<JobStatus> getJobStatus(long id);
+    /**
+     * Returns the status of the job specified by the ID.
+     * 
+     * @param id the identifier of the job.
+     * @return the status of the specified job, never be {@code null}.
+     * @throws NoSuchElementException if no job has the specified ID.  
+     */
+    JobStatus getJobStatus(long id);
 }

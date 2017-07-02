@@ -94,7 +94,7 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
     }
 
     private void executeJob(ManagedJob job) {
-        JobContext context = createJobContext(job);
+        JobContext context = prepareJob(job);
         for (Task task : job.getTasks()) {
             task.run(context);
         }

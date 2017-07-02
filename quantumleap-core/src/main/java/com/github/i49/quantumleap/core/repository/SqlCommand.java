@@ -17,58 +17,52 @@
  */
 package com.github.i49.quantumleap.core.repository;
 
+import static com.github.i49.quantumleap.core.common.Message.RESOURCE_IS_MISSING;
+import static com.github.i49.quantumleap.core.common.Message.STATEMENT_IS_UNDEFINED;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.MissingResourceException;
+import java.util.Properties;
 
 /**
  * All SQL commands used by {@link JdbcWorkflowRepository}.
  */
 enum SqlCommand {
 
-    COUNT_JOBS("SELECT COUNT(1) FROM job"),
-    COUNT_JOBS_BY_STATUS("SELECT COUNT(1) FROM job WHERE job_status = ?"),
-    COUNT_WORKFLOWS("SELECT COUNT(1) FROM workflow"),
+    COUNT_JOBS,
+    COUNT_JOBS_BY_STATUS,
+    COUNT_WORKFLOWS,
     
-    DELETE_WORKFLOWS("DELETE FROM workflow"),
-    DELETE_JOBS("DELETE FROM job"),
-    DELETE_JOB_DEPENDENCY("DELETE FROM job_link"),
-    DELETE_TASKS("DELETE FROM task"),
+    DELETE_JOB_LINKS,
+    DELETE_JOBS,
+    DELETE_TASKS,
+    DELETE_WORKFLOWS,
     
-    FIND_JOBS_BY_STATUS("SELECT * FROM job WHERE job_status = ? ORDER BY job_id"),
-    FIND_FIRST_JOB_BY_STATUS("SELECT * FROM job WHERE job_status = ? ORDER BY job_id LIMIT 1"),
-    FIND_JOB_STATUS_BY_ID("SELECT job_status FROM job WHERE job_id = ?"),
-    FIND_JOB_BY_ID("SELECT * FROM job WHERE job_id = ?"),
-    FIND_DEPENDANT_JOBS("SELECT target_job_id FROM job_link WHERE source_job_id = ?"),
-    FIND_TASK("SELECT * FROM task WHERE job_id = ? ORDER BY sequence_number"),
+    FIND_FIRST_JOB_BY_STATUS,
+    FIND_JOB_BY_ID,
+    FIND_JOB_STATUS_BY_ID,
+    FIND_JOBS_BY_STATUS,
+    FIND_LINKS_BY_TARGET,
+    FIND_NEXT_JOBS,
+    FIND_TASK,
 
-    INSERT_JOB("INSERT INTO job (job_name, job_status, job_input, workflow_id) VALUES(?, ?, ?, ?)"),
-    INSERT_JOB_LINK("INSERT INTO job_link (source_job_id, target_job_id) VALUES(?, ?)"),
-    INSERT_TASK("INSERT INTO task (job_id, sequence_number, class_name, parameters) VALUES(?, ?, ?, ?)"),
-    INSERT_WORKFLOW("INSERT INTO workflow (workflow_name) VALUES(?)"),
+    INSERT_JOB,
+    INSERT_JOB_LINK,
+    INSERT_TASK,
+    INSERT_WORKFLOW,
     
-    UPDATE_JOB("UPDATE job SET job_status = ?, job_output = ?, standard_output = ? WHERE job_id = ?"),
-    UPDATE_JOB_STATUS("UPDATE job SET job_status = ? WHERE job_id = ?"),
-    UPDATE_JOB_STATUS_IF_READY(
-            "UPDATE job j SET job_status = 'READY' "
-            + "WHERE job_id = ? AND NOT EXISTS ("
-            + "SELECT 1 FROM job_link l "
-            + "INNER JOIN job s ON s.job_id = l.source_job_id AND s.job_status <> 'COMPLETED' "
-            + "WHERE l.target_job_id = j.job_id) "
-    ),
+    UPDATE_JOB,
+    UPDATE_JOB_STATUS,
+    UPDATE_JOB_STATUS_IF_READY
     ;
 
-    private final String sql;
-
-    /**
-     * Constructs this command.
-     * 
-     * @param sql the SQL statement assigned to this command.
-     */
-    private SqlCommand(String sql) {
-        this.sql = sql;
-    }
+    private static final String RESOURCE_NAME = "sql.properties";
+    private static final Properties props = loadStatements();
 
     /**
      * Creates a prepared statement for this command.
@@ -79,9 +73,28 @@ enum SqlCommand {
      */
     public PreparedStatement prepare(Connection connection) throws SQLException {
         if (this == INSERT_WORKFLOW || this == INSERT_JOB) {
-            return connection.prepareStatement(this.sql, Statement.RETURN_GENERATED_KEYS);
+            return connection.prepareStatement(getSql(), Statement.RETURN_GENERATED_KEYS);
         } else {
-            return connection.prepareStatement(this.sql);
+            return connection.prepareStatement(getSql());
+        }
+    }
+    
+    public String getSql() {
+        String sql = props.getProperty(name());
+        if (sql == null) {
+            throw new MissingResourceException(STATEMENT_IS_UNDEFINED.with(name()), getClass().getName(), name());
+        }
+        return sql;
+    }
+    
+    private static Properties loadStatements() {
+        Class<SqlCommand> theClass = SqlCommand.class;
+        try (InputStream inStream = theClass.getResourceAsStream(RESOURCE_NAME)) {
+            Properties props = new Properties();
+            props.load(inStream);
+            return props;
+        } catch (IOException e) {
+            throw new MissingResourceException(RESOURCE_IS_MISSING.with(RESOURCE_NAME), theClass.getName(), null);
         }
     }
 }

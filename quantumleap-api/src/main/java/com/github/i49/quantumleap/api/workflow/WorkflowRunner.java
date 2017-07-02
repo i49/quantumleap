@@ -17,6 +17,8 @@
  */
 package com.github.i49.quantumleap.api.workflow;
 
+import com.github.i49.quantumleap.api.base.Platform;
+
 /**
  * The interface for running workflows and jobs in the repository.
  */

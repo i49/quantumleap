@@ -15,34 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.common;
+package com.github.i49.quantumleap.core.mappers;
 
-import com.github.i49.quantumleap.api.base.Platform;
+import java.util.Map;
+
+import com.github.i49.quantumleap.api.base.ParameterSet;
+import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
 
 /**
- * A helper class to detect current platform.
  */
-public class Platforms {
-
-    private static final Platform current;
+public class KeyMapParameterSetMapper implements ParameterSetMapper {
     
-    static {
-        current = detect();
-    }
+    private final Map<String, String> keyMap;
     
-    public static Platform getCurrent() {
-        return current;
+    public KeyMapParameterSetMapper(Map<String, String> keyMap) {
+        this.keyMap = keyMap;
     }
 
-    private static Platform detect() {
-        String name = System.getProperty("os.name");
-        name = name.toLowerCase();
-        if (name.contains("windows")) {
-            return Platform.WINDOWS;
-        } else if (name.contains("linux") || name.contains("unix")) {
-            return Platform.UNIX;
+    @Override
+    public void mapParameterSet(ParameterSet source, ParameterSet target) {
+        for (String sourceKey: keyMap.keySet()) {
+            String targetKey = keyMap.get(sourceKey);
+            Object value = source.get(sourceKey);
+            target.put(targetKey, value);
         }
-        // TODO: test other platforms.
-        return Platform.OTHER;
     }
 }

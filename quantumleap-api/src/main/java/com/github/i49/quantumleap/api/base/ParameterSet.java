@@ -15,17 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.api.workflow;
+package com.github.i49.quantumleap.api.base;
+
+import java.util.Map;
 
 /**
- * Platforms on which workflows are executed.
+ * A set of parameters that will be read or written by a task.
  */
-public enum Platform {
-    /** Unix platform */
-    UNIX,
-    /** Windows family */
-    WINDOWS,
-    SOLARIS,
-    MAC,
-    OTHER
+public interface ParameterSet extends Map<String, Object> {
 }

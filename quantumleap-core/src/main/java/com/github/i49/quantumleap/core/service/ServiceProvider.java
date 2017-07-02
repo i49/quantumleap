@@ -19,6 +19,7 @@ package com.github.i49.quantumleap.core.service;
 
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
 import com.github.i49.quantumleap.api.workflow.JobBuilder;
+import com.github.i49.quantumleap.api.workflow.ParameterSetMapperFactory;
 import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
 import com.github.i49.quantumleap.api.workflow.WorkflowBuilder;
 import com.github.i49.quantumleap.api.workflow.WorkflowEngine;
@@ -66,6 +67,11 @@ public class ServiceProvider implements WorkflowEngine {
         return singleton.createRunner(repository, configuration);
     }
 
+    @Override
+    public ParameterSetMapperFactory getParameterSetMapperFactory() {
+        return singleton.getParameterSetMapperFactory();
+    }
+ 
     @Override
     public TaskFactory getTaskFactory() {
         return singleton.getTaskFactory();

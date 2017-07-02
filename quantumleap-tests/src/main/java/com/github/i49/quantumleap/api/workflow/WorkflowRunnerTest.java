@@ -97,16 +97,16 @@ public class WorkflowRunnerTest {
         
         repository.addWorkflow(workflow1);
         
-        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.READY);
-        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.WAITING);
+        assertThat(repository.getJobStatus(job1.getId())).isSameAs(JobStatus.READY);
+        assertThat(repository.getJobStatus(job2.getId())).isSameAs(JobStatus.WAITING);
 
         runner.runSingle();
-        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.COMPLETED);
-        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.READY);
+        assertThat(repository.getJobStatus(job1.getId())).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job2.getId())).isSameAs(JobStatus.READY);
        
         runner.runSingle();
-        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.COMPLETED);
-        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job1.getId())).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job2.getId())).isSameAs(JobStatus.COMPLETED);
     }
 
     @Test
@@ -133,33 +133,33 @@ public class WorkflowRunnerTest {
         
         repository.addWorkflow(workflow1);
         
-        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.READY);
-        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.WAITING);
-        assertThat(repository.getJobStatus(job3.getId())).hasValue(JobStatus.WAITING);
-        assertThat(repository.getJobStatus(job4.getId())).hasValue(JobStatus.WAITING);
+        assertThat(repository.getJobStatus(job1.getId())).isSameAs(JobStatus.READY);
+        assertThat(repository.getJobStatus(job2.getId())).isSameAs(JobStatus.WAITING);
+        assertThat(repository.getJobStatus(job3.getId())).isSameAs(JobStatus.WAITING);
+        assertThat(repository.getJobStatus(job4.getId())).isSameAs(JobStatus.WAITING);
 
         runner.runSingle();
-        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.COMPLETED);
-        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.READY);
-        assertThat(repository.getJobStatus(job3.getId())).hasValue(JobStatus.READY);
-        assertThat(repository.getJobStatus(job4.getId())).hasValue(JobStatus.WAITING);
+        assertThat(repository.getJobStatus(job1.getId())).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job2.getId())).isSameAs(JobStatus.READY);
+        assertThat(repository.getJobStatus(job3.getId())).isSameAs(JobStatus.READY);
+        assertThat(repository.getJobStatus(job4.getId())).isSameAs(JobStatus.WAITING);
        
         runner.runSingle();
         runner.runSingle();
-        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.COMPLETED);
-        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.COMPLETED);
-        assertThat(repository.getJobStatus(job3.getId())).hasValue(JobStatus.COMPLETED);
-        assertThat(repository.getJobStatus(job4.getId())).hasValue(JobStatus.READY);
+        assertThat(repository.getJobStatus(job1.getId())).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job2.getId())).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job3.getId())).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job4.getId())).isSameAs(JobStatus.READY);
 
         runner.runSingle();
-        assertThat(repository.getJobStatus(job1.getId())).hasValue(JobStatus.COMPLETED);
-        assertThat(repository.getJobStatus(job2.getId())).hasValue(JobStatus.COMPLETED);
-        assertThat(repository.getJobStatus(job3.getId())).hasValue(JobStatus.COMPLETED);
-        assertThat(repository.getJobStatus(job4.getId())).hasValue(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job1.getId())).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job2.getId())).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job3.getId())).isSameAs(JobStatus.COMPLETED);
+        assertThat(repository.getJobStatus(job4.getId())).isSameAs(JobStatus.COMPLETED);
     }
     
     @Test
-    public void runSingle_shouldUpdateJobOutput() {
+    public void runSingle_shouldRunSummingJob() {
         Job job1 = engine.buildJob("job1")
                 .tasks(new SummingTask())
                 .input("numbers", Arrays.asList(1, 2, 3))
@@ -169,9 +169,28 @@ public class WorkflowRunnerTest {
         runner.runSingle();
         
         job1 = repository.findJobById(job1.getId());
-        Map<String, Object> jobParameters = job1.getJobInput();
-        assertThat(jobParameters).containsKey("numbers");
-        Map<String, Object> jobOutput = job1.getJobOutput();
+        Map<String, Object> jobInput = job1.getInputParameters();
+        assertThat(jobInput).containsKey("numbers");
+        Map<String, Object> jobOutput = job1.getOutputParameters();
         assertThat(jobOutput.get("sum")).isEqualTo(6);
+    }
+
+    @Test
+    public void runSingle_shouldRunScalingJob() {
+        Job job1 = engine.buildJob("job1")
+                .tasks(new ScalingTask())
+                .input("multiplicand", 2)
+                .input("multiplier", 4)
+                .get();
+        Workflow workflow1 = engine.buildWorkflow("workflow1").jobs(job1).get();
+        repository.addWorkflow(workflow1);
+        runner.runSingle();
+        
+        job1 = repository.findJobById(job1.getId());
+        Map<String, Object> jobInput = job1.getInputParameters();
+        assertThat(jobInput).containsKey("multiplicand");
+        assertThat(jobInput).containsKey("multiplier");
+        Map<String, Object> jobOutput = job1.getOutputParameters();
+        assertThat(jobOutput.get("answer")).isEqualTo(8);
     }
 }

@@ -15,24 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.api.workflow;
 
-import java.util.List;
-
-import com.github.i49.quantumleap.api.tasks.Task;
-import com.github.i49.quantumleap.api.tasks.TaskContext;
-
-public class SummingTask implements Task {
-
-    @Override
-    public void run(TaskContext context) {
-        @SuppressWarnings("unchecked")
-        List<Integer> numbers = (List<Integer>)context.getInputParameters().get("numbers");
-        context.getOutputParameters().put("sum", sum(numbers));
-    }
-    
-    private static int sum(List<Integer> numbers) {
-        Integer sum = numbers.stream().reduce(0, (x, y)->x + y);
-        return sum;
-    }
-}
+/**
+ * Provides basic types used by other packages.
+ */
+package com.github.i49.quantumleap.api.base;

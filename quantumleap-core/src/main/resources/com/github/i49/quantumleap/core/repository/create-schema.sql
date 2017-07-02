@@ -38,6 +38,8 @@ CREATE TABLE job (
 CREATE TABLE job_link (
     source_job_id BIGINT,
     target_job_id BIGINT,
+    mapper_class LONGVARCHAR NOT NULL,
+    mapper_object BLOB,
     
     PRIMARY KEY (source_job_id, target_job_id),
     FOREIGN KEY (source_job_id) REFERENCES job (job_id),

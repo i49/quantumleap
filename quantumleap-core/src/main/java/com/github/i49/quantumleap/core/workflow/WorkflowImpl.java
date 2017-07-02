@@ -28,8 +28,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.github.i49.quantumleap.api.workflow.Job;
+import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
 import com.github.i49.quantumleap.api.workflow.Workflow;
 import com.github.i49.quantumleap.api.workflow.WorkflowBuilder;
+import com.github.i49.quantumleap.core.mappers.MergingParameterSetMapper;
 
 /**
  * The implementation of {@link Workflow} provided by this engine.
@@ -98,7 +100,9 @@ class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
         private final Set<ManagedJob> jobs = new LinkedHashSet<>();
         private final Set<JobLink> links = new HashSet<>();
         private final Map<ManagedJob, Set<ManagedJob>> dependencyMap = new HashMap<>();
-
+        
+        private static final ParameterSetMapper DEFAULT_MAPPER = MergingParameterSetMapper.INSTANCE;
+        
         public Builder(String name) {
             this.name = name;
         }
@@ -115,10 +119,18 @@ class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
         
         @Override
         public Builder link(Job source, Job target) {
+            link(source, target, DEFAULT_MAPPER);
+            return this;
+        }
+
+        @Override
+        public Builder link(Job source, Job target, ParameterSetMapper mapper) {
             checkNotNull(source, "source");
             checkNotNull(target, "target");
+            checkNotNull(mapper, "mapper");
             link(checkRealType(source, ManagedJob.class, "source"),
-                 checkRealType(target, ManagedJob.class, "target"));  
+                 checkRealType(target, ManagedJob.class, "target"),
+                 mapper);  
             return this;
         }
 
@@ -131,10 +143,10 @@ class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
             this.jobs.add(job);
         }
         
-        private void link(ManagedJob source, ManagedJob target) {
+        private void link(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
             addJob(source);
             addJob(target);
-            this.links.add(new JobLinkImpl(source, target));
+            this.links.add(new JobLinkImpl(source, target, mapper));
             
             Set<ManagedJob> dependencies = this.dependencyMap.get(target);
             if (dependencies == null) {
@@ -149,10 +161,12 @@ class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
 
         private final ManagedJob source;
         private final ManagedJob target;
+        private final ParameterSetMapper mapper;
         
-        private JobLinkImpl(ManagedJob source, ManagedJob target) {
+        private JobLinkImpl(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
             this.source = source;
             this.target = target;
+            this.mapper = mapper;
         }
         
         @Override
@@ -163,6 +177,11 @@ class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
         @Override
         public ManagedJob getTarget() {
             return target;
+        }
+        
+        @Override
+        public ParameterSetMapper getMapper() {
+            return mapper;
         }
 
         @Override

@@ -18,9 +18,9 @@
 package com.github.i49.quantumleap.api.workflow;
 
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
+import com.github.i49.quantumleap.api.base.ParameterSet;
 import com.github.i49.quantumleap.api.tasks.Task;
 
 /**
@@ -49,14 +49,14 @@ public interface Job {
      * 
      * @return the unmodifiable map containing the input parameters of this job, never be {@code null}.
      */
-    Map<String, Object> getJobInput();
+    ParameterSet getInputParameters();
 
     /**
      * Returns the output of this job.
      * 
      * @return the unmodifiable map containing the output of this job, never be {@code null}.
      */
-    Map<String, Object> getJobOutput();
+    ParameterSet getOutputParameters();
     
     /**
      * Returns the contents which this job wrote into the standard output.

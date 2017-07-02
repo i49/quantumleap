@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.i49.quantumleap.api.workflow.Platform;
+import com.github.i49.quantumleap.api.base.Platform;
 import com.github.i49.quantumleap.api.workflow.WorkflowException;
 
 /**

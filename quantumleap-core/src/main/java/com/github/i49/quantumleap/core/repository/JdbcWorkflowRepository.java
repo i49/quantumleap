@@ -92,7 +92,7 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     public void clear() {
         try {
             getStatement(SqlCommand.DELETE_TASKS).execute();
-            getStatement(SqlCommand.DELETE_JOB_DEPENDENCY).execute();
+            getStatement(SqlCommand.DELETE_JOB_LINKS).execute();
             getStatement(SqlCommand.DELETE_JOBS).execute();
             getStatement(SqlCommand.DELETE_WORKFLOWS).execute();
         } catch (SQLException e) {
@@ -190,16 +190,16 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     }
     
     @Override
-    public Optional<JobStatus> getJobStatus(long jobId) {
+    public JobStatus getJobStatus(long jobId) {
         PreparedStatement s = getStatement(SqlCommand.FIND_JOB_STATUS_BY_ID);
         try {
             s.setLong(1, jobId);
             try (ResultSet rs = s.executeQuery()) {
                 if (rs.next()) {
-                    JobStatus status = JobStatus.valueOf(rs.getString(1));
-                    return Optional.of(status);
+                    return JobStatus.valueOf(rs.getString(1));
                 } else {
-                    return Optional.empty();
+                    // TODO:
+                    throw new NoSuchElementException();
                 }
             }
         } catch (SQLException e) {
@@ -209,10 +209,28 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     }
     
     /* EnhancedWorkflowRepository interface */
-   
+  
     @Override
-    public List<Long> findDependants(Job job) {
-        PreparedStatement s = getStatement(SqlCommand.FIND_DEPENDANT_JOBS);
+    public List<JobLink> findLinksByTarget(long targetId) {
+        List<JobLink> links = new ArrayList<>();
+        PreparedStatement s = getStatement(SqlCommand.FIND_LINKS_BY_TARGET);
+        try {
+            s.setLong(1, targetId);
+            try (ResultSet resultSet = s.executeQuery()) {
+                while (resultSet.next()) {
+                    links.add(mapToLink(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            // TODO: add message
+            throw new WorkflowException("", e);
+        }
+        return null;
+    }
+    
+    @Override
+    public List<Long> findNextJobs(Job job) {
+        PreparedStatement s = getStatement(SqlCommand.FIND_NEXT_JOBS);
         try {
             s.setLong(1, job.getId());
             List<Long> dependants = new ArrayList<>();
@@ -303,7 +321,7 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
             PreparedStatement s = getStatement(SqlCommand.INSERT_JOB);
             s.setString(1, job.getName());
             s.setString(2, status.name());
-            s.setBytes(3, marshal(job.getJobInput()));
+            s.setBytes(3, marshal(job.getInputParameters()));
             s.setLong(4, workflowId);
             s.executeUpdate();
             long jobId = getGeneratedKey(s);
@@ -320,6 +338,8 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         try {
             s.setLong(1, link.getSource().getId());
             s.setLong(2, link.getTarget().getId());
+            s.setString(3,  link.getMapper().getClass().getName());
+            s.setBytes(4, marshal(link.getMapper()));
             s.executeUpdate();
         } catch (SQLException e) {
             // TODO: add message
@@ -452,6 +472,11 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
             // TODO Auto-generated catch block
             throw new WorkflowException("", e);
         }
+    }
+    
+    private JobLink mapToLink(ResultSet rs) {
+        // TODO:
+        return null;
     }
     
     private byte[] marshal(Optional<?> object) {

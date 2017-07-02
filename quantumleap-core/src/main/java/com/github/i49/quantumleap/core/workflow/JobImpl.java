@@ -22,11 +22,11 @@ import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
 
+import com.github.i49.quantumleap.api.base.ParameterSet;
 import com.github.i49.quantumleap.api.tasks.Task;
 import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.JobBuilder;
@@ -38,8 +38,8 @@ import com.github.i49.quantumleap.api.workflow.JobStatus;
 class JobImpl extends WorkflowComponent implements ManagedJob {
 
     private final String name;
-    private final Map<String, Object> jobInput;
-    private final Map<String, Object> jobOutput;
+    private final ParameterSet inputParameters;
+    private final ParameterSet outputParameters;
     private final List<Task> tasks;
     private final JobStatus status;
     private final List<String> standardOutput;
@@ -47,8 +47,8 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
     private JobImpl(Builder builder) {
         super(builder.id);
         this.name = builder.name;
-        this.jobInput = builder.jobInput;
-        this.jobOutput = Collections.unmodifiableMap(builder.jobOutput);
+        this.inputParameters = builder.inputParameters;
+        this.outputParameters = builder.outputParameters;
         this.tasks = Collections.unmodifiableList(builder.tasks);
         this.status = builder.status;
         this.standardOutput = builder.standardOutput;
@@ -60,13 +60,13 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
     }
    
     @Override
-    public Map<String, Object> getJobInput() {
-        return jobInput;
+    public ParameterSet getInputParameters() {
+        return inputParameters;
     }
     
     @Override
-    public Map<String, Object> getJobOutput() {
-        return jobOutput;
+    public ParameterSet getOutputParameters() {
+        return outputParameters;
     }
     
     @Override
@@ -97,8 +97,8 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         private OptionalLong id;
         private final String name;
         private final List<Task> tasks = new ArrayList<>();
-        private Map<String, Object> jobInput;
-        private Map<String, Object> jobOutput;
+        private final ParameterSet inputParameters;
+        private final ParameterSet outputParameters;
         private JobStatus status;
         private List<String> standardOutput;
 
@@ -106,20 +106,20 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
             this.id = OptionalLong.empty();
             this.name = name;
             this.status = JobStatus.INITIAL;
-            this.jobInput = new HashMap<>();
-            this.jobOutput = new HashMap<>();
+            this.inputParameters = new SimpleParameterSet();
+            this.outputParameters = new SimpleParameterSet();
             this.standardOutput = Collections.emptyList();
         }
         
         public JobBuilder input(String name, Object value) {
             checkNotNull(name, "name");
-            this.jobInput.put(name, value);
+            this.inputParameters.put(name, value);
             return this;
         }
 
         public JobBuilder input(Map<String, Object> parameters) {
             checkNotNull(parameters, "parameters");
-            this.jobInput.putAll(parameters);
+            this.inputParameters.putAll(parameters);
             return this;
         }
         
@@ -150,7 +150,7 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         @Override
         public Builder jobOutput(Map<String, Object> jobOutput) {
             checkNotNull(jobOutput, "jobOutput");
-            this.jobOutput = jobOutput;
+            this.outputParameters.putAll(jobOutput);
             return this;
         }
         

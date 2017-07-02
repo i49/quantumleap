@@ -29,7 +29,12 @@ public enum Message {
     PARAMETER_ITEM_IS_NULL,
     PARAMETER_IS_OF_UNEXPECTED_TYPE,
     PARAMETER_ITEM_IS_OF_UNEXPECTED_TYPE,
-    REPOSITORY_FAILED_TO_CLEAR;
+
+    RESOURCE_IS_MISSING,
+
+    STATEMENT_IS_UNDEFINED,
+    REPOSITORY_FAILED_TO_CLEAR,
+    ;
 
     private static final String BASE_NAME = "com.github.i49.quantumleap.core.messages";
     private static final ResourceBundle bundle = ResourceBundle.getBundle(BASE_NAME);

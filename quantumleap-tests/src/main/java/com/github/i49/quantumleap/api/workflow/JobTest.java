@@ -114,11 +114,11 @@ public class JobTest {
     @Test
     public void getParameters_shouldReturnEmptyMapByDefault() {
         Job job = engine.buildJob("job1").get();
-        assertThat(job.getJobInput()).isEmpty();
+        assertThat(job.getInputParameters()).isEmpty();
 
         registerJob(job);
         job = repository.findJobById(job.getId());
-        assertThat(job.getJobInput()).isEmpty();
+        assertThat(job.getInputParameters()).isEmpty();
     }
     
     private Map<String, Object> createJobParameters() {
@@ -147,7 +147,7 @@ public class JobTest {
     }
     
     private void assertOnJobParameters(Job job) {
-        Map<String, Object> p = job.getJobInput();
+        Map<String, Object> p = job.getInputParameters();
         assertThat(p).isNotNull().isNotEmpty();
         assertThat(p.get("firstName")).isInstanceOf(String.class).isEqualTo("John");
         assertThat(p.get("lastName")).isInstanceOf(String.class).isEqualTo("Smith");

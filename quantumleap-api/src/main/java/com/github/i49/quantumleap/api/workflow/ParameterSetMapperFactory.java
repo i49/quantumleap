@@ -17,22 +17,14 @@
  */
 package com.github.i49.quantumleap.api.workflow;
 
-import java.util.List;
+import java.util.Map;
 
-import com.github.i49.quantumleap.api.tasks.Task;
-import com.github.i49.quantumleap.api.tasks.TaskContext;
+/**
+ *
+ */
+public interface ParameterSetMapperFactory {
 
-public class SummingTask implements Task {
+    ParameterSetMapper createKeyMapper(Map<String, String> keyMap);
 
-    @Override
-    public void run(TaskContext context) {
-        @SuppressWarnings("unchecked")
-        List<Integer> numbers = (List<Integer>)context.getInputParameters().get("numbers");
-        context.getOutputParameters().put("sum", sum(numbers));
-    }
-    
-    private static int sum(List<Integer> numbers) {
-        Integer sum = numbers.stream().reduce(0, (x, y)->x + y);
-        return sum;
-    }
+    ParameterSetMapper createKeyMapper(String... keys);
 }
