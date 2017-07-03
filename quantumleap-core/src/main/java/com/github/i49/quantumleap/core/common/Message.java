@@ -34,6 +34,8 @@ public enum Message {
 
     STATEMENT_IS_UNDEFINED,
     REPOSITORY_FAILED_TO_CLEAR,
+    
+    INTERNAL_ERROR
     ;
 
     private static final String BASE_NAME = "com.github.i49.quantumleap.core.messages";

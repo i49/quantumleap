@@ -17,21 +17,17 @@
  */
 package com.github.i49.quantumleap.core.repository;
 
-import static com.github.i49.quantumleap.core.common.Message.*;
 import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 import static com.github.i49.quantumleap.core.common.Preconditions.checkRealType;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -54,7 +50,7 @@ import com.github.i49.quantumleap.core.workflow.WorkflowFactory;
 public class JdbcWorkflowRepository implements EnhancedRepository {
 
     private final Connection connection;
-    private final Map<SqlCommand, PreparedStatement> statements;
+    private final Map<SqlCommand, Query> queries;
 
     private final Marshaller<String> textMarshaller;
     private final Marshaller<byte[]> binaryMarshaller;
@@ -69,7 +65,7 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         try {
             connection = dataSource.getConnection();
             createSchema(connection);
-            this.statements = prepareStatements(connection);
+            this.queries = prepareAllQueries(connection);
             this.connection = connection;
         } catch (WorkflowException e) {
             closeConnectionIgnoringError(connection);
@@ -90,14 +86,10 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
 
     @Override
     public void clear() {
-        try {
-            getStatement(SqlCommand.DELETE_TASKS).execute();
-            getStatement(SqlCommand.DELETE_JOB_LINKS).execute();
-            getStatement(SqlCommand.DELETE_JOBS).execute();
-            getStatement(SqlCommand.DELETE_WORKFLOWS).execute();
-        } catch (SQLException e) {
-            throw new WorkflowException(REPOSITORY_FAILED_TO_CLEAR.toString(), e);
-        }
+        getQuery(SqlCommand.DELETE_TASKS).execute();
+        getQuery(SqlCommand.DELETE_JOB_LINKS).execute();
+        getQuery(SqlCommand.DELETE_JOBS).execute();
+        getQuery(SqlCommand.DELETE_WORKFLOWS).execute();
     }
 
     @Override
@@ -112,165 +104,78 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
 
     @Override
     public long countWorkflows() {
-        PreparedStatement s = getStatement(SqlCommand.COUNT_WORKFLOWS);
-        return countHits(s);
+        return getQuery(SqlCommand.COUNT_WORKFLOWS).queryForLong();
     }
 
     @Override
     public long countJobs() {
-        PreparedStatement s = getStatement(SqlCommand.COUNT_JOBS);
-        return countHits(s);
+        return getQuery(SqlCommand.COUNT_JOBS).queryForLong();
     }
 
     @Override
     public long countJobsWithStatus(JobStatus status) {
-        PreparedStatement s = getStatement(SqlCommand.COUNT_JOBS_BY_STATUS);
-        try {
-            s.setString(1, status.name());
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
-        return countHits(s);
+        return getQuery(SqlCommand.COUNT_JOBS_BY_STATUS).setEnum(1, status).queryForLong();
     }
 
     @Override
     public List<Job> findJobsByStatus(JobStatus status) {
-        PreparedStatement s = getStatement(SqlCommand.FIND_JOBS_BY_STATUS);
-        try {
-            s.setString(1, status.name());
-            try (ResultSet rs = s.executeQuery()) {
-                List<Job> jobs = new ArrayList<>();
-                while (rs.next()) {
-                    jobs.add(mapToJobWithTasks(rs));
-                }
-                return jobs;
-            }
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.FIND_JOBS_BY_STATUS);
+        q.setEnum(1, status);
+        return q.queryForList(this::mapToJobWithTasks);
     }
 
     @Override
     public Optional<Job> findFirstJobByStatus(JobStatus status) {
-        PreparedStatement s = getStatement(SqlCommand.FIND_FIRST_JOB_BY_STATUS);
-        try {
-            s.setString(1, status.name());
-            try (ResultSet rs = s.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapToJobWithTasks(rs));
-                } else {
-                    return Optional.empty();
-                }
-            }
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.FIND_FIRST_JOB_BY_STATUS);
+        q.setEnum(1, status);
+        return q.queryForObject(this::mapToJobWithTasks);
     }
     
     @Override
     public Job findJobById(long jobId) {
-        PreparedStatement s = getStatement(SqlCommand.FIND_JOB_BY_ID);
-        try {
-            s.setLong(1, jobId);
-            try (ResultSet resultSet = s.executeQuery()) {
-                if (resultSet.next()) {
-                    return mapToJob(resultSet);
-                } else {
-                    // TODO:
-                    throw new NoSuchElementException();
-                }
-            }
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.FIND_JOB_BY_ID);
+        q.setLong(1, jobId);
+        return q.queryForObject(this::mapToJob).get();
     }
     
     @Override
     public JobStatus getJobStatus(long jobId) {
-        PreparedStatement s = getStatement(SqlCommand.FIND_JOB_STATUS_BY_ID);
-        try {
-            s.setLong(1, jobId);
-            try (ResultSet rs = s.executeQuery()) {
-                if (rs.next()) {
-                    return JobStatus.valueOf(rs.getString(1));
-                } else {
-                    // TODO:
-                    throw new NoSuchElementException();
-                }
-            }
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.FIND_JOB_STATUS_BY_ID);
+        q.setLong(1, jobId);
+        return q.queryForObject(rs->JobStatus.valueOf(rs.getString(1))).get();
     }
     
     /* EnhancedWorkflowRepository interface */
   
     @Override
     public List<JobLink> findLinksByTarget(long targetId) {
-        List<JobLink> links = new ArrayList<>();
-        PreparedStatement s = getStatement(SqlCommand.FIND_LINKS_BY_TARGET);
-        try {
-            s.setLong(1, targetId);
-            try (ResultSet resultSet = s.executeQuery()) {
-                while (resultSet.next()) {
-                    links.add(mapToLink(resultSet));
-                }
-            }
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
-        return null;
+        Query q = getQuery(SqlCommand.FIND_LINKS_BY_TARGET);
+        q.setLong(1, targetId);
+        return q.queryForList(this::mapToLink);
     }
     
     @Override
     public List<Long> findNextJobs(Job job) {
-        PreparedStatement s = getStatement(SqlCommand.FIND_NEXT_JOBS);
-        try {
-            s.setLong(1, job.getId());
-            List<Long> dependants = new ArrayList<>();
-            try (ResultSet rs = s.executeQuery()) {
-                while (rs.next()) {
-                    dependants.add(rs.getLong(1));
-                }
-            }
-            return dependants;
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.FIND_NEXT_JOBS);
+        q.setLong(1, job.getId());
+        return q.queryForList(rs->rs.getLong(1));
     }
     
     @Override
     public void storeJob(Job job, JobStatus status, Map<String, Object> jobOutput, String[] standardOutput) {
-        PreparedStatement s = getStatement(SqlCommand.UPDATE_JOB);
-        try {
-            s.setString(1, status.name());
-            s.setBytes(2, marshal(jobOutput));
-            s.setString(3, marshalToString(standardOutput));
-            s.setLong(4, job.getId());
-            s.executeUpdate();
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.UPDATE_JOB);
+        q.setEnum(1, status);
+        q.setBytes(2, marshal(jobOutput));
+        q.setString(3, marshalToString(standardOutput));
+        q.setLong(4, job.getId());
+        q.update();
     }
     
     @Override
     public int updateJobStatusIfReady(long jobId) {
-        PreparedStatement s = getStatement(SqlCommand.UPDATE_JOB_STATUS_IF_READY);
-        try {
-            s.setLong(1, jobId);
-            return s.executeUpdate();
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.UPDATE_JOB_STATUS_IF_READY);
+        q.setLong(1, jobId);
+        return q.update();
     }
     
     private void closeConnectionIgnoringError(Connection connection) {
@@ -303,84 +208,45 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     }
     
     private long insertWorkflow(ManagedWorkflow workflow) {
-        try {
-            PreparedStatement s = getStatement(SqlCommand.INSERT_WORKFLOW);
-            s.setString(1, workflow.getName());
-            s.executeUpdate();
-            long id = getGeneratedKey(s);
-            workflow.setId(id);
-            return id;
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.INSERT_WORKFLOW);
+        q.setString(1, workflow.getName());
+        long id = q.updateAndGenerateLong();
+        workflow.setId(id);
+        return id;
     }
 
     private long insertJob(ManagedJob job, JobStatus status, long workflowId) {
-        try {
-            PreparedStatement s = getStatement(SqlCommand.INSERT_JOB);
-            s.setString(1, job.getName());
-            s.setString(2, status.name());
-            s.setBytes(3, marshal(job.getInputParameters()));
-            s.setLong(4, workflowId);
-            s.executeUpdate();
-            long jobId = getGeneratedKey(s);
-            job.setId(jobId);
-            return jobId;
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.INSERT_JOB);
+        q.setString(1, job.getName());
+        q.setEnum(2, status);
+        q.setBytes(3, marshal(job.getInputParameters()));
+        q.setLong(4, workflowId);
+        long jobId = q.updateAndGenerateLong();
+        job.setId(jobId);
+        return jobId;
     }
     
     private void insertJobLink(JobLink link) {
-        PreparedStatement s = getStatement(SqlCommand.INSERT_JOB_LINK);
-        try {
-            s.setLong(1, link.getSource().getId());
-            s.setLong(2, link.getTarget().getId());
-            s.setString(3,  link.getMapper().getClass().getName());
-            s.setBytes(4, marshal(link.getMapper()));
-            s.executeUpdate();
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.INSERT_JOB_LINK);
+        q.setLong(1, link.getSource().getId());
+        q.setLong(2, link.getTarget().getId());
+        q.setString(3,  link.getMapper().getClass().getName());
+        q.setBytes(4, marshal(link.getMapper()));
+        q.update();
     }
     
     private void insertTask(Task task, long jobId, int sequenceNumber) {
-        try {
-            PreparedStatement s = getStatement(SqlCommand.INSERT_TASK);
-            s.setLong(1, jobId);
-            s.setInt(2, sequenceNumber);
-            s.setString(3, task.getClass().getName());
-            String params = marshalToString(task);
-            s.setString(4, params);
-            s.executeUpdate();
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
+        Query q = getQuery(SqlCommand.INSERT_TASK);
+        q.setLong(1, jobId);
+        q.setInt(2, sequenceNumber);
+        q.setString(3, task.getClass().getName());
+        String params = marshalToString(task);
+        q.setString(4, params);
+        q.update();
     }
 
-    private long countHits(PreparedStatement statement) {
-        try (ResultSet rs = statement.executeQuery()) {
-            rs.next();
-            return rs.getLong(1);
-        } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
-        }
-    }
-
-    private PreparedStatement getStatement(SqlCommand command) {
-        return statements.get(command);
-    }
-
-    private long getGeneratedKey(PreparedStatement statement) throws SQLException {
-        try (ResultSet rs = statement.getGeneratedKeys()) {
-            rs.next();
-            return rs.getLong(1);
-        }
+    private Query getQuery(SqlCommand command) {
+        return queries.get(command);
     }
 
     private void createSchema(Connection connection) throws IOException, SQLException {
@@ -401,10 +267,10 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         return false;
     }
 
-    private Map<SqlCommand, PreparedStatement> prepareStatements(Connection connection) throws SQLException {
-        Map<SqlCommand, PreparedStatement> map = new EnumMap<SqlCommand, PreparedStatement>(SqlCommand.class);
+    private Map<SqlCommand, Query> prepareAllQueries(Connection connection) throws SQLException {
+        Map<SqlCommand, Query> map = new EnumMap<SqlCommand, Query>(SqlCommand.class);
         for (SqlCommand c : SqlCommand.values()) {
-            map.put(c, c.prepare(connection));
+            map.put(c, c.getQuery(connection));
         }
         return map;
     }
@@ -445,14 +311,9 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     }
     
     private void buildTasks(long jobId, ManagedJobBuilder builder) throws SQLException {
-        PreparedStatement s = getStatement(SqlCommand.FIND_TASK);
-        s.setLong(1, jobId);
-        List<Task> tasks = new ArrayList<>();
-        try (ResultSet resultSet = s.executeQuery()) {
-            while (resultSet.next()) {
-                tasks.add(mapToTask(resultSet));
-            }
-        }
+        Query q = getQuery(SqlCommand.FIND_TASK);
+        q.setLong(1, jobId);
+        List<Task> tasks = q.queryForList(this::mapToTask);
         builder.tasks(tasks.toArray(new Task[0]));
     }
 

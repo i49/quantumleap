@@ -79,6 +79,11 @@ enum SqlCommand {
         }
     }
     
+    public Query getQuery(Connection connection) throws SQLException {
+        PreparedStatement statement = prepare(connection);
+        return new Query(statement);
+    }
+    
     public String getSql() {
         String sql = props.getProperty(name());
         if (sql == null) {
