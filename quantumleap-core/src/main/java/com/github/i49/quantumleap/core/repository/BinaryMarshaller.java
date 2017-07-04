@@ -20,10 +20,11 @@ package com.github.i49.quantumleap.core.repository;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import com.github.i49.quantumleap.api.workflow.WorkflowException;
+import com.github.i49.quantumleap.api.base.WorkflowException;
 
 /**
  * A binary marshaller implemented with built-in serialization provided by Java language.
@@ -37,9 +38,10 @@ public class BinaryMarshaller implements Marshaller<byte[]> {
         }
         byte[] bytes = null;
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                ObjectOutputStream objectStream = new ObjectOutputStream(byteStream)) {
+             ObjectOutputStream objectStream = new ObjectOutputStream(byteStream)) {
             objectStream.writeObject(object);
             bytes = byteStream.toByteArray();
+        } catch (NotSerializableException e) {
         } catch (IOException e) {
             // never reach here
         }

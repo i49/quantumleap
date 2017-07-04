@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.api.workflow;
+package com.github.i49.quantumleap.api.base;
 
 /**
- * The exception thrown by the worlflow engine.
+ * The base type of all exceptions thrown by the API.
  */
 public class WorkflowException extends RuntimeException {
 

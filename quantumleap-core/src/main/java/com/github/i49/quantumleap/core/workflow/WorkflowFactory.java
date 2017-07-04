@@ -17,6 +17,8 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
+import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
+
 /**
  *
  */
@@ -29,4 +31,6 @@ public interface WorkflowFactory {
     ManagedJobBuilder createJobBuilder(String name);
 
     ManagedWorkflowBuilder createWorkflowBuilder(String name);
+    
+    JobLink createJobLink(ManagedJob source, ManagedJob target, ParameterSetMapper mapper);
 }

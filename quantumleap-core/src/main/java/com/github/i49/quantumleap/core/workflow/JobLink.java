@@ -20,6 +20,7 @@ package com.github.i49.quantumleap.core.workflow;
 import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
 
 /**
+ * A link between jobs.
  */
 public interface JobLink {
 

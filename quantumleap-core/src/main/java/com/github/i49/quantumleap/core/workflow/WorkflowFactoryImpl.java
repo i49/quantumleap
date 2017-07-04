@@ -17,6 +17,8 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
+import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
+
 /**
  * Default implementation of {@link WorkflowFactory}.
  */
@@ -30,5 +32,10 @@ class WorkflowFactoryImpl implements WorkflowFactory {
     @Override
     public ManagedWorkflowBuilder createWorkflowBuilder(String name) {
         return new WorkflowImpl.Builder(name);
+    }
+
+    @Override
+    public JobLink createJobLink(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
+        return new JobLinkImpl(source, target, mapper);
     }
 }

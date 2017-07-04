@@ -17,11 +17,13 @@
  */
 package com.github.i49.quantumleap.api.workflow;
 
+import java.io.Serializable;
+
 import com.github.i49.quantumleap.api.base.ParameterSet;
 
 /**
  */
-public interface ParameterSetMapper {
+public interface ParameterSetMapper extends Serializable {
 
     /**
      * Maps two sets of parameters.

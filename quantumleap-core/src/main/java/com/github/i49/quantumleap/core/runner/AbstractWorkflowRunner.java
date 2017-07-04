@@ -25,13 +25,15 @@ import java.util.Map;
 
 import com.github.i49.quantumleap.api.base.ParameterSet;
 import com.github.i49.quantumleap.api.base.Platform;
+import com.github.i49.quantumleap.api.base.WorkflowException;
 import com.github.i49.quantumleap.api.tasks.TaskContext;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
+import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
 import com.github.i49.quantumleap.api.workflow.RunnerConfiguration;
-import com.github.i49.quantumleap.api.workflow.WorkflowException;
 import com.github.i49.quantumleap.api.workflow.WorkflowRunner;
 import com.github.i49.quantumleap.core.common.Platforms;
 import com.github.i49.quantumleap.core.repository.EnhancedRepository;
+import com.github.i49.quantumleap.core.workflow.JobLink;
 import com.github.i49.quantumleap.core.workflow.ManagedJob;
 import com.github.i49.quantumleap.core.workflow.SimpleParameterSet;
 
@@ -74,8 +76,13 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
     }
     
     protected JobContext prepareJob(ManagedJob job) {
+        ParameterSet inputParameter = job.getInputParameters();
+        for (JobLink link: getRepository().findLinksByTarget(job)) {
+            ParameterSetMapper mapper = link.getMapper();
+            mapper.mapParameterSet(link.getSource().getOutputParameters(), inputParameter);
+        }
         Path jobDirectory = createDirectoryForJob(job);
-        return new JobContextImpl(job, jobDirectory);
+        return new JobContextImpl(jobDirectory, inputParameter);
     }
     
     protected void completeJob(ManagedJob job, JobContext context) {
@@ -116,14 +123,14 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
      */
     private class JobContextImpl implements JobContext {
         
-        private final ManagedJob job;
         private final Path jobDirectory;
+        private final ParameterSet inputParameters;
         private final ParameterSet outputParameters;
         private final JobPrintStream standardStream;
         
-        private JobContextImpl(ManagedJob job, Path jobDirectory) {
-            this.job = job;
+        private JobContextImpl(Path jobDirectory, ParameterSet inputParameters) {
             this.jobDirectory = jobDirectory;
+            this.inputParameters = inputParameters;
             this.outputParameters = new SimpleParameterSet();
             this.standardStream = new JobPrintStream();
         }
@@ -135,7 +142,7 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
 
         @Override
         public ParameterSet getInputParameters() {
-            return job.getInputParameters();
+            return inputParameters;
         }
         
         @Override

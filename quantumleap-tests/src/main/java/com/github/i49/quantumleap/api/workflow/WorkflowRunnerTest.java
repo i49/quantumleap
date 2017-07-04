@@ -45,6 +45,7 @@ public class WorkflowRunnerTest {
     private static WorkflowEngine engine;
     private static WorkflowRepository repository;
     private static TaskFactory taskFactory;
+    private static ParameterSetMapperFactory mapperFactory;
     private WorkflowRunner runner;
 
     @BeforeClass
@@ -52,6 +53,7 @@ public class WorkflowRunnerTest {
         engine = WorkflowEngine.get();
         repository = engine.createRepository();
         taskFactory = engine.getTaskFactory();
+        mapperFactory = engine.getParameterSetMapperFactory();
     }
 
     @AfterClass
@@ -193,4 +195,29 @@ public class WorkflowRunnerTest {
         Map<String, Object> jobOutput = job1.getOutputParameters();
         assertThat(jobOutput.get("answer")).isEqualTo(8);
     }
+    
+    @Test
+    public void runSingle_shouldRunJobsPassingParameters() {
+        Job job1 = engine.buildJob("job1")
+                .tasks(new SummingTask())
+                .input("numbers", Arrays.asList(1, 2, 3))
+                .get();
+        Job job2 = engine.buildJob("job2")
+                .tasks(new ScalingTask())
+                .input("multiplier", 4)
+                .get();
+        
+        Workflow workflow1 = engine.buildWorkflow("workflow1")
+                .link(job1, job2, mapperFactory.createKeyMapper("sum", "multiplicand"))
+                .get();
+
+        repository.addWorkflow(workflow1);
+
+        runner.runSingle();
+        runner.runSingle();
+
+        job2 = repository.findJobById(job2.getId());
+        Map<String, Object> out = job2.getOutputParameters();
+        assertThat(out.get("answer")).isEqualTo(24);
+   }
 }

@@ -24,13 +24,14 @@ import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
 import com.github.i49.quantumleap.api.workflow.WorkflowRepository;
 import com.github.i49.quantumleap.core.workflow.JobLink;
+import com.github.i49.quantumleap.core.workflow.ManagedJob;
 
 /**
  * The enhanced {@link WorkflowRepository} interface.
  */
 public interface EnhancedRepository extends WorkflowRepository {
 
-    List<JobLink> findLinksByTarget(long targetId);
+    List<JobLink> findLinksByTarget(ManagedJob target);
 
     /**
      * Finds next jobs.

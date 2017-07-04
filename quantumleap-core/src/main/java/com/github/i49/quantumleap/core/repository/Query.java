@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.github.i49.quantumleap.api.workflow.WorkflowException;
+import com.github.i49.quantumleap.api.base.WorkflowException;
 import com.github.i49.quantumleap.core.common.Message;
 
 /**

@@ -17,6 +17,7 @@
  */
 package com.github.i49.quantumleap.api.workflow;
 
+import com.github.i49.quantumleap.api.base.WorkflowException;
 import com.github.i49.quantumleap.api.tasks.TaskFactory;
 
 /**

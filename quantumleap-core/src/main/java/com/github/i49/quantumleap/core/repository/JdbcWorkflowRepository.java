@@ -33,11 +33,12 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import com.github.i49.quantumleap.api.base.WorkflowException;
 import com.github.i49.quantumleap.api.tasks.Task;
 import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
+import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
 import com.github.i49.quantumleap.api.workflow.Workflow;
-import com.github.i49.quantumleap.api.workflow.WorkflowException;
 import com.github.i49.quantumleap.core.workflow.JobLink;
 import com.github.i49.quantumleap.core.workflow.ManagedJob;
 import com.github.i49.quantumleap.core.workflow.ManagedJobBuilder;
@@ -148,10 +149,15 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     /* EnhancedWorkflowRepository interface */
   
     @Override
-    public List<JobLink> findLinksByTarget(long targetId) {
+    public List<JobLink> findLinksByTarget(ManagedJob target) {
         Query q = getQuery(SqlCommand.FIND_LINKS_BY_TARGET);
-        q.setLong(1, targetId);
-        return q.queryForList(this::mapToLink);
+        q.setLong(1, target.getId());
+        return q.queryForList(rs->{
+            ManagedJob source = mapToJob(rs);
+            byte[] bytes = rs.getBytes(9); 
+            ParameterSetMapper mapper = unmarshal(bytes, ParameterSetMapper.class);
+            return workflowFactory.createJobLink(source, target, mapper);
+        });
     }
     
     @Override
@@ -230,7 +236,7 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         Query q = getQuery(SqlCommand.INSERT_JOB_LINK);
         q.setLong(1, link.getSource().getId());
         q.setLong(2, link.getTarget().getId());
-        q.setString(3,  link.getMapper().getClass().getName());
+        q.setString(3, link.getMapper().getClass().getName());
         q.setBytes(4, marshal(link.getMapper()));
         q.update();
     }

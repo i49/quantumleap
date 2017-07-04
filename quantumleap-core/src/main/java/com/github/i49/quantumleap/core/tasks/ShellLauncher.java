@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.i49.quantumleap.api.base.Platform;
-import com.github.i49.quantumleap.api.workflow.WorkflowException;
+import com.github.i49.quantumleap.api.base.WorkflowException;
 
 /**
  * A helper class for launching platform-dependent shell.

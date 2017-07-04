@@ -20,6 +20,8 @@ package com.github.i49.quantumleap.api.workflow;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
+import com.github.i49.quantumleap.api.base.WorkflowException;
+
 /**
  * A helper class which loads the {@link WorkflowEngine}.
  */
