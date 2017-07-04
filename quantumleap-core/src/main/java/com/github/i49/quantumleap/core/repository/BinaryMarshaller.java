@@ -17,6 +17,8 @@
  */
 package com.github.i49.quantumleap.core.repository;
 
+import static com.github.i49.quantumleap.core.common.Message.OBJECT_IS_NOT_SERIALIZABLE;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,6 +44,8 @@ public class BinaryMarshaller implements Marshaller<byte[]> {
             objectStream.writeObject(object);
             bytes = byteStream.toByteArray();
         } catch (NotSerializableException e) {
+            String className = object.getClass().getName();
+            throw new WorkflowException(OBJECT_IS_NOT_SERIALIZABLE.with(className), e);
         } catch (IOException e) {
             // never reach here
         }
@@ -49,12 +53,12 @@ public class BinaryMarshaller implements Marshaller<byte[]> {
     }
 
     @Override
-    public <T> T unmarshal(byte[] marshalled, Class<T> type) {
-        if (marshalled == null) {
+    public <T> T unmarshal(byte[] content, Class<T> type) {
+        if (content == null) {
             return null;
         }
         Object object = null;
-        try (ByteArrayInputStream byteStream = new ByteArrayInputStream(marshalled);
+        try (ByteArrayInputStream byteStream = new ByteArrayInputStream(content);
              ObjectInputStream objectStream = new ObjectInputStream(byteStream)) {
              object = objectStream.readObject();    
         } catch (ClassNotFoundException e) {

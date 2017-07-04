@@ -22,6 +22,7 @@ import java.io.Serializable;
 import com.github.i49.quantumleap.api.base.ParameterSet;
 
 /**
+ * The interface for mapping two sets of parameters.
  */
 public interface ParameterSetMapper extends Serializable {
 

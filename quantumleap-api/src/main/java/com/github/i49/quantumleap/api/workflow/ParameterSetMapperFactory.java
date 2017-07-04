@@ -20,7 +20,7 @@ package com.github.i49.quantumleap.api.workflow;
 import java.util.Map;
 
 /**
- *
+ * The factory interface for creating instances of {@link ParameterSetMapper}.
  */
 public interface ParameterSetMapperFactory {
 

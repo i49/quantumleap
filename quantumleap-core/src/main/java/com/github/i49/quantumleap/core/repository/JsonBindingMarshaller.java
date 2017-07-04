@@ -28,7 +28,7 @@ import javax.json.bind.JsonbConfig;
 import javax.json.bind.adapter.JsonbAdapter;
 
 /**
- * {@link JsonMarshaller} implemented with Java API for JSON Binding (JSR-367).
+ * A marshaller implemented with Java API for JSON Binding (JSR-367).
  */
 public class JsonBindingMarshaller implements Marshaller<String> {
     
@@ -49,11 +49,11 @@ public class JsonBindingMarshaller implements Marshaller<String> {
     }
 
     @Override
-    public <T> T unmarshal(String str, Class<T> type) {
-        if (str == null) {
+    public <T> T unmarshal(String content, Class<T> type) {
+        if (content == null) {
             return null;
         }
-        return jsonb.fromJson(str, type);
+        return jsonb.fromJson(content, type);
     }
 
     /**

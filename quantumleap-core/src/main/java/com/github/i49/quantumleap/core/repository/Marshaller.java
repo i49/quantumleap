@@ -18,13 +18,27 @@
 package com.github.i49.quantumleap.core.repository;
 
 /**
- * Interface for marshalling and unmarshalling objects.
+ * Interface responsible for marshalling of Java objects.
  * 
- * @param <R> the type of object after marshalled.
+ * @param <R> the type of the content produced by marshalling.
  */
 interface Marshaller<R> {
 
+    /**
+     * Marshals the given object.
+     * 
+     * @param object the object to be marshalled.
+     * @return the content produced by marshalling of the object.
+     */
     R marshal(Object object);
     
-    <T> T unmarshal(R marshalled, Class<T> type);
+    /**
+     * Unmarshals the given content into an object.
+     * 
+     * @param <T> the type of the object to be produced by unmarshalling.
+     * @param content the content to be unmarshalled. 
+     * @param type the class of object to be produced by unmarshalling. 
+     * @return the newly created object.
+     */
+    <T> T unmarshal(R content, Class<T> type);
 }
