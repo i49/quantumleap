@@ -17,10 +17,11 @@
  */
 package com.github.i49.quantumleap.core.repository;
 
+import static com.github.i49.quantumleap.core.common.Message.REPOSITORY_ACCESS_ERROR_OCCURRED;
+import static com.github.i49.quantumleap.core.common.Message.REPOSITORY_ACCESS_ERROR_WAS_IGNORED;
 import static com.github.i49.quantumleap.core.common.Preconditions.checkNotNull;
 import static com.github.i49.quantumleap.core.common.Preconditions.checkRealType;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -30,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -49,6 +52,8 @@ import com.github.i49.quantumleap.core.workflow.WorkflowFactory;
  * A repository which can be manipulated by JDBC interface.
  */
 public class JdbcWorkflowRepository implements EnhancedRepository {
+    
+    private static final Logger log = Logger.getLogger(JdbcWorkflowRepository.class.getName());
 
     private final Connection connection;
     private final Map<SqlCommand, Query> queries;
@@ -64,17 +69,13 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         this.workflowFactory = workflowFactory;
         Connection connection = null;
         try {
-            connection = dataSource.getConnection();
+            connection = connect(dataSource);
             createSchema(connection);
             this.queries = prepareAllQueries(connection);
             this.connection = connection;
         } catch (WorkflowException e) {
             closeConnectionIgnoringError(connection);
             throw e;
-        } catch (Exception e) {
-            closeConnectionIgnoringError(connection);
-            // TODO: add message
-            throw new WorkflowException("", e);
         }
     }
 
@@ -98,8 +99,7 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         try {
             this.connection.close();
         } catch (SQLException e) {
-            // TODO: add message
-            throw new WorkflowException("", e);
+            throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
         }
     }
 
@@ -184,13 +184,21 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         return q.update();
     }
     
-    private void closeConnectionIgnoringError(Connection connection) {
+    private Connection connect(DataSource dataSource) {
         try {
-            if (connection != null) {
-                connection.close();
-            }
+            return dataSource.getConnection();
         } catch (SQLException e) {
-            // TODO: logging
+            throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
+        }
+    }
+    
+    private void closeConnectionIgnoringError(Connection connection) {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                log.log(Level.WARNING, REPOSITORY_ACCESS_ERROR_WAS_IGNORED.toString(), e);
+            }
         }
     }
 
@@ -255,7 +263,7 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         return queries.get(command);
     }
 
-    private void createSchema(Connection connection) throws IOException, SQLException {
+    private void createSchema(Connection connection) {
         if (checkSchemaExistence(connection)) {
             return;
         }
@@ -263,22 +271,30 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         runner.runScript("create-schema.sql");
     }
     
-    private boolean checkSchemaExistence(Connection connection) throws SQLException {
-        DatabaseMetaData meta = connection.getMetaData();
-        try (ResultSet resultSet = meta.getTables(null, null, "WORKFLOW", null)) {
-            if (resultSet.next()) {
-                return true;
+    private boolean checkSchemaExistence(Connection connection) {
+        try {
+            DatabaseMetaData meta = connection.getMetaData();
+            try (ResultSet resultSet = meta.getTables(null, null, "WORKFLOW", null)) {
+                if (resultSet.next()) {
+                    return true;
+                }
             }
+            return false;
+        } catch (SQLException e) {
+            throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
         }
-        return false;
     }
 
-    private Map<SqlCommand, Query> prepareAllQueries(Connection connection) throws SQLException {
-        Map<SqlCommand, Query> map = new EnumMap<SqlCommand, Query>(SqlCommand.class);
-        for (SqlCommand c : SqlCommand.values()) {
-            map.put(c, c.getQuery(connection));
+    private Map<SqlCommand, Query> prepareAllQueries(Connection connection) {
+        try {
+            Map<SqlCommand, Query> map = new EnumMap<SqlCommand, Query>(SqlCommand.class);
+            for (SqlCommand c : SqlCommand.values()) {
+                map.put(c, c.getQuery(connection));
+            }
+            return map;
+        } catch (SQLException e) {
+            throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
         }
-        return map;
     }
     
     private ManagedJob mapToJob(ResultSet resultSet) throws SQLException {

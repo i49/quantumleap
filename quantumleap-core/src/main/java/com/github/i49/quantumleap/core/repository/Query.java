@@ -17,6 +17,9 @@
  */
 package com.github.i49.quantumleap.core.repository;
 
+import static com.github.i49.quantumleap.core.common.Message.INTERNAL_ERROR;
+import static com.github.i49.quantumleap.core.common.Message.REPOSITORY_ACCESS_ERROR_OCCURRED;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.github.i49.quantumleap.api.base.WorkflowException;
-import com.github.i49.quantumleap.core.common.Message;
 
 /**
  * SQL statement.
@@ -82,8 +84,7 @@ public class Query {
         try {
             statement.execute();
         } catch (SQLException e) {
-            // TODO:
-            throw new WorkflowException("", e);
+            throwAccessError(e);
         }
     }
     
@@ -92,8 +93,8 @@ public class Query {
             rs.next();
             return rs.getLong(1);
         } catch (SQLException e) {
-            // TODO:
-            throw new WorkflowException("", e);
+            throwAccessError(e);
+            return 0;
         }
     }
     
@@ -105,8 +106,8 @@ public class Query {
             }
             return list;
         } catch (SQLException e) {
-            // TODO:
-            throw new WorkflowException("", e);
+            throwAccessError(e);
+            return null;
         }
     }
     
@@ -118,8 +119,8 @@ public class Query {
                 return Optional.empty();
             }
         } catch (SQLException e) {
-            // TODO:
-            throw new WorkflowException("", e);
+            throwAccessError(e);
+            return Optional.empty();
         }
     }
    
@@ -127,8 +128,7 @@ public class Query {
         try {
             return statement.executeUpdate();
         } catch (SQLException e) {
-            // TODO:
-            throw new WorkflowException("", e);
+            throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
         }
     }
     
@@ -138,12 +138,16 @@ public class Query {
             rs.next();
             return rs.getLong(1);
         } catch (SQLException e) {
-            // TODO:
-            throw new WorkflowException("", e);
+            throwAccessError(e);
+            return 0;
         }
     }
     
     private static void throwInternalError(SQLException e) {
-        throw new WorkflowException(Message.INTERNAL_ERROR.toString(), e);
+        throw new WorkflowException(INTERNAL_ERROR.toString(), e);
+    }
+    
+    private static void throwAccessError(SQLException e) {
+        throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
     }
 }

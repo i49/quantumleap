@@ -71,7 +71,7 @@ enum SqlCommand {
      * @return newly created prepared statement.
      * @throws SQLException if data access error has occurred. 
      */
-    public PreparedStatement prepare(Connection connection) throws SQLException {
+    private PreparedStatement prepare(Connection connection) throws SQLException {
         if (this == INSERT_WORKFLOW || this == INSERT_JOB) {
             return connection.prepareStatement(getSql(), Statement.RETURN_GENERATED_KEYS);
         } else {

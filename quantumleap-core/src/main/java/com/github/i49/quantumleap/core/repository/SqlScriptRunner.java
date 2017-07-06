@@ -17,6 +17,9 @@
  */
 package com.github.i49.quantumleap.core.repository;
 
+import static com.github.i49.quantumleap.core.common.Message.RESOURCE_CANNOT_BE_READ;
+import static com.github.i49.quantumleap.core.common.Message.SQL_SCRIPT_FAILED;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +32,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.github.i49.quantumleap.api.base.WorkflowException;
 
 /**
  * A helper class for running given SQL script.
@@ -45,19 +50,17 @@ class SqlScriptRunner {
     /**
      * Runs a script read from the specified resource file.
      * 
-     * @param resourceName
-     *            the name of the resource file, which must be on the current
-     *            classpath.
-     * @throws IOException
-     *             if an I/O error has occurred.
-     * @throws SQLException
-     *             if a database access error has occurred.
+     * @param resourceName the name of the resource file, which must be on the current classpath.
      */
-    void runScript(String resourceName) throws IOException, SQLException {
+    void runScript(String resourceName) {
         try (InputStream in = getClass().getResourceAsStream(resourceName)) {
             try (Reader reader = new InputStreamReader(in, DEFAULT_CHARSET)) {
                 runScript(reader);
             }
+        } catch (IOException e) {
+            throw new WorkflowException(RESOURCE_CANNOT_BE_READ.with(resourceName), e);
+        } catch (SQLException e) {
+            throw new WorkflowException(SQL_SCRIPT_FAILED.with(resourceName), e);
         }
     }
 

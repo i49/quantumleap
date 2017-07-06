@@ -17,7 +17,10 @@
  */
 package com.github.i49.quantumleap.core.common;
 
+import static com.github.i49.quantumleap.core.common.Message.PLATFORM_CANNOT_BE_DETECTED;
+
 import com.github.i49.quantumleap.api.base.Platform;
+import com.github.i49.quantumleap.api.base.WorkflowException;
 
 /**
  * A helper class to detect current platform.
@@ -42,7 +45,6 @@ public class Platforms {
         } else if (name.contains("linux") || name.contains("unix")) {
             return Platform.UNIX;
         }
-        // TODO: test other platforms.
-        return Platform.OTHER;
+        throw new WorkflowException(PLATFORM_CANNOT_BE_DETECTED.toString());
     }
 }

@@ -27,8 +27,7 @@ public class WorkflowException extends RuntimeException {
     /**
      * Constructs this exception with a detail message.
      * 
-     * @param message the detail message of this exception. cannot be
-     *            {@code null}.
+     * @param message the detail message of this exception. cannot be {@code null}.
      */
     public WorkflowException(String message) {
         super(message);
@@ -37,8 +36,7 @@ public class WorkflowException extends RuntimeException {
     /**
      * Constructs this exception with a detail message and a real cause.
      * 
-     * @param message the detail message of this exception. cannot be
-     *            {@code null}.
+     * @param message the detail message of this exception. cannot be {@code null}.
      * @param cause the real cause of this exception. cannot be {@code null}.
      */
     public WorkflowException(String message, Throwable cause) {
