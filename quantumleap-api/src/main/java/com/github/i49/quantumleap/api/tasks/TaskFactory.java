@@ -41,5 +41,5 @@ public interface TaskFactory {
      * @return newly created builder.
      * @throws NullPointerException if given scriptPath is {@code null}.
      */
-    ScriptTaskBuilder buildShellTask(Path scriptPath);
+    ScriptTaskBuilder createShellTaskBuilder(Path scriptPath);
 }

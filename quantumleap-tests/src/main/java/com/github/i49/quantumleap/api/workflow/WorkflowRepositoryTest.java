@@ -61,7 +61,7 @@ public class WorkflowRepositoryTest {
 
     @Test
     public void addWorkflow_shouldAddEmptyWorkflow() {
-        Workflow workflow = engine.buildWorkflow("workflow1").get();
+        Workflow workflow = engine.createWorkflowBuilder("workflow1").build();
         assertThat(repository.countWorkflows()).isEqualTo(0);
         repository.addWorkflow(workflow);
         assertThat(repository.countWorkflows()).isEqualTo(1);
@@ -70,9 +70,9 @@ public class WorkflowRepositoryTest {
 
     @Test
     public void addWorkflow_shouldAddJobs() {
-        Job job1 = engine.buildJob("job1").get();
-        Job job2 = engine.buildJob("job2").get();
-        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1, job2).get();
+        Job job1 = engine.createJobBuilder("job1").build();
+        Job job2 = engine.createJobBuilder("job2").build();
+        Workflow workflow = engine.createWorkflowBuilder("workflow1").jobs(job1, job2).build();
         repository.addWorkflow(workflow);
 
         assertThat(repository.countWorkflows()).isEqualTo(1);
@@ -84,9 +84,9 @@ public class WorkflowRepositoryTest {
 
     @Test
     public void findJobsByStatus_shouldReturnReadyJobs() {
-        Job job1 = engine.buildJob("job1").get();
-        Job job2 = engine.buildJob("job2").get();
-        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1, job2).get();
+        Job job1 = engine.createJobBuilder("job1").build();
+        Job job2 = engine.createJobBuilder("job2").build();
+        Workflow workflow = engine.createWorkflowBuilder("workflow1").jobs(job1, job2).build();
         repository.addWorkflow(workflow);
 
         List<Job> jobs = repository.findJobsByStatus(JobStatus.READY);
@@ -96,9 +96,9 @@ public class WorkflowRepositoryTest {
 
     @Test
     public void findFirstJobByStatus_shouldReturnFirstReadyJob() {
-        Job job1 = engine.buildJob("job1").get();
-        Job job2 = engine.buildJob("job2").get();
-        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1, job2).get();
+        Job job1 = engine.createJobBuilder("job1").build();
+        Job job2 = engine.createJobBuilder("job2").build();
+        Workflow workflow = engine.createWorkflowBuilder("workflow1").jobs(job1, job2).build();
         repository.addWorkflow(workflow);
 
         Optional<Job> job = repository.findFirstJobByStatus(JobStatus.READY);

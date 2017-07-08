@@ -30,9 +30,9 @@ public class ScriptTaskTest extends BaseTaskTest {
     @Test
     public void run_shouldRunScript() {
         Path path = Paths.get("target/test-classes/hello.bat");
-        Task task = factory.buildShellTask(path)
+        Task task = factory.createShellTaskBuilder(path)
                 .arguments("John Smith")
-                .get();
+                .build();
         runTask(task);
     }
 }

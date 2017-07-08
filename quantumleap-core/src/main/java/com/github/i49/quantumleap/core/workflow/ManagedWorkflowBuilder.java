@@ -25,5 +25,5 @@ import com.github.i49.quantumleap.api.workflow.WorkflowBuilder;
 public interface ManagedWorkflowBuilder extends WorkflowBuilder {
 
     @Override
-    ManagedWorkflow get();
+    ManagedWorkflow build();
 }

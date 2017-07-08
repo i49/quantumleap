@@ -89,7 +89,7 @@ public class ScriptTaskImpl implements ScriptTask {
         }
         
         @Override
-        public ScriptTask get() {
+        public ScriptTask build() {
             ScriptTaskImpl task = new ScriptTaskImpl();
             task.setScriptPath(this.scriptPath);
             task.setArguments(this.arguments);

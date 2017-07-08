@@ -135,7 +135,7 @@ class WorkflowImpl extends WorkflowComponent implements ManagedWorkflow {
         }
 
         @Override
-        public ManagedWorkflow get() {
+        public ManagedWorkflow build() {
             return new WorkflowImpl(this);
         }
         

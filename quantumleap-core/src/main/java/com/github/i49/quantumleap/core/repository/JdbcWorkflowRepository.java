@@ -298,14 +298,14 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     }
     
     private ManagedJob mapToJob(ResultSet resultSet) throws SQLException {
-        return buildJob(resultSet).get();
+        return buildJob(resultSet).build();
     }
     
     private Job mapToJobWithTasks(ResultSet resultSet) throws SQLException {
         long jobId = resultSet.getLong(1);
         ManagedJobBuilder builder = buildJob(resultSet);
         buildTasks(jobId, builder);
-        return builder.get();
+        return builder.build();
     }
     
     private ManagedJobBuilder buildJob(ResultSet resultSet) throws SQLException {

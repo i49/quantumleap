@@ -50,5 +50,5 @@ public interface WorkflowBuilder {
      * 
      * @return the instance of {@link Workflow}.
      */
-    Workflow get();
+    Workflow build();
 }

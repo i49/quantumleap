@@ -29,7 +29,7 @@ import com.github.i49.quantumleap.api.workflow.JobStatus;
 public interface ManagedJobBuilder extends JobBuilder {
     
     @Override
-    ManagedJob get();
+    ManagedJob build();
     
     ManagedJobBuilder jobId(long id);
     

@@ -75,8 +75,8 @@ public class WorkflowRunnerTest {
     public void runSingle_shouldRunSingleJob() {
         Task task1 = taskFactory.createEchoTask("Hello");
         Task task2 = taskFactory.createEchoTask("World");
-        Job job1 = engine.buildJob("job1").tasks(task1, task2).get();
-        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1).get();
+        Job job1 = engine.createJobBuilder("job1").tasks(task1, task2).build();
+        Workflow workflow = engine.createWorkflowBuilder("workflow1").jobs(job1).build();
         repository.addWorkflow(workflow);
 
         assertThat(repository.countJobsWithStatus(JobStatus.READY)).isEqualTo(1);
@@ -86,16 +86,16 @@ public class WorkflowRunnerTest {
     
     @Test
     public void runSingle_shouldRunJobWithDependencies() {
-        Job job1 = engine.buildJob("job1")
+        Job job1 = engine.createJobBuilder("job1")
                 .tasks(taskFactory.createEchoTask("Running job1"))
-                .get();
-        Job job2 = engine.buildJob("job2")
+                .build();
+        Job job2 = engine.createJobBuilder("job2")
                 .tasks(taskFactory.createEchoTask("Running job2"))
-                .get();
+                .build();
         
-        Workflow workflow1 = engine.buildWorkflow("workflow1")
+        Workflow workflow1 = engine.createWorkflowBuilder("workflow1")
                 .link(job1, job2)
-                .get();
+                .build();
         
         repository.addWorkflow(workflow1);
         
@@ -113,25 +113,25 @@ public class WorkflowRunnerTest {
 
     @Test
     public void runSingle_shouldRunJobInDiamondDependencies() {
-        Job job1 = engine.buildJob("job1")
+        Job job1 = engine.createJobBuilder("job1")
                 .tasks(taskFactory.createEchoTask("Running job1"))
-                .get();
-        Job job2 = engine.buildJob("job2")
+                .build();
+        Job job2 = engine.createJobBuilder("job2")
                 .tasks(taskFactory.createEchoTask("Running job2"))
-                .get();
-        Job job3 = engine.buildJob("job3")
+                .build();
+        Job job3 = engine.createJobBuilder("job3")
                 .tasks(taskFactory.createEchoTask("Running job3"))
-                .get();
-        Job job4 = engine.buildJob("job4")
+                .build();
+        Job job4 = engine.createJobBuilder("job4")
                 .tasks(taskFactory.createEchoTask("Running job4"))
-                .get();
+                .build();
         
-        Workflow workflow1 = engine.buildWorkflow("workflow1")
+        Workflow workflow1 = engine.createWorkflowBuilder("workflow1")
                 .link(job1, job2)
                 .link(job1, job3)
                 .link(job2, job4)
                 .link(job3, job4)
-                .get();
+                .build();
         
         repository.addWorkflow(workflow1);
         
@@ -162,11 +162,11 @@ public class WorkflowRunnerTest {
     
     @Test
     public void runSingle_shouldRunSummingJob() {
-        Job job1 = engine.buildJob("job1")
+        Job job1 = engine.createJobBuilder("job1")
                 .tasks(new SummingTask())
                 .input("numbers", Arrays.asList(1, 2, 3))
-                .get();
-        Workflow workflow1 = engine.buildWorkflow("workflow1").jobs(job1).get();
+                .build();
+        Workflow workflow1 = engine.createWorkflowBuilder("workflow1").jobs(job1).build();
         repository.addWorkflow(workflow1);
         runner.runSingle();
         
@@ -179,12 +179,12 @@ public class WorkflowRunnerTest {
 
     @Test
     public void runSingle_shouldRunScalingJob() {
-        Job job1 = engine.buildJob("job1")
+        Job job1 = engine.createJobBuilder("job1")
                 .tasks(new ScalingTask())
                 .input("multiplicand", 2)
                 .input("multiplier", 4)
-                .get();
-        Workflow workflow1 = engine.buildWorkflow("workflow1").jobs(job1).get();
+                .build();
+        Workflow workflow1 = engine.createWorkflowBuilder("workflow1").jobs(job1).build();
         repository.addWorkflow(workflow1);
         runner.runSingle();
         
@@ -198,18 +198,18 @@ public class WorkflowRunnerTest {
     
     @Test
     public void runSingle_shouldRunJobsPassingParameters() {
-        Job job1 = engine.buildJob("job1")
+        Job job1 = engine.createJobBuilder("job1")
                 .tasks(new SummingTask())
                 .input("numbers", Arrays.asList(1, 2, 3))
-                .get();
-        Job job2 = engine.buildJob("job2")
+                .build();
+        Job job2 = engine.createJobBuilder("job2")
                 .tasks(new ScalingTask())
                 .input("multiplier", 4)
-                .get();
+                .build();
         
-        Workflow workflow1 = engine.buildWorkflow("workflow1")
+        Workflow workflow1 = engine.createWorkflowBuilder("workflow1")
                 .link(job1, job2, mapperFactory.createKeyMapper("sum", "multiplicand"))
-                .get();
+                .build();
 
         repository.addWorkflow(workflow1);
 

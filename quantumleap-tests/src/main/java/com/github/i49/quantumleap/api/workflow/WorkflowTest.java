@@ -36,13 +36,13 @@ public class WorkflowTest {
 
     @Test
     public void hasId_shouldReturnFalseByDefault() {
-        Workflow workflow = this.engine.buildWorkflow("workflow1").get();
+        Workflow workflow = this.engine.createWorkflowBuilder("workflow1").build();
         assertThat(workflow.hasId()).isFalse();
     }
 
     @Test
     public void getId_shouldThrowExceptionByDefault() {
-        Workflow workflow = engine.buildWorkflow("workflow1").get();
+        Workflow workflow = engine.createWorkflowBuilder("workflow1").build();
         Throwable thrown = catchThrowable(() -> {
             workflow.getId();
         });
@@ -51,15 +51,15 @@ public class WorkflowTest {
 
     @Test
     public void getName_shouldReturnNameOfWorkflow() {
-        Workflow workflow = engine.buildWorkflow("workflow1").get();
+        Workflow workflow = engine.createWorkflowBuilder("workflow1").build();
         assertThat(workflow.getName()).isEqualTo("workflow1");
     }
 
     @Test
     public void getJobs_shouldReturnAllJobsAssigned() {
-        Job job1 = engine.buildJob("job1").get();
-        Job job2 = engine.buildJob("job2").get();
-        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job1, job2).get();
+        Job job1 = engine.createJobBuilder("job1").build();
+        Job job2 = engine.createJobBuilder("job2").build();
+        Workflow workflow = engine.createWorkflowBuilder("workflow1").jobs(job1, job2).build();
         assertThat(workflow.getJobs()).containsExactly(job1, job2);
     }
 }

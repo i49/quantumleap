@@ -63,8 +63,8 @@ public class BaseTaskTest {
     }
 
     protected Job runTask(Task task) {
-        Job job = engine.buildJob("job1").tasks(task).get();
-        Workflow workflow = engine.buildWorkflow("workflow1").jobs(job).get();
+        Job job = engine.createJobBuilder("job1").tasks(task).build();
+        Workflow workflow = engine.createWorkflowBuilder("workflow1").jobs(job).build();
         repository.addWorkflow(workflow);
         runner.runSingle();
         return repository.findJobById(job.getId());

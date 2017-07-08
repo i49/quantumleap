@@ -43,7 +43,7 @@ public class DefaultTaskFactory implements TaskFactory {
     }
 
     @Override
-    public ScriptTaskBuilder buildShellTask(Path scriptPath) {
+    public ScriptTaskBuilder createShellTaskBuilder(Path scriptPath) {
         checkNotNull(scriptPath, "scriptPath");
         return new ScriptTaskImpl.Builder(scriptPath);
     }

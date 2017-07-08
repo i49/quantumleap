@@ -49,7 +49,7 @@ public interface WorkflowEngine {
      * @return a builder to build a workflow.
      * @throws NullPointerException if given {@code name} is {@code null}.
      */
-    WorkflowBuilder buildWorkflow(String name);
+    WorkflowBuilder createWorkflowBuilder(String name);
 
     /**
      * Creates a builder to build a job.
@@ -58,7 +58,7 @@ public interface WorkflowEngine {
      * @return a builder to build a job.
      * @throws NullPointerException if given {@code name} is {@code null}.
      */
-    JobBuilder buildJob(String name);
+    JobBuilder createJobBuilder(String name);
 
     /**
      * Creates a configuration of a workflow runner.

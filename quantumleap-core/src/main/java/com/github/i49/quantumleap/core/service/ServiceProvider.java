@@ -43,13 +43,13 @@ public class ServiceProvider implements WorkflowEngine {
     }
 
     @Override
-    public WorkflowBuilder buildWorkflow(String name) {
-        return singleton.buildWorkflow(name);
+    public WorkflowBuilder createWorkflowBuilder(String name) {
+        return singleton.createWorkflowBuilder(name);
     }
 
     @Override
-    public JobBuilder buildJob(String name) {
-        return singleton.buildJob(name);
+    public JobBuilder createJobBuilder(String name) {
+        return singleton.createJobBuilder(name);
     }
 
     @Override

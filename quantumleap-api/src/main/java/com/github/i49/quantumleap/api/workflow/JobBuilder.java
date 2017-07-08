@@ -59,5 +59,5 @@ public interface JobBuilder {
      * 
      * @return the instance of {@link Job}.
      */
-    Job get();
+    Job build();
 }

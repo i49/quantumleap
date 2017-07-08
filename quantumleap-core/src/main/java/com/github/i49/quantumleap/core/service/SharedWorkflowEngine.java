@@ -62,13 +62,13 @@ public class SharedWorkflowEngine implements WorkflowEngine {
     }
 
     @Override
-    public WorkflowBuilder buildWorkflow(String name) {
+    public WorkflowBuilder createWorkflowBuilder(String name) {
         checkNotNull(name, "name");
         return workflowFactory.createWorkflowBuilder(name);
     }
 
     @Override
-    public JobBuilder buildJob(String name) {
+    public JobBuilder createJobBuilder(String name) {
         checkNotNull(name, "name");
         return workflowFactory.createJobBuilder(name);
     }

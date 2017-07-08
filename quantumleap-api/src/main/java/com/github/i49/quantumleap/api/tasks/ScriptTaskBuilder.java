@@ -35,5 +35,5 @@ public interface ScriptTaskBuilder {
      * 
      * @return the instance of {@link ScriptTask}.
      */
-    ScriptTask get();
+    ScriptTask build();
 }

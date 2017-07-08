@@ -133,7 +133,7 @@ class JobImpl extends WorkflowComponent implements ManagedJob {
         }
         
         @Override
-        public JobImpl get() {
+        public JobImpl build() {
             return new JobImpl(this);
         }
 
