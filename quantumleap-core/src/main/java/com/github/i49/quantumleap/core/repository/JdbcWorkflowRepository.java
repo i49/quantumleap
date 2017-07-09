@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -40,11 +41,10 @@ import com.github.i49.quantumleap.api.base.WorkflowException;
 import com.github.i49.quantumleap.api.tasks.Task;
 import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.JobStatus;
-import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
 import com.github.i49.quantumleap.api.workflow.Workflow;
+import com.github.i49.quantumleap.api.workflow.WorkflowStatus;
 import com.github.i49.quantumleap.core.workflow.JobLink;
 import com.github.i49.quantumleap.core.workflow.ManagedJob;
-import com.github.i49.quantumleap.core.workflow.ManagedJobBuilder;
 import com.github.i49.quantumleap.core.workflow.ManagedWorkflow;
 import com.github.i49.quantumleap.core.workflow.WorkflowFactory;
 
@@ -60,13 +60,13 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
 
     private final Marshaller<String> textMarshaller;
     private final Marshaller<byte[]> binaryMarshaller;
-    
-    private final WorkflowFactory workflowFactory;
+
+    private final RowMappers mappers;
 
     public JdbcWorkflowRepository(DataSource dataSource, WorkflowFactory workflowFactory) {
-        this.textMarshaller = new JsonBindingMarshaller();
-        this.binaryMarshaller = new BinaryMarshaller();
-        this.workflowFactory = workflowFactory;
+        this.textMarshaller = JsonBindingMarshaller.getInstance();
+        this.binaryMarshaller = BinaryMarshaller.getInstance();
+        this.mappers = new RowMappers(workflowFactory);
         Connection connection = null;
         try {
             connection = connect(dataSource);
@@ -122,21 +122,28 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     public List<Job> findJobsByStatus(JobStatus status) {
         Query q = getQuery(SqlCommand.FIND_JOBS_BY_STATUS);
         q.setEnum(1, status);
-        return q.queryForList(this::mapToJobWithTasks);
+        List<ManagedJob> jobs = q.queryForList(mappers::mapToJob);
+        return jobs.stream().map(job->{
+            job.setTasks(findTasks(job.getId()));
+            return job;
+        }).collect(Collectors.toList());
     }
 
     @Override
     public Optional<Job> findFirstJobByStatus(JobStatus status) {
         Query q = getQuery(SqlCommand.FIND_FIRST_JOB_BY_STATUS);
         q.setEnum(1, status);
-        return q.queryForObject(this::mapToJobWithTasks);
+        return q.queryForObject(mappers::mapToJob).map(job->{
+            job.setTasks(findTasks(job.getId()));
+            return job;
+        });
     }
     
     @Override
     public Job findJobById(long jobId) {
         Query q = getQuery(SqlCommand.FIND_JOB_BY_ID);
         q.setLong(1, jobId);
-        return q.queryForObject(this::mapToJob).get();
+        return q.queryForObject(mappers::mapToJob).get();
     }
     
     @Override
@@ -146,18 +153,20 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         return q.queryForObject(rs->JobStatus.valueOf(rs.getString(1))).get();
     }
     
+    @Override
+    public Workflow getWorkflow(long workflowId) {
+        Query q = getQuery(SqlCommand.FIND_WORKFLOW_BY_ID);
+        q.setLong(1, workflowId);
+        return q.queryForObject(mappers::mapToWorkflow).get();
+    }
+    
     /* EnhancedWorkflowRepository interface */
   
     @Override
     public List<JobLink> findLinksByTarget(ManagedJob target) {
         Query q = getQuery(SqlCommand.FIND_LINKS_BY_TARGET);
         q.setLong(1, target.getId());
-        return q.queryForList(rs->{
-            ManagedJob source = mapToJob(rs);
-            byte[] bytes = rs.getBytes(9); 
-            ParameterSetMapper mapper = unmarshal(bytes, ParameterSetMapper.class);
-            return workflowFactory.createJobLink(source, target, mapper);
-        });
+        return q.queryForList(mappers.mappingToJobLink(target));
     }
     
     @Override
@@ -203,18 +212,20 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     }
 
     private void addWorkflow(ManagedWorkflow workflow) {
+        workflow.setStatus(WorkflowStatus.READY);
         long workflowId = insertWorkflow(workflow);
         for (ManagedJob job: workflow.getManagedJobs()) {
-            addJob(job, workflowId, workflow.getDependenciesOf(job));
+            job.setWorkflowId(workflowId);
+            addJob(job, workflow.getDependenciesOf(job));
         }
         for (JobLink link: workflow.getJobLinks()) {
             insertJobLink(link);
         }
     }
 
-    private void addJob(ManagedJob job, long workflowId, Set<ManagedJob> dependencies) {
+    private void addJob(ManagedJob job, Set<ManagedJob> dependencies) {
         JobStatus status = dependencies.isEmpty() ? JobStatus.READY : JobStatus.WAITING;
-        long jobId = insertJob(job, status, workflowId);
+        long jobId = insertJob(job, status);
         int sequence = 0;
         for (Task task : job.getTasks()) {
             insertTask(task, jobId, sequence++);
@@ -224,17 +235,18 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     private long insertWorkflow(ManagedWorkflow workflow) {
         Query q = getQuery(SqlCommand.INSERT_WORKFLOW);
         q.setString(1, workflow.getName());
+        q.setEnum(2, workflow.getStatus());
         long id = q.updateAndGenerateLong();
         workflow.setId(id);
         return id;
     }
 
-    private long insertJob(ManagedJob job, JobStatus status, long workflowId) {
+    private long insertJob(ManagedJob job, JobStatus status) {
         Query q = getQuery(SqlCommand.INSERT_JOB);
         q.setString(1, job.getName());
         q.setEnum(2, status);
         q.setBytes(3, marshal(job.getInputParameters()));
-        q.setLong(4, workflowId);
+        q.setLong(4, job.getWorkdlowId());
         long jobId = q.updateAndGenerateLong();
         job.setId(jobId);
         return jobId;
@@ -297,100 +309,17 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         }
     }
     
-    private ManagedJob mapToJob(ResultSet resultSet) throws SQLException {
-        return buildJob(resultSet).build();
-    }
-    
-    private Job mapToJobWithTasks(ResultSet resultSet) throws SQLException {
-        long jobId = resultSet.getLong(1);
-        ManagedJobBuilder builder = buildJob(resultSet);
-        buildTasks(jobId, builder);
-        return builder.build();
-    }
-    
-    private ManagedJobBuilder buildJob(ResultSet resultSet) throws SQLException {
-        final long id = resultSet.getLong(1);
-        final String name = resultSet.getString(2);
-        final JobStatus status = JobStatus.valueOf(resultSet.getString(3));
-        @SuppressWarnings("unchecked")
-        final Map<String, Object> jobParameters = unmarshal(resultSet.getBytes(4), Map.class);
-        @SuppressWarnings("unchecked")
-        final Map<String, Object> jobOutput = unmarshal(resultSet.getBytes(5), Map.class);
-        final String standardOutput = resultSet.getString(6);
-        ManagedJobBuilder builder = this.workflowFactory.createJobBuilder(name);
-        builder.jobId(id);
-        if (jobParameters != null) {
-            builder.input(jobParameters);
-        }
-        if (jobOutput != null) {
-            builder.jobOutput(jobOutput);
-        }
-        builder.status(status);
-        if (standardOutput != null) {
-            builder.standardOutput(unmarshalFromString(standardOutput, String[].class));
-        }
-        return builder;
-    }
-    
-    private void buildTasks(long jobId, ManagedJobBuilder builder) throws SQLException {
+    private List<Task> findTasks(long jobId) {
         Query q = getQuery(SqlCommand.FIND_TASK);
         q.setLong(1, jobId);
-        List<Task> tasks = q.queryForList(this::mapToTask);
-        builder.tasks(tasks.toArray(new Task[0]));
-    }
-
-    private Task mapToTask(ResultSet rs) throws SQLException {
-        final String className = rs.getString(3);
-        final String params = rs.getString(4);
-        try {
-            Class<?> type = Class.forName(className);
-            if (Task.class.isAssignableFrom(type)) {
-                Object task = unmarshalFromString(params, type);
-                return (Task) task;
-            } else {
-                // TODO
-                throw new WorkflowException("");
-            }
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            throw new WorkflowException("", e);
-        }
-    }
-    
-    private JobLink mapToLink(ResultSet rs) {
-        // TODO:
-        return null;
-    }
-    
-    private byte[] marshal(Optional<?> object) {
-        if (object.isPresent()) {
-            return this.binaryMarshaller.marshal(object.get());
-        } else {
-            return null;
-        }
+        return q.queryForList(mappers::mapToTask);
     }
     
     private byte[] marshal(Object object) {
         return this.binaryMarshaller.marshal(object);
     }
     
-    private <T> T unmarshal(byte[] bytes, Class<T> type) {
-        return this.binaryMarshaller.unmarshal(bytes, type);
-    }
-    
     private String marshalToString(Object object) {
         return this.textMarshaller.marshal(object);
-    }
-    
-    private String marshalToString(Optional<?> object) {
-        if (object.isPresent()) {
-            return this.textMarshaller.marshal(object.get());
-        } else {
-            return null;
-        }
-    }
-    
-    private <T> T unmarshalFromString(String str, Class<? extends T> type) {
-        return this.textMarshaller.unmarshal(str, type);
     }
 }

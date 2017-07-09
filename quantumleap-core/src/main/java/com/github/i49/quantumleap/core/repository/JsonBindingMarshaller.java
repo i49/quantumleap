@@ -30,11 +30,17 @@ import javax.json.bind.adapter.JsonbAdapter;
 /**
  * A marshaller implemented with Java API for JSON Binding (JSR-367).
  */
-public class JsonBindingMarshaller implements Marshaller<String> {
+class JsonBindingMarshaller implements Marshaller<String> {
     
     private final Jsonb jsonb;
     
-    public JsonBindingMarshaller() {
+    private static final JsonBindingMarshaller singleton = new JsonBindingMarshaller();
+    
+    public static JsonBindingMarshaller getInstance() {
+        return singleton;
+    }
+    
+    private JsonBindingMarshaller() {
         JsonbConfig config = new JsonbConfig()
                 .withAdapters(new PathAdapter());
         this.jsonb = JsonbBuilder.create(config);

@@ -35,6 +35,7 @@ import com.github.i49.quantumleap.core.common.Platforms;
 import com.github.i49.quantumleap.core.repository.EnhancedRepository;
 import com.github.i49.quantumleap.core.workflow.JobLink;
 import com.github.i49.quantumleap.core.workflow.ManagedJob;
+import com.github.i49.quantumleap.core.workflow.ManagedWorkflow;
 import com.github.i49.quantumleap.core.workflow.SimpleParameterSet;
 
 /**
@@ -44,22 +45,14 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
     
     private final Platform platform;
     private final EnhancedRepository repository;
-    private final Path workDirectory;
-    private final Path jobsDirectory;
+    private final DirectoryLayoutStrategy layoutStrategy;
 
     protected AbstractWorkflowRunner(EnhancedRepository repository, RunnerConfiguration config) {
 
         this.platform = Platforms.getCurrent();
         this.repository = repository;
-        this.workDirectory = (Path)config.getProperty(RunnerConfiguration.WORKING_DIRECTORY).get();
-        this.jobsDirectory = this.workDirectory.resolve("jobs");
-                
-        try {
-            prepareDirectory((Boolean)config.getProperty(RunnerConfiguration.WORKING_DIRECTORY_RESET).get());
-        } catch (IOException e) {
-            // TODO
-            throw new WorkflowException("", e);
-        }
+        Path baseDirectory = (Path)config.getProperty(RunnerConfiguration.WORKING_DIRECTORY).get();
+        this.layoutStrategy = new BasicDirectoryLayoutStrategy(baseDirectory);
     }
     
     @Override
@@ -71,17 +64,10 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         return repository;
     }
     
-    protected Path getWorkDirectory() {
-        return workDirectory;
-    }
-    
     protected JobContext prepareJob(ManagedJob job) {
-        ParameterSet inputParameter = job.getInputParameters();
-        for (JobLink link: getRepository().findLinksByTarget(job)) {
-            ParameterSetMapper mapper = link.getMapper();
-            mapper.mapParameterSet(link.getSource().getOutputParameters(), inputParameter);
-        }
-        Path jobDirectory = createDirectoryForJob(job);
+        ManagedWorkflow workflow = (ManagedWorkflow)getRepository().getWorkflow(job.getWorkdlowId());
+        Path jobDirectory = createDirectoryForJob(workflow, job);
+        ParameterSet inputParameter = prepareInputParameters(job);
         return new JobContextImpl(jobDirectory, inputParameter);
     }
     
@@ -95,9 +81,17 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         }
     }
     
-    private Path createDirectoryForJob(ManagedJob job) {
-        String name = String.valueOf(job.getId());
-        Path path = jobsDirectory.resolve(name);
+    private ParameterSet prepareInputParameters(ManagedJob job) {
+        ParameterSet inputParameters = job.getInputParameters();
+        for (JobLink link: getRepository().findLinksByTarget(job)) {
+            ParameterSetMapper mapper = link.getMapper();
+            mapper.mapParameterSet(link.getSource().getOutputParameters(), inputParameters);
+        }
+        return inputParameters;
+    }
+    
+    private Path createDirectoryForJob(ManagedWorkflow workflow, ManagedJob job) {
+        Path path = layoutStrategy.getJobDirectory(workflow, job);
         try {
             Files.createDirectories(path);
         } catch (IOException e) {
@@ -105,17 +99,6 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
             throw new WorkflowException("", e);
         }
         return path;
-    }
-    
-    /**
-     * Prepares working directory of this runner.
-     * 
-     * @param clean
-     * @throws IOException if an I/O error has occurred.
-     */
-    private void prepareDirectory(boolean clean) throws IOException {
-        Files.createDirectories(workDirectory);
-        Files.createDirectories(jobsDirectory);
     }
     
     /**

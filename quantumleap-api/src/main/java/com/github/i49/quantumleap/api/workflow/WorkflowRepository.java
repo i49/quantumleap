@@ -88,4 +88,6 @@ public interface WorkflowRepository extends AutoCloseable {
      * @throws NoSuchElementException if no job has the specified ID.  
      */
     JobStatus getJobStatus(long id);
+
+    Workflow getWorkflow(long id);
 }

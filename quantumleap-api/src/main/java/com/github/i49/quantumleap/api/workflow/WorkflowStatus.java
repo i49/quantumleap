@@ -15,27 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.i49.quantumleap.core.workflow;
-
-import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
+package com.github.i49.quantumleap.api.workflow;
 
 /**
- * Default implementation of {@link WorkflowFactory}.
+ * Status values allowed for a job.
  */
-class WorkflowFactoryImpl implements WorkflowFactory {
-    
-    @Override
-    public ManagedJobBuilder createJobBuilder(String name) {
-        return new JobImpl.Builder(name);
-    }
-
-    @Override
-    public ManagedWorkflowBuilder createWorkflowBuilder(String name) {
-        return new WorkflowImpl.Builder(name);
-    }
-
-    @Override
-    public JobLink createJobLink(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
-        return new JobLinkImpl(source, target, mapper);
-    }
+public enum WorkflowStatus {
+    /** Initial state. */
+    INITIAL, 
+    /** The workflow is ready to run. */
+    READY,
+    /** The workflow is running. */
+    RUNNING,
+    /** The workflow is completed. */
+    COMPLETED
 }

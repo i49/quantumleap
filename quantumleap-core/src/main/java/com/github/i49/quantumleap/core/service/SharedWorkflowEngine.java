@@ -51,7 +51,7 @@ public class SharedWorkflowEngine implements WorkflowEngine {
     private final ParameterSetMapperFactory parameterSetMapperFactory;
 
     public SharedWorkflowEngine() {
-        this.workflowFactory = WorkflowFactory.newInstance();
+        this.workflowFactory = WorkflowFactory.getInstance();
         this.taskFactory = new DefaultTaskFactory();
         this.parameterSetMapperFactory = new DefaultParameterSetMapperFactory();
     }

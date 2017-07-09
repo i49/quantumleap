@@ -22,11 +22,52 @@ import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
 /**
  * A link between jobs.
  */
-public interface JobLink {
+public class JobLink {
 
-    ManagedJob getSource();
+    private final ManagedJob source;
+    private final ManagedJob target;
+    private final ParameterSetMapper mapper;
     
-    ManagedJob getTarget();
+    public static JobLink of(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
+        return new JobLink(source, target, mapper);
+    }
     
-    ParameterSetMapper getMapper();
+    private JobLink(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
+        this.source = source;
+        this.target = target;
+        this.mapper = mapper;
+    }
+    
+    public ManagedJob getSource() {
+        return source;
+    }
+    
+    public ManagedJob getTarget() {
+        return target;
+    }
+    
+    public ParameterSetMapper getMapper() {
+        return mapper;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + System.identityHashCode(source);
+        result = prime * result + System.identityHashCode(target);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        JobLink other = (JobLink)obj;
+        return (source == other.source && target == other.target);
+    }
 }

@@ -54,4 +54,11 @@ public interface Workflow {
      * @return all jobs in this workflow.
      */
     Iterable<Job> getJobs();
+    
+    /**
+     * Returns the status of this workflow.
+     * 
+     * @return the status of this workflow.
+     */
+    WorkflowStatus getStatus();
 }

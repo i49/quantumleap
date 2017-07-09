@@ -50,6 +50,7 @@ enum SqlCommand {
     FIND_LINKS_BY_TARGET,
     FIND_NEXT_JOBS,
     FIND_TASK,
+    FIND_WORKFLOW_BY_ID,
 
     INSERT_JOB,
     INSERT_JOB_LINK,

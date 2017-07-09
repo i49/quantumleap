@@ -20,17 +20,33 @@ package com.github.i49.quantumleap.core.workflow;
 import com.github.i49.quantumleap.api.workflow.ParameterSetMapper;
 
 /**
- *
+ * The factory for producing workflow components.
  */
-public interface WorkflowFactory {
+public class WorkflowFactory {
     
-    static WorkflowFactory newInstance() {
-        return new WorkflowFactoryImpl();
+    private static final WorkflowFactory singleton = new WorkflowFactory();
+    
+    /**
+     * Returns the singleton of this class.
+     * 
+     * @return the singleton of this class.
+     */
+    public static WorkflowFactory getInstance() {
+        return singleton;
     }
     
-    ManagedJobBuilder createJobBuilder(String name);
+    private WorkflowFactory() {
+    }
 
-    ManagedWorkflowBuilder createWorkflowBuilder(String name);
+    public ManagedJobBuilder createJobBuilder(String name) {
+        return new ManagedJobBuilder(name);
+    }
+
+    public ManagedWorkflowBuilder createWorkflowBuilder(String name) {
+        return new ManagedWorkflowBuilder(name);
+    }
     
-    JobLink createJobLink(ManagedJob source, ManagedJob target, ParameterSetMapper mapper);
+    public JobLink createJobLink(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
+        return JobLink.of(source, target, mapper);
+   }
 }

@@ -17,25 +17,74 @@
  */
 package com.github.i49.quantumleap.core.workflow;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
+import com.github.i49.quantumleap.api.workflow.Job;
 import com.github.i49.quantumleap.api.workflow.Workflow;
+import com.github.i49.quantumleap.api.workflow.WorkflowStatus;
 
 /**
- * The job managed by this engine.
+ * The workflow managed by the workflow engine.
  */
-public interface ManagedWorkflow extends Workflow {
+public class ManagedWorkflow extends WorkflowComponent implements Workflow {
 
-    /**
-     * Assigns the identifier of this workflow.
-     * 
-     * @param id the identifier of this workflow.
-     */
-    void setId(long id);
+    private final String name;
+    private final Set<ManagedJob> jobs;
+    private final Set<JobLink> jobLinks;
+    private final Map<ManagedJob, Set<ManagedJob>> dependencyMap;
+
+    private WorkflowStatus status;
+
+    ManagedWorkflow(ManagedWorkflowBuilder builder) {
+        this.name = builder.name;
+        this.jobs = Collections.unmodifiableSet(builder.jobs);
+        this.dependencyMap = Collections.unmodifiableMap(builder.dependencyMap);
+        this.jobLinks = Collections.unmodifiableSet(builder.links);
+
+        this.status = WorkflowStatus.INITIAL;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Iterable<Job> getJobs() {
+        Set<? extends Job> jobs = this.jobs;
+        return (Iterable<Job>)jobs;
+    }
     
-    Iterable<ManagedJob> getManagedJobs();
+    @Override
+    public WorkflowStatus getStatus() {
+        return status;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
     
-    Iterable<JobLink> getJobLinks();
+    public Iterable<ManagedJob> getManagedJobs() {
+        return jobs;
+    }
     
-    Set<ManagedJob> getDependenciesOf(ManagedJob job);
+    public Iterable<JobLink> getJobLinks() {
+        return jobLinks;
+    }
+    
+    public Set<ManagedJob> getDependenciesOf(ManagedJob job) {
+        Set<ManagedJob> dependencies = dependencyMap.get(job);
+        if (dependencies == null) {
+            return Collections.emptySet();
+        }
+        return dependencies;
+    }
+    
+    public void setStatus(WorkflowStatus status) {
+        this.status = status;
+    }
 }

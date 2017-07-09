@@ -31,8 +31,17 @@ import com.github.i49.quantumleap.api.base.WorkflowException;
 /**
  * A binary marshaller implemented with built-in serialization provided by Java language.
  */
-public class BinaryMarshaller implements Marshaller<byte[]> {
+class BinaryMarshaller implements Marshaller<byte[]> {
 
+    private static final BinaryMarshaller singleton = new BinaryMarshaller();
+    
+    public static BinaryMarshaller getInstance() {
+        return singleton;
+    }
+    
+    private BinaryMarshaller() {
+    }
+    
     @Override
     public byte[] marshal(Object object) {
         if (object == null) {
