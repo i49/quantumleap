@@ -1,6 +1,8 @@
-# QuantumLeap
+# Unite
+[![Apache 2.0 License](https://img.shields.io/:license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0
+)
 
-QuantumLeap is a lightweight scientific workflow engine.
+Unite is a lightweight scientific workflow engine.
 
 ## How To Build
 
@@ -12,7 +14,7 @@ All prerequisites to build the project are listed below:
 ### Building with Maven
 The following commands build and install all modules provided by this project into your local Maven repository.
 ```bash
-$ git clone https://github.com/i49/quantumleap.git
-$ cd quantumleap/quantumleap
+$ git clone https://github.com/i49/unite.git
+$ cd unite/unite
 $ mvn
 ```
