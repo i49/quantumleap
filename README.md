@@ -15,6 +15,8 @@ All prerequisites to build the project are listed below:
 The following commands build and install all modules provided by this project into your local Maven repository.
 ```bash
 $ git clone https://github.com/i49/unite.git
-$ cd unite/unite
-$ mvn
+$ cd unite/unite-maven-plugin
+$ mvn install
+$ cd ../unite
+$ mvn install
 ```
