@@ -29,11 +29,24 @@ public class ScriptTaskTest extends BaseTaskTest {
 
     @Test
     public void run_shouldRunScript() {
-        Path path = Paths.get("target/test-classes/hello.bat");
+        // given
+        Path dir = Paths.get("target/test-classes");
+        Path path = dir.resolve("hello" + getScriptExtension());
         Task task = factory.createShellTaskBuilder(path)
                 .arguments("John Smith")
                 .build();
+        
+        // when
         runTask(task);
+    }
+    
+    private static String getScriptExtension() {
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("windows")) {
+            return ".bat";
+        } else {
+            return ".sh";
+        }
     }
 }
 

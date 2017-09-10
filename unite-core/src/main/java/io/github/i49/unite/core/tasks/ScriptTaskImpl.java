@@ -41,7 +41,7 @@ public class ScriptTaskImpl implements ScriptTask {
     
     @Override
     public void run(TaskContext context) {
-        ShellLauncher launcher = ShellLauncher.get(context.getPlatform());
+        ShellLauncher launcher = ShellLauncher.launcherFor(context.getPlatform());
         launcher.setDirectory(context.getJobDirectory());
         Path scriptPath = getScriptPath().toAbsolutePath();
         launcher.launchScript(scriptPath.toString(), this.arguments);

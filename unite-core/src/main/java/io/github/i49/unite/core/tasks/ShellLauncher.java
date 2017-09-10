@@ -30,10 +30,12 @@ import io.github.i49.unite.api.base.WorkflowException;
  */
 abstract class ShellLauncher {
 
-    static ShellLauncher get(Platform platform) {
+    static ShellLauncher launcherFor(Platform platform) {
         switch (platform) {
         case WINDOWS:
             return new WindowsShellLauncher();
+        case UNIX:
+            return new LinuxShellLauncher();
         default:
             break;
         }
@@ -82,6 +84,23 @@ abstract class ShellLauncher {
             List<String> commands = new ArrayList<>();
             commands.add("cmd.exe");
             commands.add("/C");
+            commands.add(scriptPath.toString());
+            if (arguments.size() > 0) {
+                commands.addAll(arguments);
+            }
+            return commands;
+        }
+    }
+    
+    /**
+     * {@link ShellLauncher} for Linux platform.
+     */
+    private static class LinuxShellLauncher extends ShellLauncher {
+
+        @Override
+        protected List<String> buildCommands(String scriptPath, List<String> arguments) {
+            List<String> commands = new ArrayList<>();
+            commands.add("/bin/sh");
             commands.add(scriptPath.toString());
             if (arguments.size() > 0) {
                 commands.addAll(arguments);
