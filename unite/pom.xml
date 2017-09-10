@@ -90,6 +90,19 @@
                                         <ignore />
                                     </action> 
                                 </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>io.github.i49</groupId>
+                                        <artifactId>unite-maven-plugin</artifactId>
+                                        <versionRange>[1.0.0-SNAPSHOT,)</versionRange>
+                                        <goals>
+                                            <goal>template</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>   
+                                    <action>
+                                        <ignore />
+                                    </action> 
+                                </pluginExecution>
                             </pluginExecutions>    
                         </lifecycleMappingMetadata>    
                     </configuration>    

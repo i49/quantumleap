@@ -15,18 +15,18 @@
 --
 
 CREATE TABLE workflow (
-    workflow_id BIGINT ${SERIAL} PRIMARY KEY,
-    workflow_name ${LONGVARCHAR} NOT NULL,
+    workflow_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    workflow_name MEDIUMTEXT NOT NULL,
     workflow_status VARCHAR(10) NOT NULL
 );
 
 CREATE TABLE job (
-    job_id BIGINT ${SERIAL} PRIMARY KEY,
-    job_name ${LONGVARCHAR} NOT NULL,
+    job_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    job_name MEDIUMTEXT NOT NULL,
     job_status VARCHAR(10) NOT NULL,
     job_input BLOB,
     job_output BLOB,
-    standard_output LONGVARCHAR, 
+    standard_output MEDIUMTEXT, 
     workflow_id BIGINT NOT NULL,
 
     FOREIGN KEY (workflow_id) REFERENCES workflow (workflow_id)
@@ -35,12 +35,12 @@ CREATE TABLE job (
 CREATE TABLE job_link (
     source_job_id BIGINT,
     target_job_id BIGINT,
-    mapper_class ${LONGVARCHAR} NOT NULL,
+    mapper_class MEDIUMTEXT NOT NULL,
     mapper_object BLOB,
     
     PRIMARY KEY (source_job_id, target_job_id),
     FOREIGN KEY (source_job_id) REFERENCES job (job_id),
-    FOREIGN KEY (target_job_id) REFERENCES Job (job_id)
+    FOREIGN KEY (target_job_id) REFERENCES job (job_id)
 );
 
 CREATE TABLE task (
