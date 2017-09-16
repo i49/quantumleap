@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.runner;
+package io.github.i49.unite.server.runner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -29,7 +27,6 @@ import io.github.i49.unite.api.base.WorkflowException;
 import io.github.i49.unite.api.tasks.TaskContext;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.ParameterSetMapper;
-import io.github.i49.unite.api.workflow.RunnerConfiguration;
 import io.github.i49.unite.api.workflow.WorkflowRunner;
 
 import io.github.i49.unite.core.common.Platforms;
@@ -48,11 +45,10 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
     private final EnhancedRepository repository;
     private final DirectoryLayoutStrategy layoutStrategy;
 
-    protected AbstractWorkflowRunner(EnhancedRepository repository, RunnerConfiguration config) {
-
+    protected AbstractWorkflowRunner(EnhancedRepository repository, Configuration config) {
         this.platform = Platforms.getCurrent();
         this.repository = repository;
-        Path baseDirectory = (Path)config.getProperty(RunnerConfiguration.WORKING_DIRECTORY).get();
+        Path baseDirectory = config.getRunner().getDirectoryAsPath();
         this.layoutStrategy = new BasicDirectoryLayoutStrategy(baseDirectory);
     }
     

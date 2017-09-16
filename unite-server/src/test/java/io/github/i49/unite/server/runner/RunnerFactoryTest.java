@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +14,32 @@
  * limitations under the License.
  */
 
+package io.github.i49.unite.server.runner;
+
+import static org.assertj.core.api.Assertions.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import io.github.i49.unite.api.workflow.WorkflowRunner;
+
 /**
- * Provides workflow runner implementation.
  */
-package io.github.i49.unite.core.runner;
+public class RunnerFactoryTest {
+    
+    private RunnerFactory sut;
+    
+    @Before
+    public void setUp() {
+        sut = new RunnerFactory();
+    }
+    
+    @Test
+    public void createRunner_shoudCreateRunner() {
+        // when
+        WorkflowRunner runner = sut.createRunner();
+        
+        // then
+        assertThat(runner).isNotNull();
+    }
+}

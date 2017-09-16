@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,29 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.api.tasks;
+package io.github.i49.unite.server.runner.tasks;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
+
+import io.github.i49.unite.api.tasks.ScriptTask;
+import io.github.i49.unite.api.tasks.Task;
 
 /**
  * Unit test of {@link ScriptTask}.
  */
-public class ScriptTaskTest extends BaseTaskTest {
+public class ScriptTaskTest {
 
+    @ClassRule
+    public static final TaskRunner runner = new TaskRunner();
+
+    @Before
+    public void setUp() {
+        runner.reset();
+    }
+    
     @Test
     public void run_shouldRunScript() {
         // given
         Path dir = Paths.get("target/test-classes");
         Path path = dir.resolve("hello" + getScriptExtension());
-        Task task = factory.createShellTaskBuilder(path)
+        Task task = runner.getFactory().createShellTaskBuilder(path)
                 .arguments("John Smith")
                 .build();
         
         // when
-        runTask(task);
+        runner.runTask(task);
     }
     
     private static String getScriptExtension() {

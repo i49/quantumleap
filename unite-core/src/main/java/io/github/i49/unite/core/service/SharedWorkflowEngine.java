@@ -35,8 +35,6 @@ import io.github.i49.unite.core.mappers.DefaultParameterSetMapperFactory;
 import io.github.i49.unite.core.repository.EnhancedRepository;
 import io.github.i49.unite.core.repository.JdbcWorkflowRepository;
 import io.github.i49.unite.core.repository.SimpleDataSource;
-import io.github.i49.unite.core.runner.SerialWorkflowRunner;
-import io.github.i49.unite.core.runner.SimpleRunnerConfiguration;
 import io.github.i49.unite.core.tasks.DefaultTaskFactory;
 import io.github.i49.unite.core.workflow.WorkflowFactory;
 
@@ -76,7 +74,7 @@ public class SharedWorkflowEngine implements WorkflowEngine {
 
     @Override
     public RunnerConfiguration createRunnerConfiguration() {
-        return new SimpleRunnerConfiguration();
+        return null;
     }
 
     @Override
@@ -89,7 +87,7 @@ public class SharedWorkflowEngine implements WorkflowEngine {
         checkNotNull(repository, "repository");
         checkNotNull(configuration, "configuration");
         EnhancedRepository enhanced = checkRealType(repository, EnhancedRepository.class, "repository"); 
-        return new SerialWorkflowRunner(enhanced, configuration);
+        return null;
     }
     
     @Override

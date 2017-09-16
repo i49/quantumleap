@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,26 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.api.tasks;
+package io.github.i49.unite.server.runner.tasks;
 
 import static org.assertj.core.api.Assertions.*;
 
+import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 
+import io.github.i49.unite.api.tasks.EchoTask;
+import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
 
 /**
  * Unit test of {@link EchoTask}.
  */
-public class EchoTaskTest extends BaseTaskTest {
+public class EchoTaskTest {
+    
+    @ClassRule
+    public static final TaskRunner runner = new TaskRunner();
+    
+    @Before
+    public void setUp() {
+        runner.reset();
+    }
 
     @Test
     public void run_shouldEchoMessage() {
+        // given
         String message = "The quick brown fox jumps over the lazy dog";
-        Task task = factory.createEchoTask(message);
-        Job job = runTask(task);
+        Task task = runner.getFactory().createEchoTask(message);
         
+        // when
+        Job job = runner.runTask(task);
+        
+        // then
         assertThat(job.getStatus()).isSameAs(JobStatus.COMPLETED);
         assertThat(job.getStandardOutput()).containsExactly(message);
     }

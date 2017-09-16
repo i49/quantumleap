@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.runner;
+package io.github.i49.unite.server.runner;
 
 import java.util.Optional;
 
 import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
-import io.github.i49.unite.api.workflow.RunnerConfiguration;
 import io.github.i49.unite.api.workflow.WorkflowRunner;
 
 import io.github.i49.unite.core.repository.EnhancedRepository;
@@ -38,7 +35,7 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
     @SuppressWarnings("unused")
     private boolean canceled;
 
-    public SerialWorkflowRunner(EnhancedRepository repository, RunnerConfiguration configuration) {
+    public SerialWorkflowRunner(EnhancedRepository repository, Configuration configuration) {
         super(repository, configuration);
         this.totalJobsDone = 0;
         this.running = false;
