@@ -15,11 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.api.workflow;
+package io.github.i49.unite.server.runner;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -32,21 +31,18 @@ import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
+import io.github.i49.unite.api.workflow.ParameterSetMapperFactory;
 import io.github.i49.unite.api.workflow.Workflow;
 import io.github.i49.unite.api.workflow.WorkflowEngine;
 import io.github.i49.unite.api.workflow.WorkflowRepository;
-import io.github.i49.unite.api.workflow.WorkflowRunner;
 
-/**
- * Unit test of {@link WorkflowRunner}.
- */
-public class WorkflowRunnerTest {
+public class WorkflowRunTest {
 
     private static WorkflowEngine engine;
     private static WorkflowRepository repository;
     private static TaskFactory taskFactory;
     private static ParameterSetMapperFactory mapperFactory;
-    private WorkflowRunner runner;
+    private static WorkflowRunner runner;
 
     @BeforeClass
     public static void setUpOnce() {
@@ -54,6 +50,7 @@ public class WorkflowRunnerTest {
         repository = engine.createRepository();
         taskFactory = engine.getTaskFactory();
         mapperFactory = engine.getParameterSetMapperFactory();
+        runner = new RunnerFactory().createRunner();
     }
 
     @AfterClass
@@ -66,9 +63,6 @@ public class WorkflowRunnerTest {
     @Before
     public void setUp() {
         repository.clear();
-        RunnerConfiguration config = engine.createRunnerConfiguration()
-                .withDirectory(Paths.get("target/work"));
-        runner = engine.createRunner(repository, config);
     }
 
     @Test

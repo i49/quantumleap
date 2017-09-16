@@ -15,21 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.api.workflow;
+package io.github.i49.unite.server.runner;
 
-import java.util.Map;
+import java.util.List;
 
 import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.tasks.TaskContext;
 
-public class ScalingTask implements Task {
+public class SummingTask implements Task {
 
     @Override
     public void run(TaskContext context) {
-        Map<String, Object> input = context.getInputParameters();
-        int multiplicand = (int)input.get("multiplicand");
-        int multiplier = (int)input.get("multiplier");
-        int answer = multiplicand * multiplier;
-        context.getOutputParameters().put("answer", answer);
+        @SuppressWarnings("unchecked")
+        List<Integer> numbers = (List<Integer>)context.getInputParameters().get("numbers");
+        context.getOutputParameters().put("sum", sum(numbers));
+    }
+    
+    private static int sum(List<Integer> numbers) {
+        Integer sum = numbers.stream().reduce(0, (x, y)->x + y);
+        return sum;
     }
 }

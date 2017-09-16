@@ -27,8 +27,6 @@ import io.github.i49.unite.api.base.WorkflowException;
 import io.github.i49.unite.api.tasks.TaskContext;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.ParameterSetMapper;
-import io.github.i49.unite.api.workflow.WorkflowRunner;
-
 import io.github.i49.unite.core.common.Platforms;
 import io.github.i49.unite.core.repository.EnhancedRepository;
 import io.github.i49.unite.core.workflow.JobLink;

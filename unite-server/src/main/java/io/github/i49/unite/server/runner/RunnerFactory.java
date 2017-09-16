@@ -25,11 +25,10 @@ import java.nio.file.Paths;
 import org.yaml.snakeyaml.Yaml;
 
 import io.github.i49.unite.api.workflow.WorkflowEngine;
-import io.github.i49.unite.api.workflow.WorkflowRunner;
 import io.github.i49.unite.core.repository.EnhancedRepository;
 
 /**
- *
+ * Factory for creating workflow runner.
  */
 public class RunnerFactory {
     
@@ -38,6 +37,11 @@ public class RunnerFactory {
     public RunnerFactory() {
     }
     
+    /**
+     * Creates a workflow runner with loaded configuration.
+     *
+     * @return newly created workflow.
+     */
     public WorkflowRunner createRunner() {
         Configuration config = findAndLoadConfiguration();
         EnhancedRepository repository = createRepository();

@@ -21,8 +21,6 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.github.i49.unite.api.workflow.WorkflowRunner;
-
 /**
  */
 public class RunnerFactoryTest {

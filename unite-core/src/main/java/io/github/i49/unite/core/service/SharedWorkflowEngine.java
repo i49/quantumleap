@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,21 +16,16 @@
 package io.github.i49.unite.core.service;
 
 import static io.github.i49.unite.core.common.Preconditions.checkNotNull;
-import static io.github.i49.unite.core.common.Preconditions.checkRealType;
 
 import javax.sql.DataSource;
 
 import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.JobBuilder;
 import io.github.i49.unite.api.workflow.ParameterSetMapperFactory;
-import io.github.i49.unite.api.workflow.RunnerConfiguration;
 import io.github.i49.unite.api.workflow.WorkflowBuilder;
 import io.github.i49.unite.api.workflow.WorkflowEngine;
 import io.github.i49.unite.api.workflow.WorkflowRepository;
-import io.github.i49.unite.api.workflow.WorkflowRunner;
-
 import io.github.i49.unite.core.mappers.DefaultParameterSetMapperFactory;
-import io.github.i49.unite.core.repository.EnhancedRepository;
 import io.github.i49.unite.core.repository.JdbcWorkflowRepository;
 import io.github.i49.unite.core.repository.SimpleDataSource;
 import io.github.i49.unite.core.tasks.DefaultTaskFactory;
@@ -72,24 +65,6 @@ public class SharedWorkflowEngine implements WorkflowEngine {
         return workflowFactory.createJobBuilder(name);
     }
 
-    @Override
-    public RunnerConfiguration createRunnerConfiguration() {
-        return null;
-    }
-
-    @Override
-    public WorkflowRunner createRunner(WorkflowRepository repository) {
-        return createRunner(repository, createRunnerConfiguration());
-    }
-    
-    @Override
-    public WorkflowRunner createRunner(WorkflowRepository repository, RunnerConfiguration configuration) {
-        checkNotNull(repository, "repository");
-        checkNotNull(configuration, "configuration");
-        EnhancedRepository enhanced = checkRealType(repository, EnhancedRepository.class, "repository"); 
-        return null;
-    }
-    
     @Override
     public ParameterSetMapperFactory getParameterSetMapperFactory() {
         return parameterSetMapperFactory;

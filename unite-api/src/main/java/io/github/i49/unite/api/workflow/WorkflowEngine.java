@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +15,6 @@
  */
 package io.github.i49.unite.api.workflow;
 
-import io.github.i49.unite.api.base.WorkflowException;
 import io.github.i49.unite.api.tasks.TaskFactory;
 
 /**
@@ -59,34 +56,6 @@ public interface WorkflowEngine {
      * @throws NullPointerException if given {@code name} is {@code null}.
      */
     JobBuilder createJobBuilder(String name);
-
-    /**
-     * Creates a configuration of a workflow runner.
-     * 
-     * @return a configuration of a workflow runner.
-     */
-    RunnerConfiguration createRunnerConfiguration();
-    
-    /**
-     * Creates a workflow runner with default configuration.
-     * 
-     * @param repository the repository where workflows to run are stored, cannot be {@code null}.
-     * @return newly created instance of {@link WorkflowRunner}.
-     * @throws NullPointerException if given {@code repository} is {@code null}.
-     * @throws WorkflowException if given {@code repository} is not instantiated by this engine.
-     */
-    WorkflowRunner createRunner(WorkflowRepository repository);
-
-    /**
-     * Creates a workflow runner with specified configuration.
-     * 
-     * @param repository the repository where workflows to run are stored, cannot be {@code null}.
-     * @param configuration the configuration of the runner, cannot be {@code null}.
-     * @return newly created instance of {@link WorkflowRunner}.
-     * @throws NullPointerException if one or more parameters are {@code null}.
-     * @throws WorkflowException if given {@code repository} is not instantiated by this engine.
-     */
-    WorkflowRunner createRunner(WorkflowRepository repository, RunnerConfiguration configuration);
 
     ParameterSetMapperFactory getParameterSetMapperFactory();
     

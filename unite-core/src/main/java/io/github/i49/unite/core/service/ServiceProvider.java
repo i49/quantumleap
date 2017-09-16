@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,11 +18,9 @@ package io.github.i49.unite.core.service;
 import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.JobBuilder;
 import io.github.i49.unite.api.workflow.ParameterSetMapperFactory;
-import io.github.i49.unite.api.workflow.RunnerConfiguration;
 import io.github.i49.unite.api.workflow.WorkflowBuilder;
 import io.github.i49.unite.api.workflow.WorkflowEngine;
 import io.github.i49.unite.api.workflow.WorkflowRepository;
-import io.github.i49.unite.api.workflow.WorkflowRunner;
 
 /**
  * An implementation of {@link WorkflowEngine}. This class just delegates all
@@ -50,21 +46,6 @@ public class ServiceProvider implements WorkflowEngine {
     @Override
     public JobBuilder createJobBuilder(String name) {
         return singleton.createJobBuilder(name);
-    }
-
-    @Override
-    public RunnerConfiguration createRunnerConfiguration() {
-        return singleton.createRunnerConfiguration();
-    }
-
-    @Override
-    public WorkflowRunner createRunner(WorkflowRepository repository) {
-        return singleton.createRunner(repository);
-    }
-
-    @Override
-    public WorkflowRunner createRunner(WorkflowRepository repository, RunnerConfiguration configuration) {
-        return singleton.createRunner(repository, configuration);
     }
 
     @Override
