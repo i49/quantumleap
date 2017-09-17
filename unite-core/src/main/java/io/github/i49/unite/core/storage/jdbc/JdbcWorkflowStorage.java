@@ -29,11 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import javax.sql.DataSource;
 
 import io.github.i49.unite.api.base.WorkflowException;
 import io.github.i49.unite.api.tasks.Task;
@@ -57,6 +54,7 @@ import io.github.i49.unite.core.workflow.ManagedWorkflow;
  */
 public class JdbcWorkflowStorage implements WorkflowStorage {
     
+    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(JdbcWorkflowStorage.class.getName());
  
     private final Connection connection;

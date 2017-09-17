@@ -28,6 +28,11 @@
             <artifactId>javax.json.bind-api</artifactId>
             <version>1.0.0-RC2</version>
         </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.18</version>
+        </dependency>
         <!-- test-->
         <dependency>
             <groupId>junit</groupId>

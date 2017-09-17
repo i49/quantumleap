@@ -50,11 +50,4 @@ public class StorageConfiguration {
     public void setPassword(String password) {
         this.password = password;
     }
-    
-    public static StorageConfiguration getDefault() {
-        StorageConfiguration config = new StorageConfiguration();
-        config.setUrl("jdbc:hsqldb:mem:workflowdb;shutdown=true");
-        config.setUsername("SA");
-        return config;
-    }
 }

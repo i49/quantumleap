@@ -23,9 +23,9 @@ import io.github.i49.unite.api.workflow.ParameterSetMapperFactory;
 import io.github.i49.unite.api.workflow.WorkflowBuilder;
 import io.github.i49.unite.api.workflow.WorkflowEngine;
 import io.github.i49.unite.api.workflow.WorkflowRepository;
+import io.github.i49.unite.core.common.Configurations;
 import io.github.i49.unite.core.mappers.DefaultParameterSetMapperFactory;
 import io.github.i49.unite.core.repository.DefaultWorkflowRepository;
-import io.github.i49.unite.core.storage.StorageConfiguration;
 import io.github.i49.unite.core.storage.WorkflowStorage;
 import io.github.i49.unite.core.storage.util.WorkflowStorages;
 import io.github.i49.unite.core.tasks.DefaultTaskFactory;
@@ -48,7 +48,7 @@ public class SharedWorkflowEngine implements WorkflowEngine {
 
     @Override
     public WorkflowRepository createRepository() {
-        WorkflowStorage storage = createStorage();
+        WorkflowStorage storage = createWorkflowStorage();
         return new DefaultWorkflowRepository(storage);
     }
 
@@ -74,8 +74,8 @@ public class SharedWorkflowEngine implements WorkflowEngine {
         return taskFactory;
     }
     
-    private WorkflowStorage createStorage() {
-        StorageConfiguration config = StorageConfiguration.getDefault();
-        return WorkflowStorages.create(config);
+    private WorkflowStorage createWorkflowStorage() {
+        ServiceConfiguration config = Configurations.load(ServiceConfiguration.class);
+        return WorkflowStorages.create(config.getRepository());
     }
 }

@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package io.github.i49.unite.core.common;
+package io.github.i49.unite.core.service;
 
-import java.text.MessageFormat;
+import io.github.i49.unite.core.storage.StorageConfiguration;
 
 /**
- *
+ * Configuration for workflow service.
+ * 
+ * @author i49
  */
-public interface MessageProvider {
+public class ServiceConfiguration {
+    
+    private StorageConfiguration repository;
 
-    /**
-     * Returns the pattern of the message.
-     * 
-     * @return the pattern of the message.
-     */
-    @Override
-    String toString();
+    public StorageConfiguration getRepository() {
+        return repository;
+    }
 
-    default String with(Object... args) {
-        return MessageFormat.format(toString(), args);
+    public void setRepository(StorageConfiguration repository) {
+        this.repository = repository;
     }
 }

@@ -28,14 +28,14 @@ import io.github.i49.unite.core.storage.StorageConfiguration;
  */
 public class ServerConfiguration {
 
-    private RepositoryConfiguration repository;
+    private StorageConfiguration repository;
     private RunnerConfiguration runner;
     
-    public RepositoryConfiguration getRepository() {
+    public StorageConfiguration getRepository() {
         return repository;
     }
     
-    public void setRepository(RepositoryConfiguration config) {
+    public void setRepository(StorageConfiguration config) {
         this.repository = config;
     }
     
@@ -45,9 +45,6 @@ public class ServerConfiguration {
     
     public void setRunner(RunnerConfiguration config) {
         this.runner = config;
-    }
-    
-    public static class RepositoryConfiguration extends StorageConfiguration {
     }
     
     public static class RunnerConfiguration {
