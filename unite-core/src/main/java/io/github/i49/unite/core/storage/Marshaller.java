@@ -15,14 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.repository;
+package io.github.i49.unite.core.storage;
 
 /**
  * Interface responsible for marshalling of Java objects.
  * 
  * @param <R> the type of the content produced by marshalling.
  */
-interface Marshaller<R> {
+public interface Marshaller<R> {
 
     /**
      * Marshals the given object.

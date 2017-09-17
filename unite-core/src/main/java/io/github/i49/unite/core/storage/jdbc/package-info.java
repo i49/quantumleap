@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.repository;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
+ * @author i49
  *
  */
-@FunctionalInterface
-public interface RowMapper<T> {
-
-    T mapRow(ResultSet resultSet) throws SQLException;
-}
+package io.github.i49.unite.core.storage.jdbc;

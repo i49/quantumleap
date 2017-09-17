@@ -27,12 +27,12 @@ import io.github.i49.unite.api.base.WorkflowException;
 import io.github.i49.unite.api.tasks.TaskContext;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.ParameterSetMapper;
-import io.github.i49.unite.core.common.Platforms;
-import io.github.i49.unite.core.repository.EnhancedRepository;
+import io.github.i49.unite.core.storage.WorkflowStorage;
 import io.github.i49.unite.core.workflow.JobLink;
 import io.github.i49.unite.core.workflow.ManagedJob;
 import io.github.i49.unite.core.workflow.ManagedWorkflow;
 import io.github.i49.unite.core.workflow.SimpleParameterSet;
+import io.github.i49.unite.server.base.Platforms;
 
 /**
  * A skeletal implementation of {@link WorkflowRunner}.
@@ -40,12 +40,12 @@ import io.github.i49.unite.core.workflow.SimpleParameterSet;
 abstract class AbstractWorkflowRunner implements WorkflowRunner {
     
     private final Platform platform;
-    private final EnhancedRepository repository;
+    private final WorkflowStorage storage;
     private final DirectoryLayoutStrategy layoutStrategy;
 
-    protected AbstractWorkflowRunner(EnhancedRepository repository, Configuration config) {
+    protected AbstractWorkflowRunner(ServerConfiguration config, WorkflowStorage storage) {
         this.platform = Platforms.getCurrent();
-        this.repository = repository;
+        this.storage = storage;
         Path baseDirectory = config.getRunner().getDirectoryAsPath();
         this.layoutStrategy = new BasicDirectoryLayoutStrategy(baseDirectory);
     }
@@ -55,12 +55,12 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         return platform;
     }
     
-    protected EnhancedRepository getRepository() {
-        return repository;
+    protected WorkflowStorage getStorage() {
+        return storage;
     }
     
     protected JobContext prepareJob(ManagedJob job) {
-        ManagedWorkflow workflow = (ManagedWorkflow)getRepository().getWorkflow(job.getWorkdlowId());
+        ManagedWorkflow workflow = (ManagedWorkflow)getStorage().getWorkflow(job.getWorkdlowId());
         Path jobDirectory = createDirectoryForJob(workflow, job);
         ParameterSet inputParameter = prepareInputParameters(job);
         return new JobContextImpl(jobDirectory, inputParameter);
@@ -70,15 +70,15 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
         JobStatus status = JobStatus.COMPLETED;
         Map<String, Object> jobOutput = context.getOutputParameters();
         String[] lines = context.getStandardOutputLines();
-        getRepository().storeJob(job, status, jobOutput, lines);
-        for (long nextId: getRepository().findNextJobs(job)) {
-            getRepository().updateJobStatusIfReady(nextId);
+        getStorage().storeJob(job, status, jobOutput, lines);
+        for (long nextId: getStorage().findNextJobs(job)) {
+            getStorage().updateJobStatusIfReady(nextId);
         }
     }
     
     private ParameterSet prepareInputParameters(ManagedJob job) {
         ParameterSet inputParameters = job.getInputParameters();
-        for (JobLink link: getRepository().findLinksByTarget(job)) {
+        for (JobLink link: getStorage().findLinksByTarget(job)) {
             ParameterSetMapper mapper = link.getMapper();
             mapper.mapParameterSet(link.getSource().getOutputParameters(), inputParameters);
         }

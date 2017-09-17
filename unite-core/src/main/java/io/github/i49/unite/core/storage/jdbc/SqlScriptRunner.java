@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.repository;
+package io.github.i49.unite.core.storage.jdbc;
 
 import static io.github.i49.unite.core.common.Message.RESOURCE_CANNOT_BE_READ;
 import static io.github.i49.unite.core.common.Message.SQL_SCRIPT_FAILED;
@@ -38,12 +36,12 @@ import io.github.i49.unite.api.base.WorkflowException;
 /**
  * A helper class for running given SQL script.
  */
-class SqlScriptRunner {
+public class SqlScriptRunner {
 
     private final Connection conncetion;
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-    SqlScriptRunner(Connection conncetion) {
+    public SqlScriptRunner(Connection conncetion) {
         this.conncetion = conncetion;
     }
 
@@ -52,7 +50,7 @@ class SqlScriptRunner {
      * 
      * @param resourceName the name of the resource file, which must be on the current classpath.
      */
-    void runScript(String resourceName) {
+    public void runScript(String resourceName) {
         try (InputStream in = getClass().getResourceAsStream(resourceName)) {
             try (Reader reader = new InputStreamReader(in, DEFAULT_CHARSET)) {
                 runScript(reader);
@@ -64,14 +62,14 @@ class SqlScriptRunner {
         }
     }
 
-    void runScript(Reader reader) throws IOException, SQLException {
+    public void runScript(Reader reader) throws IOException, SQLException {
         try (BufferedReader bufferedReader = new BufferedReader(reader)) {
             List<String> lines = bufferedReader.lines().collect(Collectors.toList());
             runScript(lines);
         }
     }
 
-    void runScript(List<String> lines) throws SQLException {
+    public void runScript(List<String> lines) throws SQLException {
         String[] commands = parseScript(lines);
         execute(commands);
     }

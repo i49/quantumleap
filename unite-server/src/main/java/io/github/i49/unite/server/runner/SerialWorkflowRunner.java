@@ -20,7 +20,7 @@ import java.util.Optional;
 import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
-import io.github.i49.unite.core.repository.EnhancedRepository;
+import io.github.i49.unite.core.storage.WorkflowStorage;
 import io.github.i49.unite.core.workflow.ManagedJob;
 
 /**
@@ -33,8 +33,8 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
     @SuppressWarnings("unused")
     private boolean canceled;
 
-    public SerialWorkflowRunner(EnhancedRepository repository, Configuration configuration) {
-        super(repository, configuration);
+    public SerialWorkflowRunner(ServerConfiguration config, WorkflowStorage storage) {
+        super(config, storage);
         this.totalJobsDone = 0;
         this.running = false;
         this.canceled = false;
@@ -52,7 +52,7 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
 
     @Override
     public long runSingle() {
-        Optional<Job> job = getRepository().findFirstJobByStatus(JobStatus.READY);
+        Optional<Job> job = getStorage().findFirstJobByStatus(JobStatus.READY);
         if (job.isPresent()) {
             launchJob((ManagedJob)job.get());
             this.totalJobsDone++;

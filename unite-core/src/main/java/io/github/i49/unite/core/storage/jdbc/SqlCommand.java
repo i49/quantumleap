@@ -1,6 +1,4 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.repository;
+package io.github.i49.unite.core.storage.jdbc;
 
-import static io.github.i49.unite.core.common.Message.RESOURCE_IS_MISSING;
-import static io.github.i49.unite.core.common.Message.STATEMENT_IS_UNDEFINED;
+import static io.github.i49.unite.core.common.Message.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,9 +27,9 @@ import java.util.MissingResourceException;
 import java.util.Properties;
 
 /**
- * All SQL commands used by {@link JdbcWorkflowRepository}.
+ * All SQL commands used by {@link JdbcWorkflowStorage}.
  */
-enum SqlCommand {
+public enum SqlCommand {
 
     COUNT_JOBS,
     COUNT_JOBS_BY_STATUS,

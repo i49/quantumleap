@@ -17,8 +17,6 @@ package io.github.i49.unite.core.service;
 
 import static io.github.i49.unite.core.common.Preconditions.checkNotNull;
 
-import javax.sql.DataSource;
-
 import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.JobBuilder;
 import io.github.i49.unite.api.workflow.ParameterSetMapperFactory;
@@ -26,8 +24,10 @@ import io.github.i49.unite.api.workflow.WorkflowBuilder;
 import io.github.i49.unite.api.workflow.WorkflowEngine;
 import io.github.i49.unite.api.workflow.WorkflowRepository;
 import io.github.i49.unite.core.mappers.DefaultParameterSetMapperFactory;
-import io.github.i49.unite.core.repository.JdbcWorkflowRepository;
-import io.github.i49.unite.core.repository.SimpleDataSource;
+import io.github.i49.unite.core.repository.DefaultWorkflowRepository;
+import io.github.i49.unite.core.storage.StorageConfiguration;
+import io.github.i49.unite.core.storage.WorkflowStorage;
+import io.github.i49.unite.core.storage.util.WorkflowStorages;
 import io.github.i49.unite.core.tasks.DefaultTaskFactory;
 import io.github.i49.unite.core.workflow.WorkflowFactory;
 
@@ -35,8 +35,6 @@ import io.github.i49.unite.core.workflow.WorkflowFactory;
  * The workflow engine which is shared by all threads.
  */
 public class SharedWorkflowEngine implements WorkflowEngine {
-
-    private static final String DEFAULT_DATASOURCE_URL = "jdbc:hsqldb:mem:workflowdb;shutdown=true";
 
     private final WorkflowFactory workflowFactory;
     private final TaskFactory taskFactory;
@@ -50,7 +48,8 @@ public class SharedWorkflowEngine implements WorkflowEngine {
 
     @Override
     public WorkflowRepository createRepository() {
-        return new JdbcWorkflowRepository(createDefaultDataSource(), this.workflowFactory);
+        WorkflowStorage storage = createStorage();
+        return new DefaultWorkflowRepository(storage);
     }
 
     @Override
@@ -74,8 +73,9 @@ public class SharedWorkflowEngine implements WorkflowEngine {
     public TaskFactory getTaskFactory() {
         return taskFactory;
     }
-
-    private static DataSource createDefaultDataSource() {
-        return SimpleDataSource.at(DEFAULT_DATASOURCE_URL, "SA", "");
+    
+    private WorkflowStorage createStorage() {
+        StorageConfiguration config = StorageConfiguration.getDefault();
+        return WorkflowStorages.create(config);
     }
 }

@@ -24,11 +24,14 @@ import java.nio.file.Paths;
 
 import org.yaml.snakeyaml.Yaml;
 
-import io.github.i49.unite.api.workflow.WorkflowEngine;
-import io.github.i49.unite.core.repository.EnhancedRepository;
+import io.github.i49.unite.core.storage.StorageConfiguration;
+import io.github.i49.unite.core.storage.WorkflowStorage;
+import io.github.i49.unite.core.storage.util.WorkflowStorages;
 
 /**
  * Factory for creating workflow runner.
+ * 
+ * @author i49
  */
 public class RunnerFactory {
     
@@ -43,23 +46,22 @@ public class RunnerFactory {
      * @return newly created workflow.
      */
     public WorkflowRunner createRunner() {
-        Configuration config = findAndLoadConfiguration();
-        EnhancedRepository repository = createRepository();
-        return new SerialWorkflowRunner(repository, config);
+        ServerConfiguration config = findAndLoadConfiguration();
+        WorkflowStorage storage = createStorage(config.getRepository());
+        return new SerialWorkflowRunner(config, storage);
     }
     
-    private EnhancedRepository createRepository() {
-        WorkflowEngine engine = WorkflowEngine.get();
-        return (EnhancedRepository)engine.createRepository();
+    private WorkflowStorage createStorage(StorageConfiguration config) {
+        return WorkflowStorages.create(config);
     }
     
-    private Configuration findAndLoadConfiguration() {
+    private ServerConfiguration findAndLoadConfiguration() {
         Path path = Paths.get(DEFAULT_CONFIGURATION_NAME);
         try {
             if (Files.exists(path)) {
                 return loadConfiguration(Files.newInputStream(path));
             } else {
-                ClassLoader loader = Configuration.class.getClassLoader();
+                ClassLoader loader = ServerConfiguration.class.getClassLoader();
                 InputStream stream = loader.getResourceAsStream(DEFAULT_CONFIGURATION_NAME);
                 if (stream != null) {
                     return loadConfiguration(stream);
@@ -71,10 +73,10 @@ public class RunnerFactory {
         }
     }
     
-    private Configuration loadConfiguration(InputStream stream) throws IOException {
+    private ServerConfiguration loadConfiguration(InputStream stream) throws IOException {
         Yaml yaml = new Yaml();
         try (InputStream input = stream) {
-          return yaml.loadAs(input, Configuration.class);  
+          return yaml.loadAs(input, ServerConfiguration.class);  
         }
     }
 }

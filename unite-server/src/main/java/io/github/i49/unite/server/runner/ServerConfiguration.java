@@ -19,10 +19,14 @@ package io.github.i49.unite.server.runner;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import io.github.i49.unite.core.storage.StorageConfiguration;
+
 /**
- * Runner configuration.
+ * Configuration for workflow runner.
+ * 
+ * @author i49
  */
-public class Configuration {
+public class ServerConfiguration {
 
     private RepositoryConfiguration repository;
     private RunnerConfiguration runner;
@@ -43,9 +47,9 @@ public class Configuration {
         this.runner = config;
     }
     
-    public static class RepositoryConfiguration {
+    public static class RepositoryConfiguration extends StorageConfiguration {
     }
-
+    
     public static class RunnerConfiguration {
         
         private String directory;

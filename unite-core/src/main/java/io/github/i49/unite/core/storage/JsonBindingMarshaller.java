@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.repository;
+package io.github.i49.unite.core.storage;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,7 +30,7 @@ import javax.json.bind.adapter.JsonbAdapter;
 /**
  * A marshaller implemented with Java API for JSON Binding (JSR-367).
  */
-class JsonBindingMarshaller implements Marshaller<String> {
+public class JsonBindingMarshaller implements Marshaller<String> {
     
     private final Jsonb jsonb;
     

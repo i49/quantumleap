@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.repository;
 
-import static io.github.i49.unite.core.common.Message.REPOSITORY_ACCESS_ERROR_OCCURRED;
-import static io.github.i49.unite.core.common.Message.REPOSITORY_ACCESS_ERROR_WAS_IGNORED;
-import static io.github.i49.unite.core.common.Preconditions.checkNotNull;
-import static io.github.i49.unite.core.common.Preconditions.checkRealType;
+package io.github.i49.unite.core.storage.jdbc;
+
+import static io.github.i49.unite.core.common.Message.*;
+import static io.github.i49.unite.core.common.Preconditions.*;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.EnumMap;
@@ -43,19 +41,24 @@ import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.Workflow;
 import io.github.i49.unite.api.workflow.WorkflowStatus;
-
+import io.github.i49.unite.core.storage.BinaryMarshaller;
+import io.github.i49.unite.core.storage.JsonBindingMarshaller;
+import io.github.i49.unite.core.storage.Marshaller;
+import io.github.i49.unite.core.storage.StorageConfiguration;
+import io.github.i49.unite.core.storage.WorkflowStorage;
 import io.github.i49.unite.core.workflow.JobLink;
 import io.github.i49.unite.core.workflow.ManagedJob;
 import io.github.i49.unite.core.workflow.ManagedWorkflow;
-import io.github.i49.unite.core.workflow.WorkflowFactory;
 
 /**
- * A repository which can be manipulated by JDBC interface.
+ * The storage which connects to JDBC drivers.
+ * 
+ * @author i49
  */
-public class JdbcWorkflowRepository implements EnhancedRepository {
+public class JdbcWorkflowStorage implements WorkflowStorage {
     
-    private static final Logger log = Logger.getLogger(JdbcWorkflowRepository.class.getName());
-
+    private static final Logger log = Logger.getLogger(JdbcWorkflowStorage.class.getName());
+ 
     private final Connection connection;
     private final Map<SqlCommand, Query> queries;
 
@@ -63,23 +66,33 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
     private final Marshaller<byte[]> binaryMarshaller;
 
     private final RowMappers mappers;
-
-    public JdbcWorkflowRepository(DataSource dataSource, WorkflowFactory workflowFactory) {
+    
+    public JdbcWorkflowStorage(StorageConfiguration config) {
         this.textMarshaller = JsonBindingMarshaller.getInstance();
         this.binaryMarshaller = BinaryMarshaller.getInstance();
-        this.mappers = new RowMappers(workflowFactory);
-        Connection connection = null;
+        this.mappers = new RowMappers();
         try {
-            connection = connect(dataSource);
-            createSchema(connection);
-            this.queries = prepareAllQueries(connection);
-            this.connection = connection;
+            this.connection = connect(config);
+            createSchema(this.connection);
+            this.queries = prepareAllQueries(this.connection);
         } catch (WorkflowException e) {
-            closeConnectionIgnoringError(connection);
+            forceToClose();
             throw e;
         }
     }
 
+    @Override
+    public void close() {
+        if (connection == null) {
+            return;
+        }
+        try {
+            this.connection.close();
+        } catch (SQLException e) {
+            throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
+        }
+    }
+ 
     @Override
     public void addWorkflow(Workflow workflow) {
         checkNotNull(workflow, "workflow");
@@ -93,15 +106,6 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         getQuery(SqlCommand.DELETE_JOB_LINKS).execute();
         getQuery(SqlCommand.DELETE_JOBS).execute();
         getQuery(SqlCommand.DELETE_WORKFLOWS).execute();
-    }
-
-    @Override
-    public void close() {
-        try {
-            this.connection.close();
-        } catch (SQLException e) {
-            throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
-        }
     }
 
     @Override
@@ -193,22 +197,26 @@ public class JdbcWorkflowRepository implements EnhancedRepository {
         q.setLong(1, jobId);
         return q.update();
     }
+  
+    // helper methods
     
-    private Connection connect(DataSource dataSource) {
+    private Connection connect(StorageConfiguration config) {
         try {
-            return dataSource.getConnection();
+            return DriverManager.getConnection(
+                    config.getUrl(), config.getUsername(), config.getPassword());
         } catch (SQLException e) {
             throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
         }
     }
-    
-    private void closeConnectionIgnoringError(Connection connection) {
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                log.log(Level.WARNING, REPOSITORY_ACCESS_ERROR_WAS_IGNORED.toString(), e);
-            }
+
+    private void forceToClose() {
+        if (this.connection == null) {
+            return;
+        }
+        try {
+            this.connection.close();
+        } catch (SQLException e) {
+            // ignores
         }
     }
 

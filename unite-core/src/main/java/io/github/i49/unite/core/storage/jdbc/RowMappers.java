@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.repository;
+package io.github.i49.unite.core.storage.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,7 +24,9 @@ import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.ParameterSetMapper;
 import io.github.i49.unite.api.workflow.WorkflowStatus;
-
+import io.github.i49.unite.core.storage.BinaryMarshaller;
+import io.github.i49.unite.core.storage.JsonBindingMarshaller;
+import io.github.i49.unite.core.storage.Marshaller;
 import io.github.i49.unite.core.workflow.JobLink;
 import io.github.i49.unite.core.workflow.ManagedJob;
 import io.github.i49.unite.core.workflow.ManagedJobBuilder;
@@ -37,15 +37,15 @@ import io.github.i49.unite.core.workflow.WorkflowFactory;
 /**
  * A collection of the ResultSet mappers.
  */
-class RowMappers {
+public class RowMappers {
     
     private final WorkflowFactory factory;
  
     private final Marshaller<String> textMarshaller;
     private final Marshaller<byte[]> binaryMarshaller;
     
-    RowMappers(WorkflowFactory factory) {
-        this.factory = factory;
+    public RowMappers() {
+        this.factory = WorkflowFactory.getInstance();
         this.textMarshaller = JsonBindingMarshaller.getInstance();
         this.binaryMarshaller = BinaryMarshaller.getInstance();
     }
@@ -57,7 +57,7 @@ class RowMappers {
      * @return the newly created workflow.
      * @throws SQLException if a data access error has occurred.
      */
-    ManagedWorkflow mapToWorkflow(ResultSet rs) throws SQLException {
+    public ManagedWorkflow mapToWorkflow(ResultSet rs) throws SQLException {
         final String name = rs.getString(2);
         ManagedWorkflowBuilder builder = factory.createWorkflowBuilder(name);
         ManagedWorkflow workflow = builder.build();
@@ -73,7 +73,7 @@ class RowMappers {
      * @return the newly created job.
      * @throws SQLException if a data access error has occurred.
      */
-    ManagedJob mapToJob(ResultSet rs) throws SQLException {
+    public ManagedJob mapToJob(ResultSet rs) throws SQLException {
         final long id = rs.getLong(1);
         final String name = rs.getString(2);
         final JobStatus status = JobStatus.valueOf(rs.getString(3));
@@ -97,7 +97,7 @@ class RowMappers {
         return job;
     }
     
-    Task mapToTask(ResultSet rs) throws SQLException {
+    public Task mapToTask(ResultSet rs) throws SQLException {
         final String className = rs.getString(3);
         final String params = rs.getString(4);
         try {
@@ -121,7 +121,7 @@ class RowMappers {
      * @param targetJob the target job of the link.
      * @return the mapper.
      */
-    RowMapper<JobLink> mappingToJobLink(ManagedJob targetJob) {
+    public RowMapper<JobLink> mappingToJobLink(ManagedJob targetJob) {
         return rs->{
             ManagedJob sourceJob = mapToJob(rs);
             byte[] bytes = rs.getBytes(9); 

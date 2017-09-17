@@ -1,2 +1,7 @@
+repository:
+    url: jdbc:hsqldb:mem:workflowdb;shutdown=true
+    username: sa
+    password: 
+    
 runner:
-  directory: target/work
+    directory: target/work

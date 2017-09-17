@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.repository;
+package io.github.i49.unite.core.storage;
 
 import static io.github.i49.unite.core.common.Message.OBJECT_IS_NOT_SERIALIZABLE;
 
@@ -31,7 +31,7 @@ import io.github.i49.unite.api.base.WorkflowException;
 /**
  * A binary marshaller implemented with built-in serialization provided by Java language.
  */
-class BinaryMarshaller implements Marshaller<byte[]> {
+public class BinaryMarshaller implements Marshaller<byte[]> {
 
     private static final BinaryMarshaller singleton = new BinaryMarshaller();
     
