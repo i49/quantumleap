@@ -15,8 +15,6 @@
  */
 package io.github.i49.unite.api.workflow;
 
-import io.github.i49.unite.api.tasks.TaskFactory;
-
 /**
  * The central interface for the API to manipulate the workflow engine.
  */
@@ -51,11 +49,4 @@ public interface WorkflowEngine {
     JobBuilder createJobBuilder(String name);
 
     ParameterSetMapperFactory getParameterSetMapperFactory();
-    
-    /**
-     * Returns the instance of {@link TaskFactory}.
-     * 
-     * @return the instance of {@link TaskFactory}.
-     */
-    TaskFactory getTaskFactory();
 }

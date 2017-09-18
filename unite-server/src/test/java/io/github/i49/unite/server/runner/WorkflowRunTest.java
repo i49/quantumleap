@@ -53,7 +53,7 @@ public class WorkflowRunTest {
         engine = WorkflowEngine.get();
         repository = WorkflowRepositoryBuilder.newInstance()
                 .withDataSource(dataSource).build();
-        taskFactory = engine.getTaskFactory();
+        taskFactory = TaskFactory.newInstance();
         mapperFactory = engine.getParameterSetMapperFactory();
         runner = new RunnerFactory().createRunner();
     }

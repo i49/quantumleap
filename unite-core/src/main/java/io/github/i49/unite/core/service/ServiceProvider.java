@@ -49,15 +49,15 @@ public class ServiceProvider implements WorkflowEngine, WorkflowService {
         return singleton.getParameterSetMapperFactory();
     }
  
-    @Override
-    public TaskFactory getTaskFactory() {
-        return singleton.getTaskFactory();
-    }
-
     // WorkflowService
     
     @Override
     public WorkflowRepositoryBuilder creteRepositoryBuilder() {
         return singleton.creteRepositoryBuilder();
+    }
+
+    @Override
+    public TaskFactory createTaskFactory() {
+        return singleton.createTaskFactory();
     }
 }

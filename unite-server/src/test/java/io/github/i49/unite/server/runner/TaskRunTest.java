@@ -46,14 +46,14 @@ public class TaskRunTest {
     private static final DataSource dataSource = new TestDataSource();
     
     private static WorkflowEngine engine;
-    private static TaskFactory factory;
+    private static TaskFactory taskFactory;
     private static WorkflowRepository repository;
     private static WorkflowRunner runner;
     
     @BeforeClass
     public static void setUpOnce() {
         engine = WorkflowEngine.get();
-        factory = engine.getTaskFactory();
+        taskFactory = TaskFactory.newInstance();
         repository = WorkflowRepositoryBuilder.newInstance()
                 .withDataSource(dataSource).build();
         runner = new RunnerFactory().createRunner();
@@ -76,7 +76,7 @@ public class TaskRunTest {
     public void echoTask_shouldEchoMessage() {
         // given
         String message = "The quick brown fox jumps over the lazy dog";
-        Task task = factory.createEchoTask(message);
+        Task task = taskFactory.createEchoTask(message);
         
         // when
         Job job = runTask(task);
@@ -91,7 +91,7 @@ public class TaskRunTest {
         // given
         Path dir = Paths.get("target/test-classes");
         Path path = dir.resolve("hello" + getScriptExtension());
-        Task task = factory.createShellTaskBuilder(path)
+        Task task = taskFactory.createShellTaskBuilder(path)
                 .arguments("John Smith")
                 .build();
         

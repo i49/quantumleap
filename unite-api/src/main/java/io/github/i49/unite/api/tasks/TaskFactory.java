@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +17,23 @@ package io.github.i49.unite.api.tasks;
 
 import java.nio.file.Path;
 
+import io.github.i49.unite.api.spi.WorkflowServiceProvider;
+
 /**
  * A factory interface for producing predefined tasks.
+ * 
+ * @author i49
  */
 public interface TaskFactory {
+    
+    /**
+     * Creates an instance of this type.
+     * 
+     * @return newly created instance of {@link TaskFactory}.
+     */
+    static TaskFactory newInstance() {
+        return WorkflowServiceProvider.provide().createTaskFactory();
+    }
 
     /**
      * Creates an instance of {@link EchoTask}.

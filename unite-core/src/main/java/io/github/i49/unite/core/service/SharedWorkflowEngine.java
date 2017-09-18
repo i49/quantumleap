@@ -37,7 +37,6 @@ public class SharedWorkflowEngine implements WorkflowEngine, WorkflowService {
     private static final SharedWorkflowEngine singleton = new SharedWorkflowEngine();
     
     private final WorkflowFactory workflowFactory;
-    private final TaskFactory taskFactory;
     private final ParameterSetMapperFactory parameterSetMapperFactory;
 
     public static SharedWorkflowEngine getInstance() {
@@ -46,7 +45,6 @@ public class SharedWorkflowEngine implements WorkflowEngine, WorkflowService {
     
     private SharedWorkflowEngine() {
         this.workflowFactory = WorkflowFactory.getInstance();
-        this.taskFactory = new DefaultTaskFactory();
         this.parameterSetMapperFactory = new DefaultParameterSetMapperFactory();
     }
 
@@ -67,15 +65,15 @@ public class SharedWorkflowEngine implements WorkflowEngine, WorkflowService {
         return parameterSetMapperFactory;
     }
 
-    @Override
-    public TaskFactory getTaskFactory() {
-        return taskFactory;
-    }
- 
     // WorkflowService
     
     @Override
     public WorkflowRepositoryBuilder creteRepositoryBuilder() {
         return new DefaultWorkflowRepositoryBuilder();
+    }
+
+    @Override
+    public TaskFactory createTaskFactory() {
+        return new DefaultTaskFactory();
     }
 }
