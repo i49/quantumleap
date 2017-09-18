@@ -20,11 +20,15 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import io.github.i49.unite.api.repository.WorkflowRepository;
+import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
 import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.Job;
@@ -32,10 +36,12 @@ import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.ParameterSetMapperFactory;
 import io.github.i49.unite.api.workflow.Workflow;
 import io.github.i49.unite.api.workflow.WorkflowEngine;
-import io.github.i49.unite.api.workflow.WorkflowRepository;
+import io.github.i49.unite.server.TestDataSource;
 
 public class WorkflowRunTest {
 
+    private static final DataSource dataSource = new TestDataSource();
+    
     private static WorkflowEngine engine;
     private static WorkflowRepository repository;
     private static TaskFactory taskFactory;
@@ -45,7 +51,8 @@ public class WorkflowRunTest {
     @BeforeClass
     public static void setUpOnce() {
         engine = WorkflowEngine.get();
-        repository = engine.createRepository();
+        repository = WorkflowRepositoryBuilder.newInstance()
+                .withDataSource(dataSource).build();
         taskFactory = engine.getTaskFactory();
         mapperFactory = engine.getParameterSetMapperFactory();
         runner = new RunnerFactory().createRunner();
@@ -55,6 +62,7 @@ public class WorkflowRunTest {
     public static void tearDown() {
         if (repository != null) {
             repository.close();
+            repository = null;
         }
     }
 

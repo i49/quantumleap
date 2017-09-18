@@ -14,21 +14,9 @@
  * limitations under the License.
  */
 
-package io.github.i49.unite.core.storage.util;
-
-import io.github.i49.unite.core.storage.StorageConfiguration;
-import io.github.i49.unite.core.storage.WorkflowStorage;
-import io.github.i49.unite.core.storage.jdbc.JdbcWorkflowStorage;
-
 /**
- * Utility class for {@link WorkflowStorage}.
+ * Provides workflow repository.
+ * 
+ * @author i49
  */
-public final class WorkflowStorages {
-    
-    public static WorkflowStorage create(StorageConfiguration config) {
-        return new JdbcWorkflowStorage(config);
-    }
-
-    private WorkflowStorages() {
-    }
-}
+package io.github.i49.unite.api.repository;

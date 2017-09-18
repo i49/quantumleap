@@ -19,10 +19,10 @@ package io.github.i49.unite.core.repository;
 import java.util.List;
 import java.util.Optional;
 
+import io.github.i49.unite.api.repository.WorkflowRepository;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.Workflow;
-import io.github.i49.unite.api.workflow.WorkflowRepository;
 import io.github.i49.unite.core.storage.WorkflowStorage;
 
 /**

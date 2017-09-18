@@ -21,24 +21,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.sql.DataSource;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import io.github.i49.unite.api.repository.WorkflowRepository;
+import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
 import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.Workflow;
 import io.github.i49.unite.api.workflow.WorkflowEngine;
-import io.github.i49.unite.api.workflow.WorkflowRepository;
+import io.github.i49.unite.server.TestDataSource;
 
 /**
  *
  */
 public class TaskRunTest {
 
+    private static final DataSource dataSource = new TestDataSource();
+    
     private static WorkflowEngine engine;
     private static TaskFactory factory;
     private static WorkflowRepository repository;
@@ -48,7 +54,8 @@ public class TaskRunTest {
     public static void setUpOnce() {
         engine = WorkflowEngine.get();
         factory = engine.getTaskFactory();
-        repository = engine.createRepository();
+        repository = WorkflowRepositoryBuilder.newInstance()
+                .withDataSource(dataSource).build();
         runner = new RunnerFactory().createRunner();
     }
     
@@ -56,6 +63,7 @@ public class TaskRunTest {
     public static void tearDownOnce() {
         if (repository != null) {
             repository.close();
+            repository = null;
         }
     }
     

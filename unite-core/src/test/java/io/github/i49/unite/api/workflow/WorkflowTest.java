@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +27,8 @@ import io.github.i49.unite.api.workflow.WorkflowEngine;
 
 /**
  * Unit test of {@link Workflow}.
+ * 
+ * @author i49
  */
 public class WorkflowTest {
 

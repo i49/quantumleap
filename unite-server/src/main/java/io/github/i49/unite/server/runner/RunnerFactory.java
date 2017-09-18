@@ -16,10 +16,13 @@
 
 package io.github.i49.unite.server.runner;
 
+import javax.sql.DataSource;
+
 import io.github.i49.unite.core.common.Configurations;
 import io.github.i49.unite.core.storage.StorageConfiguration;
 import io.github.i49.unite.core.storage.WorkflowStorage;
-import io.github.i49.unite.core.storage.util.WorkflowStorages;
+import io.github.i49.unite.core.storage.util.DirectDataSource;
+import io.github.i49.unite.core.storage.util.WorkflowStorageBuilder;
 
 /**
  * Factory for creating workflow runner.
@@ -40,6 +43,12 @@ public class RunnerFactory {
     }
     
     private WorkflowStorage createStorage(StorageConfiguration config) {
-        return WorkflowStorages.create(config);
+        DataSource dataSource = new DirectDataSource(
+                config.getUrl(), config.getUsername(), config.getPassword()
+                );
+        WorkflowStorageBuilder builder = new WorkflowStorageBuilder();
+        return builder
+            .withDataSource(dataSource)
+            .build();
     }
 }

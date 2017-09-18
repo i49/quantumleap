@@ -15,28 +15,24 @@
  */
 package io.github.i49.unite.core.service;
 
+import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
+import io.github.i49.unite.api.spi.WorkflowService;
 import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.JobBuilder;
 import io.github.i49.unite.api.workflow.ParameterSetMapperFactory;
 import io.github.i49.unite.api.workflow.WorkflowBuilder;
 import io.github.i49.unite.api.workflow.WorkflowEngine;
-import io.github.i49.unite.api.workflow.WorkflowRepository;
 
 /**
  * An implementation of {@link WorkflowEngine}. This class just delegates all
  * method invocations to {@link SharedWorkflowEngine}.
  */
-public class ServiceProvider implements WorkflowEngine {
+public class ServiceProvider implements WorkflowEngine, WorkflowService {
 
     /**
      * The singleton which is shared by all threads.
      */
-    private static final SharedWorkflowEngine singleton = new SharedWorkflowEngine();
-
-    @Override
-    public WorkflowRepository createRepository() {
-        return singleton.createRepository();
-    }
+    private static final SharedWorkflowEngine singleton = SharedWorkflowEngine.getInstance();
 
     @Override
     public WorkflowBuilder createWorkflowBuilder(String name) {
@@ -56,5 +52,12 @@ public class ServiceProvider implements WorkflowEngine {
     @Override
     public TaskFactory getTaskFactory() {
         return singleton.getTaskFactory();
+    }
+
+    // WorkflowService
+    
+    @Override
+    public WorkflowRepositoryBuilder creteRepositoryBuilder() {
+        return singleton.creteRepositoryBuilder();
     }
 }

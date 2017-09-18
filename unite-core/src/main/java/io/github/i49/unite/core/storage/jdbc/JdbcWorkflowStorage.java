@@ -21,7 +21,6 @@ import static io.github.i49.unite.core.common.Preconditions.*;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.EnumMap;
@@ -32,6 +31,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
 import io.github.i49.unite.api.base.WorkflowException;
 import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.workflow.Job;
@@ -41,7 +42,6 @@ import io.github.i49.unite.api.workflow.WorkflowStatus;
 import io.github.i49.unite.core.storage.BinaryMarshaller;
 import io.github.i49.unite.core.storage.JsonBindingMarshaller;
 import io.github.i49.unite.core.storage.Marshaller;
-import io.github.i49.unite.core.storage.StorageConfiguration;
 import io.github.i49.unite.core.storage.WorkflowStorage;
 import io.github.i49.unite.core.workflow.JobLink;
 import io.github.i49.unite.core.workflow.ManagedJob;
@@ -57,6 +57,7 @@ public class JdbcWorkflowStorage implements WorkflowStorage {
     @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(JdbcWorkflowStorage.class.getName());
  
+    private final DataSource dataSource;
     private final Connection connection;
     private final Map<SqlCommand, Query> queries;
 
@@ -65,12 +66,13 @@ public class JdbcWorkflowStorage implements WorkflowStorage {
 
     private final RowMappers mappers;
     
-    public JdbcWorkflowStorage(StorageConfiguration config) {
+    public JdbcWorkflowStorage(DataSource dataSource) {
+        this.dataSource = dataSource;
         this.textMarshaller = JsonBindingMarshaller.getInstance();
         this.binaryMarshaller = BinaryMarshaller.getInstance();
         this.mappers = new RowMappers();
         try {
-            this.connection = connect(config);
+            this.connection = connect();
             createSchema(this.connection);
             this.queries = prepareAllQueries(this.connection);
         } catch (WorkflowException e) {
@@ -198,10 +200,9 @@ public class JdbcWorkflowStorage implements WorkflowStorage {
   
     // helper methods
     
-    private Connection connect(StorageConfiguration config) {
+    private Connection connect() {
         try {
-            return DriverManager.getConnection(
-                    config.getUrl(), config.getUsername(), config.getPassword());
+            return this.dataSource.getConnection();
         } catch (SQLException e) {
             throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
         }

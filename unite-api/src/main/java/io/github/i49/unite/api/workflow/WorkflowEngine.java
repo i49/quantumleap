@@ -32,13 +32,6 @@ public interface WorkflowEngine {
         return WorkflowEngineLoader.getEngine();
     }
     
-     /**
-     * Creates the repository which will store workflows and jobs.
-     * 
-     * @return the workflow repository.
-     */
-    WorkflowRepository createRepository();
-
     /**
      * Creates a builder to build a workflow.
      * 

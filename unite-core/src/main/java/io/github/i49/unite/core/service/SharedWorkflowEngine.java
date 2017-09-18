@@ -17,39 +17,37 @@ package io.github.i49.unite.core.service;
 
 import static io.github.i49.unite.core.common.Preconditions.checkNotNull;
 
+import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
+import io.github.i49.unite.api.spi.WorkflowService;
 import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.JobBuilder;
 import io.github.i49.unite.api.workflow.ParameterSetMapperFactory;
 import io.github.i49.unite.api.workflow.WorkflowBuilder;
 import io.github.i49.unite.api.workflow.WorkflowEngine;
-import io.github.i49.unite.api.workflow.WorkflowRepository;
-import io.github.i49.unite.core.common.Configurations;
 import io.github.i49.unite.core.mappers.DefaultParameterSetMapperFactory;
-import io.github.i49.unite.core.repository.DefaultWorkflowRepository;
-import io.github.i49.unite.core.storage.WorkflowStorage;
-import io.github.i49.unite.core.storage.util.WorkflowStorages;
+import io.github.i49.unite.core.repository.DefaultWorkflowRepositoryBuilder;
 import io.github.i49.unite.core.tasks.DefaultTaskFactory;
 import io.github.i49.unite.core.workflow.WorkflowFactory;
 
 /**
  * The workflow engine which is shared by all threads.
  */
-public class SharedWorkflowEngine implements WorkflowEngine {
+public class SharedWorkflowEngine implements WorkflowEngine, WorkflowService {
 
+    private static final SharedWorkflowEngine singleton = new SharedWorkflowEngine();
+    
     private final WorkflowFactory workflowFactory;
     private final TaskFactory taskFactory;
     private final ParameterSetMapperFactory parameterSetMapperFactory;
 
-    public SharedWorkflowEngine() {
+    public static SharedWorkflowEngine getInstance() {
+        return singleton;
+    }
+    
+    private SharedWorkflowEngine() {
         this.workflowFactory = WorkflowFactory.getInstance();
         this.taskFactory = new DefaultTaskFactory();
         this.parameterSetMapperFactory = new DefaultParameterSetMapperFactory();
-    }
-
-    @Override
-    public WorkflowRepository createRepository() {
-        WorkflowStorage storage = createWorkflowStorage();
-        return new DefaultWorkflowRepository(storage);
     }
 
     @Override
@@ -73,9 +71,11 @@ public class SharedWorkflowEngine implements WorkflowEngine {
     public TaskFactory getTaskFactory() {
         return taskFactory;
     }
+ 
+    // WorkflowService
     
-    private WorkflowStorage createWorkflowStorage() {
-        ServiceConfiguration config = Configurations.load(ServiceConfiguration.class);
-        return WorkflowStorages.create(config.getRepository());
+    @Override
+    public WorkflowRepositoryBuilder creteRepositoryBuilder() {
+        return new DefaultWorkflowRepositoryBuilder();
     }
 }

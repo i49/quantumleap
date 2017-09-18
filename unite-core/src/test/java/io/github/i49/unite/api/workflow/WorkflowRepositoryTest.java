@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,35 +20,43 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.List;
 import java.util.Optional;
 
+import javax.sql.DataSource;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import io.github.i49.unite.api.TestDataSource;
+import io.github.i49.unite.api.repository.WorkflowRepository;
+import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.Workflow;
 import io.github.i49.unite.api.workflow.WorkflowEngine;
-import io.github.i49.unite.api.workflow.WorkflowRepository;
 
 /**
  * Unit test of {@link WorkflowRepository}.
  */
 public class WorkflowRepositoryTest {
 
+    private static final DataSource dataSource = new TestDataSource();
+    
     private static WorkflowEngine engine;
     private static WorkflowRepository repository;
 
     @BeforeClass
     public static void setUpOnce() {
         engine = WorkflowEngine.get();
-        repository = engine.createRepository();
+        repository = WorkflowRepositoryBuilder.newInstance()
+                .withDataSource(dataSource).build();
     }
 
     @AfterClass
     public static void tearDownOnce() {
         if (repository != null) {
             repository.close();
+            repository = null;
         }
     }
 
