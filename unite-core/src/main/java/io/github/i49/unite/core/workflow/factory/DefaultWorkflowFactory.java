@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.mappers;
+package io.github.i49.unite.core.workflow.factory;
 
 import static io.github.i49.unite.core.common.Preconditions.checkNotNull;
 
@@ -23,13 +21,40 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.github.i49.unite.api.workflow.ParameterSetMapper;
-import io.github.i49.unite.api.workflow.ParameterSetMapperFactory;
+import io.github.i49.unite.api.workflow.WorkflowFactory;
+import io.github.i49.unite.core.workflow.ManagedJobBuilder;
+import io.github.i49.unite.core.workflow.ManagedWorkflowBuilder;
+import io.github.i49.unite.core.workflow.mappers.KeyMapParameterSetMapper;
 
 /**
- * Default implementation of {@link ParameterSetMapperFactory}.
+ * The factory for producing workflow components.
  */
-public class DefaultParameterSetMapperFactory implements ParameterSetMapperFactory {
+public class DefaultWorkflowFactory implements WorkflowFactory {
     
+    private static final DefaultWorkflowFactory singleton = new DefaultWorkflowFactory();
+    
+    /**
+     * Returns the singleton of this class.
+     * 
+     * @return the singleton of this class.
+     */
+    public static DefaultWorkflowFactory getInstance() {
+        return singleton;
+    }
+    
+    public DefaultWorkflowFactory() {
+    }
+
+    @Override
+    public ManagedWorkflowBuilder createWorkflowBuilder(String name) {
+        return new ManagedWorkflowBuilder(name);
+    }
+
+    @Override
+    public ManagedJobBuilder createJobBuilder(String name) {
+        return new ManagedJobBuilder(name);
+    }
+
     @Override
     public ParameterSetMapper createKeyMapper(Map<String, String> keyMap) {
         checkNotNull(keyMap, "keyMap");

@@ -19,11 +19,11 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.NoSuchElementException;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.Workflow;
-import io.github.i49.unite.api.workflow.WorkflowEngine;
 
 /**
  * Unit test of {@link Workflow}.
@@ -32,17 +32,22 @@ import io.github.i49.unite.api.workflow.WorkflowEngine;
  */
 public class WorkflowTest {
 
-    private final WorkflowEngine engine = WorkflowEngine.get();
+    private WorkflowFactory workflowFactory;
+    
+    @Before
+    public void setUp() {
+        workflowFactory = WorkflowFactory.newInstance();
+    }
 
     @Test
     public void hasId_shouldReturnFalseByDefault() {
-        Workflow workflow = this.engine.createWorkflowBuilder("workflow1").build();
+        Workflow workflow = workflowFactory.createWorkflowBuilder("workflow1").build();
         assertThat(workflow.hasId()).isFalse();
     }
 
     @Test
     public void getId_shouldThrowExceptionByDefault() {
-        Workflow workflow = engine.createWorkflowBuilder("workflow1").build();
+        Workflow workflow = workflowFactory.createWorkflowBuilder("workflow1").build();
         Throwable thrown = catchThrowable(() -> {
             workflow.getId();
         });
@@ -51,15 +56,15 @@ public class WorkflowTest {
 
     @Test
     public void getName_shouldReturnNameOfWorkflow() {
-        Workflow workflow = engine.createWorkflowBuilder("workflow1").build();
+        Workflow workflow = workflowFactory.createWorkflowBuilder("workflow1").build();
         assertThat(workflow.getName()).isEqualTo("workflow1");
     }
 
     @Test
     public void getJobs_shouldReturnAllJobsAssigned() {
-        Job job1 = engine.createJobBuilder("job1").build();
-        Job job2 = engine.createJobBuilder("job2").build();
-        Workflow workflow = engine.createWorkflowBuilder("workflow1").jobs(job1, job2).build();
+        Job job1 = workflowFactory.createJobBuilder("job1").build();
+        Job job2 = workflowFactory.createJobBuilder("job2").build();
+        Workflow workflow = workflowFactory.createWorkflowBuilder("workflow1").jobs(job1, job2).build();
         assertThat(workflow.getJobs()).containsExactly(job1, job2);
     }
 }

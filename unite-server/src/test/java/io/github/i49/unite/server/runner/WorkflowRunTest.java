@@ -33,41 +33,37 @@ import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
-import io.github.i49.unite.api.workflow.ParameterSetMapperFactory;
 import io.github.i49.unite.api.workflow.Workflow;
-import io.github.i49.unite.api.workflow.WorkflowEngine;
+import io.github.i49.unite.api.workflow.WorkflowFactory;
 import io.github.i49.unite.server.TestDataSource;
 
 public class WorkflowRunTest {
 
     private static final DataSource dataSource = new TestDataSource();
     
-    private static WorkflowEngine engine;
     private static WorkflowRepository repository;
-    private static TaskFactory taskFactory;
-    private static ParameterSetMapperFactory mapperFactory;
     private static WorkflowRunner runner;
 
+    private WorkflowFactory workflowFactory;
+    private TaskFactory taskFactory;
+    
     @BeforeClass
     public static void setUpOnce() {
-        engine = WorkflowEngine.get();
         repository = WorkflowRepositoryBuilder.newInstance()
                 .withDataSource(dataSource).build();
-        taskFactory = TaskFactory.newInstance();
-        mapperFactory = engine.getParameterSetMapperFactory();
         runner = new RunnerFactory().createRunner();
     }
 
     @AfterClass
     public static void tearDown() {
-        if (repository != null) {
-            repository.close();
-            repository = null;
-        }
+        repository.close();
     }
 
     @Before
     public void setUp() {
+        workflowFactory = WorkflowFactory.newInstance();
+        taskFactory = TaskFactory.newInstance();
+
         repository.clear();
     }
 
@@ -75,8 +71,8 @@ public class WorkflowRunTest {
     public void runSingle_shouldRunSingleJob() {
         Task task1 = taskFactory.createEchoTask("Hello");
         Task task2 = taskFactory.createEchoTask("World");
-        Job job1 = engine.createJobBuilder("job1").tasks(task1, task2).build();
-        Workflow workflow = engine.createWorkflowBuilder("workflow1").jobs(job1).build();
+        Job job1 = workflowFactory.createJobBuilder("job1").tasks(task1, task2).build();
+        Workflow workflow = workflowFactory.createWorkflowBuilder("workflow1").jobs(job1).build();
         repository.addWorkflow(workflow);
 
         assertThat(repository.countJobsWithStatus(JobStatus.READY)).isEqualTo(1);
@@ -86,14 +82,14 @@ public class WorkflowRunTest {
     
     @Test
     public void runSingle_shouldRunJobWithDependencies() {
-        Job job1 = engine.createJobBuilder("job1")
+        Job job1 = workflowFactory.createJobBuilder("job1")
                 .tasks(taskFactory.createEchoTask("Running job1"))
                 .build();
-        Job job2 = engine.createJobBuilder("job2")
+        Job job2 = workflowFactory.createJobBuilder("job2")
                 .tasks(taskFactory.createEchoTask("Running job2"))
                 .build();
         
-        Workflow workflow1 = engine.createWorkflowBuilder("workflow1")
+        Workflow workflow1 = workflowFactory.createWorkflowBuilder("workflow1")
                 .link(job1, job2)
                 .build();
         
@@ -113,20 +109,20 @@ public class WorkflowRunTest {
 
     @Test
     public void runSingle_shouldRunJobInDiamondDependencies() {
-        Job job1 = engine.createJobBuilder("job1")
+        Job job1 = workflowFactory.createJobBuilder("job1")
                 .tasks(taskFactory.createEchoTask("Running job1"))
                 .build();
-        Job job2 = engine.createJobBuilder("job2")
+        Job job2 = workflowFactory.createJobBuilder("job2")
                 .tasks(taskFactory.createEchoTask("Running job2"))
                 .build();
-        Job job3 = engine.createJobBuilder("job3")
+        Job job3 = workflowFactory.createJobBuilder("job3")
                 .tasks(taskFactory.createEchoTask("Running job3"))
                 .build();
-        Job job4 = engine.createJobBuilder("job4")
+        Job job4 = workflowFactory.createJobBuilder("job4")
                 .tasks(taskFactory.createEchoTask("Running job4"))
                 .build();
         
-        Workflow workflow1 = engine.createWorkflowBuilder("workflow1")
+        Workflow workflow1 = workflowFactory.createWorkflowBuilder("workflow1")
                 .link(job1, job2)
                 .link(job1, job3)
                 .link(job2, job4)
@@ -162,11 +158,11 @@ public class WorkflowRunTest {
     
     @Test
     public void runSingle_shouldRunSummingJob() {
-        Job job1 = engine.createJobBuilder("job1")
+        Job job1 = workflowFactory.createJobBuilder("job1")
                 .tasks(new SummingTask())
                 .input("numbers", Arrays.asList(1, 2, 3))
                 .build();
-        Workflow workflow1 = engine.createWorkflowBuilder("workflow1").jobs(job1).build();
+        Workflow workflow1 = workflowFactory.createWorkflowBuilder("workflow1").jobs(job1).build();
         repository.addWorkflow(workflow1);
         runner.runSingle();
         
@@ -179,12 +175,12 @@ public class WorkflowRunTest {
 
     @Test
     public void runSingle_shouldRunScalingJob() {
-        Job job1 = engine.createJobBuilder("job1")
+        Job job1 = workflowFactory.createJobBuilder("job1")
                 .tasks(new ScalingTask())
                 .input("multiplicand", 2)
                 .input("multiplier", 4)
                 .build();
-        Workflow workflow1 = engine.createWorkflowBuilder("workflow1").jobs(job1).build();
+        Workflow workflow1 = workflowFactory.createWorkflowBuilder("workflow1").jobs(job1).build();
         repository.addWorkflow(workflow1);
         runner.runSingle();
         
@@ -198,17 +194,17 @@ public class WorkflowRunTest {
     
     @Test
     public void runSingle_shouldRunJobsPassingParameters() {
-        Job job1 = engine.createJobBuilder("job1")
+        Job job1 = workflowFactory.createJobBuilder("job1")
                 .tasks(new SummingTask())
                 .input("numbers", Arrays.asList(1, 2, 3))
                 .build();
-        Job job2 = engine.createJobBuilder("job2")
+        Job job2 = workflowFactory.createJobBuilder("job2")
                 .tasks(new ScalingTask())
                 .input("multiplier", 4)
                 .build();
         
-        Workflow workflow1 = engine.createWorkflowBuilder("workflow1")
-                .link(job1, job2, mapperFactory.createKeyMapper("sum", "multiplicand"))
+        Workflow workflow1 = workflowFactory.createWorkflowBuilder("workflow1")
+                .link(job1, job2, workflowFactory.createKeyMapper("sum", "multiplicand"))
                 .build();
 
         repository.addWorkflow(workflow1);

@@ -35,7 +35,7 @@ import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.Workflow;
-import io.github.i49.unite.api.workflow.WorkflowEngine;
+import io.github.i49.unite.api.workflow.WorkflowFactory;
 import io.github.i49.unite.server.TestDataSource;
 
 /**
@@ -45,15 +45,14 @@ public class TaskRunTest {
 
     private static final DataSource dataSource = new TestDataSource();
     
-    private static WorkflowEngine engine;
-    private static TaskFactory taskFactory;
     private static WorkflowRepository repository;
     private static WorkflowRunner runner;
+
+    private WorkflowFactory workflowFactory;
+    private TaskFactory taskFactory;
     
     @BeforeClass
     public static void setUpOnce() {
-        engine = WorkflowEngine.get();
-        taskFactory = TaskFactory.newInstance();
         repository = WorkflowRepositoryBuilder.newInstance()
                 .withDataSource(dataSource).build();
         runner = new RunnerFactory().createRunner();
@@ -61,14 +60,14 @@ public class TaskRunTest {
     
     @AfterClass
     public static void tearDownOnce() {
-        if (repository != null) {
-            repository.close();
-            repository = null;
-        }
+        repository.close();
     }
     
     @Before
     public void setUp() {
+        workflowFactory = WorkflowFactory.newInstance();
+        taskFactory = TaskFactory.newInstance();
+        
         repository.clear();
     }
     
@@ -103,8 +102,8 @@ public class TaskRunTest {
     }
 
     private Job runTask(Task task) {
-        Job job = engine.createJobBuilder("job1").tasks(task).build();
-        Workflow workflow = engine.createWorkflowBuilder("workflow1").jobs(job).build();
+        Job job = workflowFactory.createJobBuilder("job1").tasks(task).build();
+        Workflow workflow = workflowFactory.createWorkflowBuilder("workflow1").jobs(job).build();
         repository.addWorkflow(workflow);
         runner.runSingle();
         return repository.findJobById(job.getId());

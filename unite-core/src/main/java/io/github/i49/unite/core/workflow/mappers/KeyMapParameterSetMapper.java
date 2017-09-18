@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.i49.unite.core.mappers;
+package io.github.i49.unite.core.workflow.mappers;
 
 import java.util.Map;
 

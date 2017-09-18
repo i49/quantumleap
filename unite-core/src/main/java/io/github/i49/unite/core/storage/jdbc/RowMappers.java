@@ -32,20 +32,16 @@ import io.github.i49.unite.core.workflow.ManagedJob;
 import io.github.i49.unite.core.workflow.ManagedJobBuilder;
 import io.github.i49.unite.core.workflow.ManagedWorkflow;
 import io.github.i49.unite.core.workflow.ManagedWorkflowBuilder;
-import io.github.i49.unite.core.workflow.WorkflowFactory;
 
 /**
  * A collection of the ResultSet mappers.
  */
 public class RowMappers {
     
-    private final WorkflowFactory factory;
- 
     private final Marshaller<String> textMarshaller;
     private final Marshaller<byte[]> binaryMarshaller;
     
     public RowMappers() {
-        this.factory = WorkflowFactory.getInstance();
         this.textMarshaller = JsonBindingMarshaller.getInstance();
         this.binaryMarshaller = BinaryMarshaller.getInstance();
     }
@@ -59,7 +55,7 @@ public class RowMappers {
      */
     public ManagedWorkflow mapToWorkflow(ResultSet rs) throws SQLException {
         final String name = rs.getString(2);
-        ManagedWorkflowBuilder builder = factory.createWorkflowBuilder(name);
+        ManagedWorkflowBuilder builder = new ManagedWorkflowBuilder(name);
         ManagedWorkflow workflow = builder.build();
         workflow.setId(rs.getLong(1));
         workflow.setStatus(WorkflowStatus.valueOf(rs.getString(3)));
@@ -80,7 +76,7 @@ public class RowMappers {
         final ParameterSet inputParameters = unmarshal(rs.getBytes(4), ParameterSet.class);
         final ParameterSet outputParameters = unmarshal(rs.getBytes(5), ParameterSet.class);
         final String standardOutput = rs.getString(6);
-        ManagedJobBuilder builder = factory.createJobBuilder(name);
+        ManagedJobBuilder builder = new ManagedJobBuilder(name);
         if (inputParameters != null) {
             builder.input(inputParameters);
         }
@@ -126,7 +122,7 @@ public class RowMappers {
             ManagedJob sourceJob = mapToJob(rs);
             byte[] bytes = rs.getBytes(9); 
             ParameterSetMapper mapper = unmarshal(bytes, ParameterSetMapper.class);
-            return factory.createJobLink(sourceJob, targetJob, mapper);
+            return new JobLink(sourceJob, targetJob, mapper);
         };
     }
     

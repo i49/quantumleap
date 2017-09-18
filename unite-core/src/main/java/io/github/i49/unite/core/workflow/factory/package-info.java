@@ -14,24 +14,8 @@
  * limitations under the License.
  */
 
-package io.github.i49.unite.core.service;
-
-import io.github.i49.unite.core.storage.StorageConfiguration;
-
 /**
- * Configuration for workflow service.
- * 
  * @author i49
+ *
  */
-public class ServiceConfiguration {
-    
-    private StorageConfiguration repository;
-
-    public StorageConfiguration getRepository() {
-        return repository;
-    }
-
-    public void setRepository(StorageConfiguration repository) {
-        this.repository = repository;
-    }
-}
+package io.github.i49.unite.core.workflow.factory;

@@ -29,8 +29,7 @@ import java.util.Set;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.ParameterSetMapper;
 import io.github.i49.unite.api.workflow.WorkflowBuilder;
-
-import io.github.i49.unite.core.mappers.MergingParameterSetMapper;
+import io.github.i49.unite.core.workflow.mappers.MergingParameterSetMapper;
 
 /**
  *
@@ -87,7 +86,7 @@ public class ManagedWorkflowBuilder implements WorkflowBuilder {
     private void link(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
         addJob(source);
         addJob(target);
-        this.links.add(JobLink.of(source, target, mapper));
+        this.links.add(new JobLink(source, target, mapper));
         
         Set<ManagedJob> dependencies = this.dependencyMap.get(target);
         if (dependencies == null) {

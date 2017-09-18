@@ -44,7 +44,7 @@ public class ManagedJobBuilder implements JobBuilder {
     JobStatus status;
     List<String> standardOutput;
 
-    ManagedJobBuilder(String name) {
+    public ManagedJobBuilder(String name) {
         this.jobId = OptionalLong.empty();
         this.name = name;
         this.status = JobStatus.INITIAL;

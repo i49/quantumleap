@@ -18,15 +18,22 @@ package io.github.i49.unite.api.spi;
 
 import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
 import io.github.i49.unite.api.tasks.TaskFactory;
+import io.github.i49.unite.api.workflow.WorkflowFactory;
 
 /**
  * Service Provider Interface for the API.
+ * This type should not be directly used by the API users.
  * 
  * @author i49
  */
 public interface WorkflowService {
     
-    WorkflowRepositoryBuilder creteRepositoryBuilder();
+    /**
+     * Creates an instance of {@link WorkflowFactory}.
+     * 
+     * @return newly created instance of {@link WorkflowFactory}.
+     */
+    WorkflowFactory createWorkflowFactory();
     
     /**
      * Creates an instance of {@link TaskFactory}.
@@ -34,4 +41,11 @@ public interface WorkflowService {
      * @return newly created instance of {@link TaskFactory}.
      */
     TaskFactory createTaskFactory();
+
+    /**
+     * Creates a builder to build a workflow repository.
+     * 
+     * @return a builder to build a workflow repository.
+     */
+    WorkflowRepositoryBuilder creteRepositoryBuilder();
 }

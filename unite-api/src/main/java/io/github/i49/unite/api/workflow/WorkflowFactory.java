@@ -13,23 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.github.i49.unite.api.workflow;
 
-/**
- * The central interface for the API to manipulate the workflow engine.
- */
-public interface WorkflowEngine {
+import java.util.Map;
 
-    /**
-     * Returns the default workflow engine found. The instance will be loaded
-     * via Service Provider Interface.
-     * 
-     * @return the default workflow engine loaded.
-     */
-    static WorkflowEngine get() {
-        return WorkflowEngineLoader.getEngine();
-    }
+import io.github.i49.unite.api.spi.WorkflowServiceProvider;
+
+/**
+ * Factory type for producing various kinds of workflow components.
+ * 
+ * @author i49
+ */
+public interface WorkflowFactory {
     
+    /**
+     * Creates an instance of this type.
+     * 
+     * @return newly created instance of {@link WorkflowFactory}.
+     */
+    static WorkflowFactory newInstance() {
+        return WorkflowServiceProvider.provide().createWorkflowFactory();
+    }
+
     /**
      * Creates a builder to build a workflow.
      * 
@@ -48,5 +54,7 @@ public interface WorkflowEngine {
      */
     JobBuilder createJobBuilder(String name);
 
-    ParameterSetMapperFactory getParameterSetMapperFactory();
+    ParameterSetMapper createKeyMapper(Map<String, String> keyMap);
+
+    ParameterSetMapper createKeyMapper(String... keys);
 }

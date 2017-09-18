@@ -1,6 +1,4 @@
 /* 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
  * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,4 +14,8 @@
  * limitations under the License.
  */
 
-package io.github.i49.unite.core.mappers;
+/**
+ * @author i49
+ *
+ */
+package io.github.i49.unite.core.workflow.mappers;

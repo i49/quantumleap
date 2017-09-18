@@ -28,11 +28,7 @@ public class JobLink {
     private final ManagedJob target;
     private final ParameterSetMapper mapper;
     
-    public static JobLink of(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
-        return new JobLink(source, target, mapper);
-    }
-    
-    private JobLink(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
+    public JobLink(ManagedJob source, ManagedJob target, ParameterSetMapper mapper) {
         this.source = source;
         this.target = target;
         this.mapper = mapper;

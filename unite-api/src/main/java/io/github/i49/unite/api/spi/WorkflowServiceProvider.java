@@ -23,6 +23,7 @@ import io.github.i49.unite.api.base.WorkflowException;
 
 /**
  * The provider of {@link WorkflowService} instance.
+ * This type should not be directly used by the API users.
  * 
  * @author i49
  */

@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 import javax.sql.DataSource;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -34,7 +35,6 @@ import io.github.i49.unite.api.repository.WorkflowRepository;
 import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
-import io.github.i49.unite.api.workflow.WorkflowEngine;
 
 /**
  * Unit test of {@link Job}.
@@ -45,31 +45,33 @@ public class JobTest {
     
     private static final DataSource dataSource = new TestDataSource();
 
-    private static WorkflowEngine engine;
     private static WorkflowRepository repository;
-
+    private WorkflowFactory workflowFactory;
+    
     @BeforeClass
     public static void setUpOnce() {
-        engine = WorkflowEngine.get();
         repository = WorkflowRepositoryBuilder.newInstance()
                 .withDataSource(dataSource).build();
     }
-   
+
     @AfterClass
-    public static void tearDown() {
-        if (repository != null) {
-            repository.close();
-            repository = null;
-        }
+    public static void tearDownOnce() {
+        repository.close();
     }
-   
+
+    @Before
+    public void setUp() {
+        workflowFactory = WorkflowFactory.newInstance();
+        repository.clear();
+    }
+  
     /**
      * Registers a job with repository.
      * 
      * @param job the job to register.
      */
     private void registerJob(Job job) {
-        Workflow workflow = engine.createWorkflowBuilder("workflow1").jobs(job).build();
+        Workflow workflow = workflowFactory.createWorkflowBuilder("workflow1").jobs(job).build();
         repository.addWorkflow(workflow);
     }
     
@@ -77,13 +79,13 @@ public class JobTest {
     
     @Test
     public void hasId_shouldReturnFalseByDefault() {
-        Job job = engine.createJobBuilder("job1").build();
+        Job job = workflowFactory.createJobBuilder("job1").build();
         assertThat(job.hasId()).isFalse();
     }
 
     @Test
     public void hasId_shouldReturnAfterRegistration() {
-        Job job = engine.createJobBuilder("job1").build();
+        Job job = workflowFactory.createJobBuilder("job1").build();
         registerJob(job);
         assertThat(job.hasId()).isTrue();
     }
@@ -92,7 +94,7 @@ public class JobTest {
 
     @Test
     public void getId_shouldThrowExceptionByDefault() {
-        Job job = engine.createJobBuilder("job1").build();
+        Job job = workflowFactory.createJobBuilder("job1").build();
         Throwable thrown = catchThrowable(() -> {
             job.getId();
         });
@@ -101,7 +103,7 @@ public class JobTest {
     
     @Test
     public void getId_shouldReturnValidIdAfterRegistration() {
-        Job job = engine.createJobBuilder("job1").build();
+        Job job = workflowFactory.createJobBuilder("job1").build();
         registerJob(job);
         assertThat(job.getId()).isGreaterThanOrEqualTo(0);
     }
@@ -110,7 +112,7 @@ public class JobTest {
     
     @Test
     public void getName_shouldReturnNameOfJob() {
-        Job job = engine.createJobBuilder("job1").build();
+        Job job = workflowFactory.createJobBuilder("job1").build();
         assertThat(job.getName()).isEqualTo("job1");
         
         registerJob(job);
@@ -122,7 +124,7 @@ public class JobTest {
     
     @Test
     public void getParameters_shouldReturnEmptyMapByDefault() {
-        Job job = engine.createJobBuilder("job1").build();
+        Job job = workflowFactory.createJobBuilder("job1").build();
         assertThat(job.getInputParameters()).isEmpty();
 
         registerJob(job);
@@ -147,7 +149,7 @@ public class JobTest {
     
     @Test
     public void getParameters_shouldReturnStoredParameters() {
-        Job job = engine.createJobBuilder("job1").input(createJobParameters()).build();
+        Job job = workflowFactory.createJobBuilder("job1").input(createJobParameters()).build();
         assertOnJobParameters(job);
 
         registerJob(job);
@@ -180,15 +182,23 @@ public class JobTest {
 
     @Test
     public void getStatus_shouldReturnInitialByDefault() {
-        Job job = engine.createJobBuilder("job1").build();
-        assertThat(job.getStatus()).isSameAs(JobStatus.INITIAL);
+        // given
+        Job job = workflowFactory.createJobBuilder("job1").build();
+        // when
+        JobStatus status = job.getStatus();
+        // then
+        assertThat(status).isSameAs(JobStatus.INITIAL);
     }
     
     @Test
     public void getStatus_shouldReturnReadyBeforeRun() {
-        Job job = engine.createJobBuilder("job1").build();
+        // given
+        Job job = workflowFactory.createJobBuilder("job1").build();
         registerJob(job);
         job = repository.findJobById(job.getId());
-        assertThat(job.getStatus()).isSameAs(JobStatus.READY);
+        // when
+        JobStatus status = job.getStatus();
+        // then
+        assertThat(status).isSameAs(JobStatus.READY);
     }
 }
