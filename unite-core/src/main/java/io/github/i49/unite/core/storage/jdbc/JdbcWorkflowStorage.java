@@ -16,7 +16,7 @@
 
 package io.github.i49.unite.core.storage.jdbc;
 
-import static io.github.i49.unite.core.common.Message.*;
+import static io.github.i49.unite.core.message.Message.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;

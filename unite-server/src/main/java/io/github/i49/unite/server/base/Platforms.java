@@ -15,7 +15,7 @@
  */
 package io.github.i49.unite.server.base;
 
-import static io.github.i49.unite.core.common.Message.PLATFORM_CANNOT_BE_DETECTED;
+import static io.github.i49.unite.core.message.Message.PLATFORM_CANNOT_BE_DETECTED;
 
 import io.github.i49.unite.api.base.Platform;
 import io.github.i49.unite.api.base.WorkflowException;

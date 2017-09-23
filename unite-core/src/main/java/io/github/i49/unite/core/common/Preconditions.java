@@ -17,7 +17,7 @@
  */
 package io.github.i49.unite.core.common;
 
-import static io.github.i49.unite.core.common.Message.*;
+import static io.github.i49.unite.core.message.Message.*;
 
 /**
  * Preconditions for methods.

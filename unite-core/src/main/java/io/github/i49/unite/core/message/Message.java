@@ -16,9 +16,11 @@
  * limitations under the License.
  */
 
-package io.github.i49.unite.core.common;
+package io.github.i49.unite.core.message;
 
 import java.util.ResourceBundle;
+
+import io.github.i49.unite.core.common.MessageProvider;
 
 /**
  * Localized messages defined for this API implementation.
@@ -41,6 +43,7 @@ public enum Message implements MessageProvider {
     OBJECT_IS_NOT_SERIALIZABLE,
     REPOSITORY_ACCESS_ERROR_OCCURRED,
     REPOSITORY_ACCESS_ERROR_WAS_IGNORED,
+    REPOSITORY_PRODUCT_UNSUPPORTED,
     SQL_SCRIPT_FAILED,
 
     /* others */
@@ -48,7 +51,7 @@ public enum Message implements MessageProvider {
     INTERNAL_ERROR
     ;
 
-    private static final String BASE_NAME = "io.github.i49.unite.core.messages";
+    private static final String BASE_NAME = Message.class.getPackage().getName() + ".messages";
     private static final ResourceBundle bundle = ResourceBundle.getBundle(BASE_NAME);
 
     @Override

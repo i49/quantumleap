@@ -15,8 +15,7 @@
  */
 package io.github.i49.unite.core.storage.jdbc;
 
-import static io.github.i49.unite.core.common.Message.RESOURCE_CANNOT_BE_READ;
-import static io.github.i49.unite.core.common.Message.SQL_SCRIPT_FAILED;
+import static io.github.i49.unite.core.message.Message.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,9 +25,11 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import io.github.i49.unite.api.base.WorkflowException;
@@ -38,19 +39,28 @@ import io.github.i49.unite.api.base.WorkflowException;
  */
 public class SqlScriptRunner {
 
-    private final Connection conncetion;
+    private final Connection connection;
+    private final Dialect dialect;
+    
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-    public SqlScriptRunner(Connection conncetion) {
-        this.conncetion = conncetion;
+    /**
+     * Constructs this runner.
+     * 
+     * @param connection the established connection to the database. 
+     */
+    public SqlScriptRunner(Connection connection) {
+        this.connection = connection;
+        this.dialect = guessDialect(connection);
     }
 
     /**
      * Runs a script read from the specified resource file.
      * 
-     * @param resourceName the name of the resource file, which must be on the current classpath.
+     * @param baseName the base name of the resource file.
      */
-    public void runScript(String resourceName) {
+    public void runScript(String baseName) {
+        String resourceName = getSqlResourceName(baseName, this.dialect);
         try (InputStream in = getClass().getResourceAsStream(resourceName)) {
             try (Reader reader = new InputStreamReader(in, DEFAULT_CHARSET)) {
                 runScript(reader);
@@ -75,17 +85,36 @@ public class SqlScriptRunner {
     }
 
     private void execute(String[] commands) throws SQLException {
-        try (Statement s = this.conncetion.createStatement()) {
+        try (Statement s = this.connection.createStatement()) {
             for (String command : commands) {
                 s.execute(command);
             }
         }
-        this.conncetion.commit();
+        this.connection.commit();
     }
 
     private String[] parseScript(List<String> lines) {
         String whole = lines.stream().map(String::trim).map(line -> line.replaceAll("--.*", ""))
                 .filter(line -> !line.isEmpty()).collect(Collectors.joining(" "));
         return whole.replaceAll("/\\*.*?\\*/", "").split(";");
+    }
+    
+    private static Dialect guessDialect(Connection connection) {
+        String productName = null;
+        try {
+            DatabaseMetaData metadata = connection.getMetaData();
+            productName = metadata.getDatabaseProductName();
+            return Dialect.ofProduct(productName);
+        } catch (SQLException e) {
+            throw new WorkflowException(REPOSITORY_ACCESS_ERROR_OCCURRED.toString(), e);
+        } catch (NoSuchElementException e) {
+            throw new WorkflowException(REPOSITORY_PRODUCT_UNSUPPORTED.with(productName));
+        }
+    }
+    
+    private String getSqlResourceName(String baseName, Dialect dialect) {
+        StringBuilder b = new StringBuilder(baseName);
+        b.append("-").append(dialect.getSpecifier()).append(".sql");
+        return b.toString();
     }
 }

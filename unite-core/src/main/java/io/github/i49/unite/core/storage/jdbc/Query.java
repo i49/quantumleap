@@ -15,8 +15,8 @@
  */
 package io.github.i49.unite.core.storage.jdbc;
 
-import static io.github.i49.unite.core.common.Message.INTERNAL_ERROR;
-import static io.github.i49.unite.core.common.Message.REPOSITORY_ACCESS_ERROR_OCCURRED;
+import static io.github.i49.unite.core.message.Message.INTERNAL_ERROR;
+import static io.github.i49.unite.core.message.Message.REPOSITORY_ACCESS_ERROR_OCCURRED;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

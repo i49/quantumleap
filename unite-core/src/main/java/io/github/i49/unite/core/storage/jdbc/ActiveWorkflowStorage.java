@@ -16,7 +16,7 @@
 
 package io.github.i49.unite.core.storage.jdbc;
 
-import static io.github.i49.unite.core.common.Message.*;
+import static io.github.i49.unite.core.message.Message.*;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -71,7 +71,7 @@ public class ActiveWorkflowStorage extends JdbcSession implements WorkflowStorag
             return;
         }
         SqlScriptRunner runner = new SqlScriptRunner(getConnection());
-        runner.runScript("create-schema.sql");
+        runner.runScript("create-schema");
     }
     
     @Override

@@ -17,7 +17,7 @@
  */
 package io.github.i49.unite.core.storage;
 
-import static io.github.i49.unite.core.common.Message.OBJECT_IS_NOT_SERIALIZABLE;
+import static io.github.i49.unite.core.message.Message.OBJECT_IS_NOT_SERIALIZABLE;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

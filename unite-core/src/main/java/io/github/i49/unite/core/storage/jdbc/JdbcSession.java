@@ -16,7 +16,7 @@
 
 package io.github.i49.unite.core.storage.jdbc;
 
-import static io.github.i49.unite.core.common.Message.REPOSITORY_ACCESS_ERROR_OCCURRED;
+import static io.github.i49.unite.core.message.Message.REPOSITORY_ACCESS_ERROR_OCCURRED;
 
 import java.sql.Connection;
 import java.sql.SQLException;

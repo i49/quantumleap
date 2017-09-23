@@ -15,7 +15,7 @@
  */
 package io.github.i49.unite.core.storage.jdbc;
 
-import static io.github.i49.unite.core.common.Message.*;
+import static io.github.i49.unite.core.message.Message.*;
 
 import java.io.IOException;
 import java.io.InputStream;
