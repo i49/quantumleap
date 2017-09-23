@@ -75,9 +75,10 @@ public class SqlScriptRunner {
     }
 
     private void execute(String[] commands) throws SQLException {
-        Statement s = this.conncetion.createStatement();
-        for (String command : commands) {
-            s.execute(command);
+        try (Statement s = this.conncetion.createStatement()) {
+            for (String command : commands) {
+                s.execute(command);
+            }
         }
         this.conncetion.commit();
     }

@@ -1,5 +1,5 @@
 repository:
-    url: jdbc:hsqldb:mem:workflowdb;shutdown=true
+    url: jdbc:hsqldb:mem:unite
     username: sa
     password: 
     

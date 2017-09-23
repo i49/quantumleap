@@ -22,7 +22,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -52,11 +51,6 @@ public class WorkflowRunTest {
         repository = WorkflowRepositoryBuilder.newInstance()
                 .withDataSource(dataSource).build();
         runner = new RunnerFactory().createRunner();
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        repository.close();
     }
 
     @Before

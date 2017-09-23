@@ -25,7 +25,6 @@ import java.util.NoSuchElementException;
 
 import javax.sql.DataSource;
 
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -52,11 +51,6 @@ public class JobTest {
     public static void setUpOnce() {
         repository = WorkflowRepositoryBuilder.newInstance()
                 .withDataSource(dataSource).build();
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        repository.close();
     }
 
     @Before

@@ -16,6 +16,9 @@
 
 package io.github.i49.unite.core.repository;
 
+import static io.github.i49.unite.core.common.Preconditions.checkNotNull;
+import static io.github.i49.unite.core.common.Preconditions.checkRealType;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +27,7 @@ import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.Workflow;
 import io.github.i49.unite.core.storage.WorkflowStorage;
+import io.github.i49.unite.core.workflow.ManagedWorkflow;
 
 /**
  * The default implementation of {@link WorkdlowRepository}.
@@ -31,16 +35,12 @@ import io.github.i49.unite.core.storage.WorkflowStorage;
  * @author i49
  */
 public class DefaultWorkflowRepository implements WorkflowRepository {
-    
+
+    // Underlying storage object.
     private final WorkflowStorage storage;
     
     public DefaultWorkflowRepository(WorkflowStorage storage) {
         this.storage = storage;
-    }
-
-    @Override
-    public void close() {
-        storage.close();
     }
 
     @Override
@@ -50,6 +50,8 @@ public class DefaultWorkflowRepository implements WorkflowRepository {
 
     @Override
     public void addWorkflow(Workflow workflow) {
+        checkNotNull(workflow, "workflow");
+        checkRealType(workflow, ManagedWorkflow.class, "workflow");
         storage.addWorkflow(workflow);
     }
 
@@ -65,6 +67,7 @@ public class DefaultWorkflowRepository implements WorkflowRepository {
 
     @Override
     public long countJobsWithStatus(JobStatus status) {
+        checkNotNull(status, "status");
         return storage.countJobsWithStatus(status);
     }
 
@@ -75,11 +78,13 @@ public class DefaultWorkflowRepository implements WorkflowRepository {
 
     @Override
     public List<Job> findJobsByStatus(JobStatus status) {
+        checkNotNull(status, "status");
         return storage.findJobsByStatus(status);
     }
 
     @Override
     public Optional<Job> findFirstJobByStatus(JobStatus status) {
+        checkNotNull(status, "status");
         return storage.findFirstJobByStatus(status);
     }
 

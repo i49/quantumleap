@@ -26,14 +26,8 @@ import io.github.i49.unite.api.workflow.Workflow;
 /**
  * A repository that manages workflows to execute.
  */
-public interface WorkflowRepository extends AutoCloseable {
+public interface WorkflowRepository {
     
-    /**
-     * Closes this repository.
-     */
-    @Override
-    void close();
-
     /**
      * Clears all entries in this repository.
      */

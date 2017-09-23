@@ -30,13 +30,12 @@ import io.github.i49.unite.core.workflow.ManagedJob;
 /**
  * Low level interface for operating on workflow storage.
  */
-public interface WorkflowStorage extends AutoCloseable {
+public interface WorkflowStorage {
 
     /**
-     * Closes this storage.
+     * Creates the schema in this storage.
      */
-    @Override
-    void close();
+    void format();
     
     /**
      * Clears all entries in this storage.

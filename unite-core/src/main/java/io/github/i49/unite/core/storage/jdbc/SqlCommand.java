@@ -77,7 +77,7 @@ public enum SqlCommand {
         }
     }
     
-    public Query getQuery(Connection connection) throws SQLException {
+    public Query createQuery(Connection connection) throws SQLException {
         PreparedStatement statement = prepare(connection);
         return new Query(statement);
     }

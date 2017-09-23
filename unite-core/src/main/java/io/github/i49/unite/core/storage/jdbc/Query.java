@@ -30,12 +30,21 @@ import io.github.i49.unite.api.base.WorkflowException;
 /**
  * SQL statement.
  */
-public class Query {
+public class Query implements AutoCloseable {
     
     private final PreparedStatement statement;
     
     public Query(PreparedStatement statement) {
         this.statement = statement;
+    }
+    
+    @Override
+    public void close() {
+        try {
+            statement.close();
+        } catch (SQLException e) {
+            throwAccessError(e);
+        }
     }
     
     public Query setInt(int index, int value) {

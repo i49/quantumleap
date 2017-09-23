@@ -37,7 +37,7 @@ public class TestDataSource implements DataSource {
     private final Properties info;
     
     public TestDataSource() {
-        this.url = "jdbc:hsqldb:mem:workflowdb;shutdown=true";
+        this.url = "jdbc:hsqldb:mem:unite";
         this.info = new Properties();
         this.info.put("username", "sa");
     }
