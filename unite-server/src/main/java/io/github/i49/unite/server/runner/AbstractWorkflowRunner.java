@@ -43,11 +43,10 @@ abstract class AbstractWorkflowRunner implements WorkflowRunner {
     private final WorkflowStorage storage;
     private final DirectoryLayoutStrategy layoutStrategy;
 
-    protected AbstractWorkflowRunner(ServerConfiguration config, WorkflowStorage storage) {
+    protected AbstractWorkflowRunner(WorkflowStorage storage, Path directory) {
         this.platform = Platforms.getCurrent();
         this.storage = storage;
-        Path baseDirectory = config.getRunner().getDirectoryAsPath();
-        this.layoutStrategy = new BasicDirectoryLayoutStrategy(baseDirectory);
+        this.layoutStrategy = new BasicDirectoryLayoutStrategy(directory);
     }
     
     @Override

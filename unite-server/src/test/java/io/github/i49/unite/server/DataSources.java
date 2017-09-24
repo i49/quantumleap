@@ -14,30 +14,25 @@
  * limitations under the License.
  */
 
-package io.github.i49.unite.server.runner;
+package io.github.i49.unite.server;
 
-import static org.assertj.core.api.Assertions.*;
+import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import io.github.i49.unite.core.storage.util.DirectDataSource;
 
 /**
+ * @author i49
  */
-public class RunnerFactoryTest {
+public class DataSources {
     
-    private RunnerFactory sut;
-    
-    @Before
-    public void setUp() {
-        sut = new RunnerFactory();
+    public static DataSource get() {
+        return getDirectDataSource();
     }
     
-    @Test
-    public void createRunner_shoudCreateRunner() {
-        // when
-        WorkflowRunner runner = sut.createRunner();
-        
-        // then
-        assertThat(runner).isNotNull();
+    private static final String URL = "jdbc:hsqldb:mem:unite";
+    private static final String PASSWORD = "sa";
+    
+    private static DataSource getDirectDataSource() {
+        return new DirectDataSource(URL, PASSWORD, null);
     }
 }

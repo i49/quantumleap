@@ -23,15 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import javax.sql.DataSource;
-
 import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
-import io.github.i49.unite.api.TestDataSource;
+import io.github.i49.unite.api.RepositoryResource;
 import io.github.i49.unite.api.repository.WorkflowRepository;
-import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
 
@@ -42,21 +39,17 @@ import io.github.i49.unite.api.workflow.JobStatus;
  */
 public class JobTest {
     
-    private static final DataSource dataSource = new TestDataSource();
-
-    private static WorkflowRepository repository;
+    @ClassRule
+    public static RepositoryResource repositoryResource = new RepositoryResource();
+    
+    private WorkflowRepository repository;
     private WorkflowFactory workflowFactory;
     
-    @BeforeClass
-    public static void setUpOnce() {
-        repository = WorkflowRepositoryBuilder.newInstance()
-                .withDataSource(dataSource).build();
-    }
-
     @Before
     public void setUp() {
-        workflowFactory = WorkflowFactory.newInstance();
+        repository = repositoryResource.getRepository();
         repository.clear();
+        workflowFactory = WorkflowFactory.newInstance();
     }
   
     /**

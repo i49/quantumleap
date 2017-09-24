@@ -21,48 +21,45 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.sql.DataSource;
-
 import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import io.github.i49.unite.api.repository.WorkflowRepository;
-import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
 import io.github.i49.unite.api.tasks.Task;
 import io.github.i49.unite.api.tasks.TaskFactory;
 import io.github.i49.unite.api.workflow.Job;
 import io.github.i49.unite.api.workflow.JobStatus;
 import io.github.i49.unite.api.workflow.Workflow;
 import io.github.i49.unite.api.workflow.WorkflowFactory;
-import io.github.i49.unite.server.TestDataSource;
+import io.github.i49.unite.server.RepositoryResource;
+import io.github.i49.unite.server.RunnerResource;
 
 /**
  *
  */
 public class TaskRunTest {
 
-    private static final DataSource dataSource = new TestDataSource();
-    
-    private static WorkflowRepository repository;
-    private static WorkflowRunner runner;
+    @ClassRule
+    public static RepositoryResource repositoryResource = new RepositoryResource();
+    @ClassRule
+    public static RunnerResource runnerResource = new RunnerResource();
 
+    private WorkflowRepository repository;
     private WorkflowFactory workflowFactory;
     private TaskFactory taskFactory;
     
-    @BeforeClass
-    public static void setUpOnce() {
-        repository = WorkflowRepositoryBuilder.newInstance()
-                .withDataSource(dataSource).build();
-        runner = new RunnerFactory().createRunner();
-    }
-    
+    private WorkflowRunner runner;
+
     @Before
     public void setUp() {
+        repository = repositoryResource.getRepository();
+        repository.clear();
+
         workflowFactory = WorkflowFactory.newInstance();
         taskFactory = TaskFactory.newInstance();
-        
-        repository.clear();
+
+        runner = runnerResource.getRunner();
     }
     
     @Test

@@ -16,13 +16,10 @@
 
 package io.github.i49.unite.core.storage.util;
 
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -31,10 +28,8 @@ import javax.sql.DataSource;
  *
  * @author i49
  */
-public class DirectDataSource implements DataSource {
-
-    private static final Logger log = Logger.getLogger(DirectDataSource.class.getName());
-
+public class DirectDataSource implements DefaultDataSource {
+    
     private final String url;
     private final Properties info;
 
@@ -47,45 +42,6 @@ public class DirectDataSource implements DataSource {
         if (password != null) {
             this.info.put("password", password);
         }
-    }
-
-    @Override
-    public PrintWriter getLogWriter() throws SQLException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int getLoginTimeout() throws SQLException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return log;
-    }
-
-    @Override
-    public void setLogWriter(PrintWriter out) throws SQLException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return iface.isInstance(this);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (iface.isInstance(this)) {
-            return (T) this;
-        }
-        throw new SQLException();
     }
 
     @Override

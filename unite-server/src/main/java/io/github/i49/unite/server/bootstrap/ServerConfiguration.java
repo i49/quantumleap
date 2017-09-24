@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.i49.unite.server.runner;
+package io.github.i49.unite.server.bootstrap;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

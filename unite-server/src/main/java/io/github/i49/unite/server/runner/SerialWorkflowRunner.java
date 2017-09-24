@@ -15,6 +15,7 @@
  */
 package io.github.i49.unite.server.runner;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
 import io.github.i49.unite.api.tasks.Task;
@@ -33,8 +34,8 @@ public class SerialWorkflowRunner extends AbstractWorkflowRunner implements Work
     @SuppressWarnings("unused")
     private boolean canceled;
 
-    public SerialWorkflowRunner(ServerConfiguration config, WorkflowStorage storage) {
-        super(config, storage);
+    public SerialWorkflowRunner(WorkflowStorage storage, Path directory) {
+        super(storage, directory);
         this.totalJobsDone = 0;
         this.running = false;
         this.canceled = false;
