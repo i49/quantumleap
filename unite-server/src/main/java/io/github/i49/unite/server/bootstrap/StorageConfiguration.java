@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.i49.unite.core.storage;
+package io.github.i49.unite.server.bootstrap;
 
 /**
  * Configuration for workflow storage.

@@ -49,7 +49,6 @@ public class JdbcWorkflowStorage implements WorkflowStorage {
     
     public JdbcWorkflowStorage(DataSource dataSource) {
         this.dataSource = dataSource;
-        format();
     }
 
     @Override

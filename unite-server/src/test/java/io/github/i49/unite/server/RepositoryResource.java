@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 import org.junit.rules.ExternalResource;
 
+import io.github.i49.unite.api.repository.RepositoryOption;
 import io.github.i49.unite.api.repository.WorkflowRepository;
 import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
 
@@ -48,6 +49,7 @@ public class RepositoryResource extends ExternalResource {
     private static WorkflowRepository buildRepository(DataSource dataSource) {
         return WorkflowRepositoryBuilder.newInstance()
             .withDataSource(dataSource)
+            .withOption(RepositoryOption.FORMAT)
             .build();
     }
 }

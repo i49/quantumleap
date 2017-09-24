@@ -19,8 +19,6 @@ package io.github.i49.unite.server.bootstrap;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import io.github.i49.unite.core.storage.StorageConfiguration;
-
 /**
  * Configuration for workflow runner.
  * 

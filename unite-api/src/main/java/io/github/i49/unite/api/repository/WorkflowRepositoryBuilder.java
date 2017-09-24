@@ -48,6 +48,15 @@ public interface WorkflowRepositoryBuilder {
     WorkflowRepositoryBuilder withUrl(String url);
     
     WorkflowRepositoryBuilder withCredential(String username, String password);
+  
+    /**
+     * Enables the option for repository.
+     * 
+     * @param option the option to enable.
+     * @return this builder.
+     * @throws NullPointerException if {@code option} is {@code null}.
+     */
+    WorkflowRepositoryBuilder withOption(RepositoryOption option);
 
     /**
      * Builds new repository.

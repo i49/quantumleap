@@ -18,8 +18,12 @@ package io.github.i49.unite.core.repository;
 
 import static io.github.i49.unite.core.common.Preconditions.*;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import javax.sql.DataSource;
 
+import io.github.i49.unite.api.repository.RepositoryOption;
 import io.github.i49.unite.api.repository.WorkflowRepository;
 import io.github.i49.unite.api.repository.WorkflowRepositoryBuilder;
 import io.github.i49.unite.core.storage.WorkflowStorage;
@@ -32,6 +36,8 @@ public class DefaultWorkflowRepositoryBuilder implements WorkflowRepositoryBuild
 
     private final WorkflowStorageBuilder storageBuilder = new WorkflowStorageBuilder();
     
+    private final Set<RepositoryOption> options = EnumSet.noneOf(RepositoryOption.class);
+    
     @Override
     public WorkflowRepositoryBuilder withDataSource(DataSource dataSource) {
         checkNotNull(dataSource, "dataSource");
@@ -42,6 +48,7 @@ public class DefaultWorkflowRepositoryBuilder implements WorkflowRepositoryBuild
     @Override
     public WorkflowRepositoryBuilder withUrl(String url) {
         checkNotNull(url, "url");
+        storageBuilder.withUrl(url);
         return this;
     }
     
@@ -49,12 +56,23 @@ public class DefaultWorkflowRepositoryBuilder implements WorkflowRepositoryBuild
     public WorkflowRepositoryBuilder withCredential(String username, String password) {
         checkNotNull(username, "username");
         checkNotNull(password, "password");
+        storageBuilder.withCredential(username, password);
+        return this;
+    }
+    
+    @Override
+    public WorkflowRepositoryBuilder withOption(RepositoryOption option) {
+        checkNotNull(option, "option");
+        options.add(option);
         return this;
     }
     
     @Override
     public WorkflowRepository build() {
         WorkflowStorage storage = storageBuilder.build();
+        if (options.contains(RepositoryOption.FORMAT)) {
+            storage.format();
+        }
         return new DefaultWorkflowRepository(storage);
     }
 }
