@@ -6,7 +6,6 @@
         <groupId>io.github.i49</groupId>
         <artifactId>unite</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../unite</relativePath>
     </parent>
 
     <artifactId>unite-server</artifactId>
